@@ -1,0 +1,12 @@
+# Vercel
+.vercel
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / tooling
+.claude/
+*.log
+node_modules/

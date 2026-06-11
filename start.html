@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Start a fundraiser · CareWay</title>
+<meta name="description" content="Start a trusted fundraiser on CareWay in minutes. Share your story and give people a clear way to help.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body data-page="start">
+
+<section class="page-intro">
+  <div class="wrap">
+    <div class="breadcrumb"><a href="index.html">Home</a><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Start a campaign</span></div>
+    <h1>Start your fundraiser</h1>
+    <p>Tell your story, set a goal, and give people a clear way to help. It takes just a few minutes — no payment details needed yet.</p>
+  </div>
+</section>
+
+<section class="section-tight" style="padding-top:8px">
+  <div class="wrap wizard-grid">
+    <!-- FORM -->
+    <div>
+      <div class="stepper">
+        <div class="stepper-item current"><div class="bar"></div><div class="lbl">Your basics</div></div>
+        <div class="stepper-item"><div class="bar"></div><div class="lbl">Your story</div></div>
+        <div class="stepper-item"><div class="bar"></div><div class="lbl">Goal</div></div>
+        <div class="stepper-item"><div class="bar"></div><div class="lbl">Photos</div></div>
+        <div class="stepper-item"><div class="bar"></div><div class="lbl">Review</div></div>
+      </div>
+
+      <form class="wizard-form" autocomplete="on" onsubmit="return false">
+        <!-- Step 1 -->
+        <div class="wstep active">
+          <h2>Your basics</h2>
+          <p class="sub">Let's start with who's organizing this fundraiser.</p>
+          <div class="field" data-field="name">
+            <label>Your full name</label>
+            <input type="text" name="name" placeholder="e.g. Marcus Bell">
+            <div class="err"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Please enter your name.</span></div>
+          </div>
+          <div class="field" data-field="relation">
+            <label>Your relationship to the cause</label>
+            <input type="text" name="relation" placeholder="e.g. Brother, Owner, Teacher, Myself">
+            <div class="err"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Tell us how you're connected.</span></div>
+          </div>
+          <div class="field" data-field="location">
+            <label>Location <span class="hint">— city, state</span></label>
+            <input type="text" name="location" placeholder="e.g. Portland, OR">
+            <div class="err"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Please add a location.</span></div>
+          </div>
+          <div class="wizard-nav">
+            <button class="btn btn-primary" data-go="next">Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="wstep">
+          <h2>Your story</h2>
+          <p class="sub">Share what happened and what support would mean. Honest, specific stories connect best.</p>
+          <div class="field" data-field="story">
+            <label>Tell your story</label>
+            <textarea name="story" placeholder="Describe the situation, why support is needed, and how the funds will help…"></textarea>
+            <div class="err"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Please write at least a short paragraph.</span></div>
+          </div>
+          <div class="wizard-nav">
+            <button class="btn btn-ghost" data-go="back">Back</button>
+            <button class="btn btn-primary" data-go="next">Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="wstep">
+          <h2>Title &amp; goal</h2>
+          <p class="sub">Give your fundraiser a clear title, a category, and a realistic goal.</p>
+          <div class="field" data-field="title">
+            <label>Fundraiser title</label>
+            <input type="text" name="title" placeholder="e.g. Help Leila walk again after the accident">
+            <div class="err"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Please add a title.</span></div>
+          </div>
+          <div class="field" data-field="category">
+            <label>Category</label>
+            <div class="cat-picker">
+              <button type="button" class="cat-opt" data-cat="Medical">Medical</button>
+              <button type="button" class="cat-opt" data-cat="Emergency">Emergency</button>
+              <button type="button" class="cat-opt" data-cat="Family">Family</button>
+              <button type="button" class="cat-opt" data-cat="Education">Education</button>
+              <button type="button" class="cat-opt" data-cat="Animals">Animals</button>
+              <button type="button" class="cat-opt" data-cat="Community">Community</button>
+            </div>
+            <div class="err"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Please choose a category.</span></div>
+          </div>
+          <div class="field" data-field="goal">
+            <label>Goal amount</label>
+            <div class="input-prefix"><span>$</span><input type="number" name="goal" min="100" step="50" placeholder="10,000"></div>
+            <div class="err"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Set a goal of at least $100.</span></div>
+          </div>
+          <div class="wizard-nav">
+            <button class="btn btn-ghost" data-go="back">Back</button>
+            <button class="btn btn-primary" data-go="next">Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="wstep">
+          <h2>Photos</h2>
+          <p class="sub">A clear photo helps people connect with your story. Add up to six.</p>
+          <div class="uploader" id="uploader">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7 9m5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <p>Drag photos here, or tap to browse</p>
+            <div class="sm">JPG or PNG · up to 6 images</div>
+            <input type="file" id="fileInput" accept="image/*" multiple hidden>
+          </div>
+          <div class="upload-grid" id="uploadGrid"></div>
+          <div class="wizard-nav">
+            <button class="btn btn-ghost" data-go="back">Back</button>
+            <button class="btn btn-primary" data-go="next">Continue</button>
+          </div>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="wstep">
+          <h2>Review &amp; publish</h2>
+          <p class="sub">Take a last look. You can edit any section before submitting for review.</p>
+          <div id="reviewSlot"></div>
+          <div class="response-note" style="margin-top:8px">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 11v5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <span>Your fundraiser will be reviewed before it goes live. You'll get an email when it's approved.</span>
+          </div>
+          <div class="wizard-nav">
+            <button class="btn btn-ghost" data-go="back">Back</button>
+            <button class="btn btn-primary btn-lg" id="publishBtn">Publish fundraiser</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- LIVE PREVIEW -->
+    <div class="preview-rail" id="previewRail">
+      <button class="preview-toggle" id="previewToggle">Preview your fundraiser <svg viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <div class="plabel"><span class="dot"></span>Live preview</div>
+      <div id="previewCard"></div>
+    </div>
+  </div>
+</section>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

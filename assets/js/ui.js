@@ -1,0 +1,338 @@
+/* =====================================================================
+   CareWay — Shared UI: chrome, icons, helpers, motion
+   ===================================================================== */
+(function () {
+  "use strict";
+
+  /* ---------- Icons (inline SVG, stroke currentColor) ---------- */
+  const I = {
+    logo: '<svg class="mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path d="M6 28a14 14 0 0 1 28 0" stroke="var(--harbor-teal)" stroke-width="3.4" stroke-linecap="round"/><path d="M12 28c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="var(--warm-coral)" stroke-width="3.4" stroke-linecap="round"/><circle cx="20" cy="28" r="2.6" fill="var(--care-blue)"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    menu: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    close: '<svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    arrow: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    chevron: '<svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    chevronDown: '<svg viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    checkBadge: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5 14.6 4l3 .1 1 2.8 2.2 2-1 2.8 1 2.8-2.2 2-1 2.8-3 .1L12 21.5 9.4 20l-3-.1-1-2.8-2.2-2 1-2.8-1-2.8 2.2-2 1-2.8 3-.1L12 2.5Z" fill="currentColor" opacity=".16"/><path d="m8.5 12 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    pin: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 21s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" stroke="currentColor" stroke-width="2"/></svg>',
+    users: '<svg viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2" stroke="currentColor" stroke-width="2"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M16 5.5a3 3 0 0 1 0 5.7M17 19a5.4 5.4 0 0 0-2.3-4.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3.5 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    shield: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 9.7 4-1.4 7-5.2 7-9.7V6l-7-3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    eye: '<svg viewBox="0 0 24 24" fill="none"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>',
+    heart: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.6-9.3-9C1.3 8.4 2.6 5 6 5c2 0 3.2 1.2 4 2.4C10.8 6.2 12 5 14 5c3.4 0 4.7 3.4 3.3 6-2.3 4.4-9.3 9-9.3 9Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+    share: '<svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="2.6" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="6" r="2.6" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2.6" stroke="currentColor" stroke-width="2"/><path d="m8.3 10.8 7.4-3.6M8.3 13.2l7.4 3.6" stroke="currentColor" stroke-width="2"/></svg>',
+    flag: '<svg viewBox="0 0 24 24" fill="none"><path d="M5 21V4m0 1h11l-2 4 2 4H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    sliders: '<svg viewBox="0 0 24 24" fill="none"><path d="M4 7h10M18 7h2M4 12h2M10 12h10M4 17h7M15 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="12" r="2" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="17" r="2" stroke="currentColor" stroke-width="2"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    image: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="2"/><circle cx="8.5" cy="9.5" r="1.8" stroke="currentColor" stroke-width="2"/><path d="m4 17 4.5-4.5 3 3L16 10l4 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    upload: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7 9m5-5 5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="m4 7 8 5 8-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    handshake: '<svg viewBox="0 0 24 24" fill="none"><path d="m12 8 2-1.8a3 3 0 0 1 4 .2l3 3M2 9.5l3-3a3 3 0 0 1 4-.2L12 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="m6 12 3 3a1.6 1.6 0 0 0 2.3 0L13 13l2 2a1.6 1.6 0 0 0 2.3-2.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    spark: '<svg viewBox="0 0 24 24" fill="none"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M18 6l-2.5 2.5M8.5 15.5 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    compass: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="m15 9-2 4-4 2 2-4 4-2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+    fb: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 9h3l.5-3H14V4.5c0-.9.3-1.5 1.6-1.5H17V.3C16.6.2 15.6 0 14.5 0 12 0 10.3 1.5 10.3 4.3V6H8v3h2.3v9H14V9Z"/></svg>',
+    ig: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.7 21h-5.9l-4.3-5.6L6.4 21H3.3l7-8L2.6 3h6l3.9 5.2L17.5 3Zm-1 16h1.6L7.6 4.7H5.9L16.5 19Z"/></svg>',
+    li: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 3.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM3 9h3v12H3V9Zm5.5 0H11v1.6h.1c.4-.7 1.4-1.6 3-1.6 3.2 0 3.9 2 3.9 4.7V21h-3v-5.6c0-1.3 0-3-1.9-3s-2.1 1.4-2.1 2.9V21h-3V9Z"/></svg>',
+    info: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 11v5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    copy: '<svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2a1 1 0 0 1 .7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.1 2.3 1.4 2.6 1.6.3.1.5.1.7-.1l.7-.9c.2-.3.4-.2.6-.1l1.8.9c.3.1.5.2.5.3.1.1.1.6-.1 1.1Z"/></svg>',
+  };
+
+  /* ---------- Helpers ---------- */
+  const esc = (s = "") => String(s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+  const money = (n) => "$" + Math.round(n).toLocaleString("en-US");
+  const moneyK = (n) => (n >= 1000 ? "$" + (n / 1000).toFixed(n % 1000 === 0 ? 0 : 1) + "k" : "$" + n);
+  const initials = (name = "") => name.split(" ").filter(Boolean).slice(0, 2).map((p) => p[0]).join("").toUpperCase() || "?";
+  const qs = (s, r = document) => r.querySelector(s);
+  const qsa = (s, r = document) => Array.from(r.querySelectorAll(s));
+
+  /* ---------- Campaign card markup ---------- */
+  function campaignCard(c, opts = {}) {
+    const p = window.CareWayData.pct(c);
+    const statusBadge =
+      c.status === "urgent" ? '<span class="badge-status urgent">Urgent</span>' :
+      c.status === "almost" || p >= 80 ? '<span class="badge-status almost">Almost there</span>' : "";
+    const href = `campaign.html?id=${c.id}`;
+    return `
+    <article class="ccard reveal ${opts.peek ? "peek" : ""}" data-pct="${p}">
+      <div class="ccard-img">
+        <div class="badges">
+          <span class="badge-cat">${esc(c.category)}</span>
+          ${statusBadge}
+        </div>
+        <img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" width="900" height="563"
+             onerror="this.onerror=null;this.src='${window.CareWayData.fallbackImg(c.category)}'">
+      </div>
+      <div class="ccard-body">
+        <div class="loc">${I.pin}${esc(c.location)}</div>
+        <h3 class="ccard-title">${esc(c.title)}</h3>
+        <div class="ccard-meta">
+          <div class="careflow">
+            <div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div>
+            <div class="careflow-stats">
+              <div class="raised">${money(c.raised)} <span>raised of ${money(c.goal)}</span></div>
+              <div class="pct">${p}%</div>
+            </div>
+          </div>
+        </div>
+        <a class="stretch" href="${href}" aria-label="View ${esc(c.title)}"></a>
+      </div>
+    </article>`;
+  }
+
+  function featuredCard(c) {
+    const p = window.CareWayData.pct(c);
+    return `
+    <article class="ccard featured reveal" data-pct="${p}">
+      <div class="ccard-img">
+        <div class="badges">
+          <span class="badge-cat">${esc(c.category)}</span>
+          ${c.status === "urgent" ? '<span class="badge-status urgent">Urgent</span>' : ""}
+        </div>
+        <img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" width="900" height="563"
+             onerror="this.onerror=null;this.src='${window.CareWayData.fallbackImg(c.category)}'">
+      </div>
+      <div class="ccard-body">
+        <div class="loc">${I.pin}${esc(c.location)} · ${c.donors} supporters</div>
+        <h3 class="ccard-title">${esc(c.title)}</h3>
+        <p class="feat-blurb">${esc(c.blurb)}</p>
+        <div class="ccard-meta">
+          <div class="careflow">
+            <div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div>
+            <div class="careflow-stats">
+              <div class="raised">${money(c.raised)} <span>raised of ${money(c.goal)}</span></div>
+              <div class="pct">${p}%</div>
+            </div>
+          </div>
+        </div>
+        <a class="stretch" href="campaign.html?id=${c.id}" aria-label="View ${esc(c.title)}"></a>
+      </div>
+    </article>`;
+  }
+
+  function skeletonCard() {
+    return `<div class="skel-card"><div class="skel skel-img"></div><div class="skel-body">
+      <div class="skel skel-line" style="width:40%"></div>
+      <div class="skel skel-line" style="width:90%"></div>
+      <div class="skel skel-line" style="width:70%"></div>
+      <div class="skel skel-line" style="width:100%;height:8px;margin-top:14px"></div>
+      <div class="skel skel-line" style="width:50%;margin-top:14px"></div>
+    </div></div>`;
+  }
+
+  /* ---------- Header / Drawer / Footer injection ---------- */
+  const NAV = [
+    { href: "browse-campaigns.html", label: "Browse Campaigns", key: "browse" },
+    { href: "how-it-works.html", label: "How it Works", key: "how" },
+    { href: "start.html", label: "Start a Campaign", key: "start" },
+  ];
+
+  function renderHeader() {
+    const active = document.body.dataset.page || "";
+    const navLinks = NAV.map((n) => `<a href="${n.href}" class="${active === n.key ? "active" : ""}">${n.label}</a>`).join("");
+    const drawerLinks = NAV.map((n) => `<a href="${n.href}" class="${active === n.key ? "active" : ""}">${n.label} ${I.chevron}</a>`).join("");
+    const brand = `<a class="brand" href="index.html" aria-label="CareWay home">${I.logo}<span class="wordmark">Care<b>Way</b></span></a>`;
+
+    const header = document.createElement("header");
+    header.className = "site-header";
+    header.innerHTML = `
+      <div class="header-inner">
+        ${brand}
+        <nav class="nav">${navLinks}</nav>
+        <div class="header-actions">
+          <button class="icon-btn" id="searchOpen" aria-label="Search campaigns">${I.search}</button>
+          <a href="start.html" class="btn btn-primary btn-sm header-cta">Start a Campaign</a>
+          <button class="icon-btn menu-btn" id="menuOpen" aria-label="Open menu">${I.menu}</button>
+        </div>
+      </div>`;
+    document.body.prepend(header);
+
+    // Drawer + backdrop
+    const wrap = document.createElement("div");
+    wrap.innerHTML = `
+      <div class="drawer-backdrop" id="drawerBackdrop"></div>
+      <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-label="Menu">
+        <div class="drawer-top">
+          ${brand}
+          <button class="icon-btn" id="menuClose" aria-label="Close menu">${I.close}</button>
+        </div>
+        <nav class="drawer-nav">${drawerLinks}</nav>
+        <div class="drawer-sep"></div>
+        <a href="start.html" class="btn btn-primary btn-block">Start a Campaign</a>
+        <a href="browse-campaigns.html" class="btn btn-ghost btn-block">Browse fundraisers</a>
+        <div class="drawer-foot">
+          <div>Every story deserves a way forward.</div>
+          <div class="socials">
+            <a href="#" aria-label="Facebook">${I.fb}</a>
+            <a href="#" aria-label="Instagram">${I.ig}</a>
+            <a href="#" aria-label="X">${I.x}</a>
+          </div>
+        </div>
+      </aside>`;
+    document.body.appendChild(wrap);
+
+    // Search overlay
+    const search = document.createElement("div");
+    search.className = "search-overlay";
+    search.id = "searchOverlay";
+    search.innerHTML = `
+      <div class="search-box" role="dialog" aria-modal="true" aria-label="Search">
+        <div class="search-field">${I.search}<input type="search" id="searchInput" placeholder="Search fundraisers, causes, places…" autocomplete="off"><button class="icon-btn" id="searchClose" aria-label="Close search">${I.close}</button></div>
+        <div class="search-hint">Try: <span class="chip" data-q="Medical">Medical</span><span class="chip" data-q="Emergency">Emergency</span><span class="chip" data-q="Education">Education</span></div>
+        <div class="search-results" id="searchResults"></div>
+      </div>`;
+    document.body.appendChild(search);
+
+    wireChrome();
+  }
+
+  function lockScroll(on) {
+    document.documentElement.style.overflow = on ? "hidden" : "";
+    document.body.style.overflow = on ? "hidden" : "";
+  }
+
+  function wireChrome() {
+    const header = qs(".site-header");
+    const drawer = qs("#drawer");
+    const backdrop = qs("#drawerBackdrop");
+    const openDrawer = () => { drawer.classList.add("open"); backdrop.classList.add("open"); lockScroll(true); };
+    const closeDrawer = () => { drawer.classList.remove("open"); backdrop.classList.remove("open"); lockScroll(false); };
+    qs("#menuOpen").addEventListener("click", openDrawer);
+    qs("#menuClose").addEventListener("click", closeDrawer);
+    backdrop.addEventListener("click", closeDrawer);
+
+    // search
+    const overlay = qs("#searchOverlay");
+    const input = qs("#searchInput");
+    const results = qs("#searchResults");
+    const openSearch = () => { overlay.classList.add("open"); lockScroll(true); setTimeout(() => input.focus(), 80); };
+    const closeSearch = () => { overlay.classList.remove("open"); lockScroll(false); input.value = ""; results.innerHTML = ""; };
+    qs("#searchOpen").addEventListener("click", openSearch);
+    qs("#searchClose").addEventListener("click", closeSearch);
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) closeSearch(); });
+    qsa(".search-hint .chip").forEach((c) => c.addEventListener("click", () => { input.value = c.dataset.q; runSearch(); }));
+
+    let t;
+    const runSearch = async () => {
+      const q = input.value.trim();
+      if (!q) { results.innerHTML = ""; return; }
+      const rows = await window.CareWayData.search(q);
+      results.innerHTML = rows.length
+        ? rows.map((c) => `<a class="search-res-item" href="campaign.html?id=${c.id}">
+            <img src="${c.cover}" alt="" onerror="this.src='${window.CareWayData.fallbackImg(c.category)}'">
+            <div><div class="t">${esc(c.title)}</div><div class="m">${esc(c.category)} · ${esc(c.location)}</div></div></a>`).join("")
+        : `<div style="padding:16px;color:var(--slate-gray)">No campaigns match “${esc(q)}”. <a href="browse-campaigns.html" style="color:var(--harbor-teal);font-weight:600">Browse all →</a></div>`;
+    };
+    input.addEventListener("input", () => { clearTimeout(t); t = setTimeout(runSearch, 160); });
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") { const first = results.querySelector("a"); if (first) location.href = first.href; else location.href = "browse-campaigns.html?q=" + encodeURIComponent(input.value); } });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") { closeDrawer(); closeSearch(); }
+      if ((e.key === "/" || (e.key === "k" && (e.metaKey || e.ctrlKey))) && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); openSearch(); }
+    });
+
+    // header scroll behaviour
+    let lastY = 0;
+    const onScroll = () => {
+      const y = window.scrollY;
+      header.classList.toggle("is-scrolled", y > 8);
+      if (y > 320 && y > lastY) header.classList.add("is-hidden");
+      else header.classList.remove("is-hidden");
+      lastY = y;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+  }
+
+  function renderFooter() {
+    const groups = [
+      { h: "Discover", links: [["browse-campaigns.html", "Browse campaigns"], ["browse-campaigns.html?status=urgent", "Urgent fundraisers"], ["how-it-works.html", "How CareWay works"]] },
+      { h: "Create", links: [["start.html", "Start a campaign"], ["how-it-works.html", "Tips for organizers"], ["contact.html", "Get help"]] },
+      { h: "Company", links: [["about.html", "About us"], ["contact.html", "Contact"], ["how-it-works.html", "Trust & safety"]] },
+      { h: "Legal", links: [["terms.html", "Terms of service"], ["privacy.html", "Privacy policy"], ["contact.html", "Report a fundraiser"]] },
+    ];
+    const footer = document.createElement("footer");
+    footer.className = "site-footer";
+    footer.innerHTML = `
+      <div class="wrap">
+        <div class="footer-top">
+          <div class="footer-brand">
+            <a class="brand" href="index.html">${I.logo}<span class="wordmark">Care<b>Way</b></span></a>
+            <p>CareWay helps people share real stories and receive support through trusted fundraising pages.</p>
+            <div class="footer-socials">
+              <a href="#" aria-label="Facebook">${I.fb}</a>
+              <a href="#" aria-label="Instagram">${I.ig}</a>
+              <a href="#" aria-label="X">${I.x}</a>
+              <a href="#" aria-label="LinkedIn">${I.li}</a>
+            </div>
+          </div>
+          ${groups.map((g) => `<div class="footer-col"><h4>${g.h}</h4><ul>${g.links.map((l) => `<li><a href="${l[0]}">${l[1]}</a></li>`).join("")}</ul></div>`).join("")}
+        </div>
+        <div class="footer-bottom">
+          <div>© 2026 CareWay · Every story deserves a way forward.</div>
+          <div class="mini"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a></div>
+        </div>
+      </div>`;
+    document.body.appendChild(footer);
+  }
+
+  /* ---------- Scroll reveal ---------- */
+  function initReveal() {
+    const els = qsa(".reveal");
+    if (!("IntersectionObserver" in window) || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      els.forEach((e) => e.classList.add("in")); return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    els.forEach((e) => io.observe(e));
+  }
+
+  /* ---------- Animate CareFlow progress bars when visible ---------- */
+  function initProgress(root = document) {
+    const fills = qsa(".careflow-fill", root);
+    if (!("IntersectionObserver" in window)) { fills.forEach((f) => f.style.width = f.dataset.fill + "%"); return; }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) { e.target.style.width = e.target.dataset.fill + "%"; io.unobserve(e.target); } });
+    }, { threshold: 0.4 });
+    fills.forEach((f) => io.observe(f));
+  }
+
+  /* ---------- Toast ---------- */
+  let toastEl;
+  function toast(msg, kind = "ok") {
+    if (!toastEl) { toastEl = document.createElement("div"); toastEl.className = "toast"; document.body.appendChild(toastEl); }
+    toastEl.className = "toast " + (kind === "err" ? "err" : "");
+    toastEl.innerHTML = (kind === "err" ? I.info : I.check) + "<span>" + esc(msg) + "</span>";
+    requestAnimationFrame(() => toastEl.classList.add("show"));
+    clearTimeout(toastEl._t);
+    toastEl._t = setTimeout(() => toastEl.classList.remove("show"), 3200);
+  }
+
+  /* ---------- Web Share ---------- */
+  function share(title, url) {
+    url = url || location.href;
+    if (navigator.share) { navigator.share({ title: "CareWay — " + title, url }).catch(() => {}); }
+    else { navigator.clipboard.writeText(url).then(() => toast("Link copied to clipboard")); }
+  }
+
+  /* ---------- Reveal re-scan (for dynamically inserted cards) ---------- */
+  function observeNew(root) {
+    initReveal();
+    initProgress(root);
+  }
+
+  /* ---------- Boot ---------- */
+  function boot() {
+    renderHeader();
+    renderFooter();
+    initReveal();
+    initProgress();
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+
+  window.CW = { I, esc, money, moneyK, initials, qs, qsa, campaignCard, featuredCard, skeletonCard, toast, share, initReveal, initProgress, observeNew, lockScroll };
+})();

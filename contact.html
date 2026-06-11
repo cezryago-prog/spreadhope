@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Contact · CareWay</title>
+<meta name="description" content="How can we help? Reach the CareWay team for support, to report a fundraiser, or to partner with us.">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body data-page="contact">
+
+<section class="page-intro">
+  <div class="wrap">
+    <div class="breadcrumb"><a href="index.html">Home</a><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Contact</span></div>
+    <h1>How can we help?</h1>
+    <p>Whether you need support, want to report a fundraiser, or have a partnership in mind — we're here.</p>
+  </div>
+</section>
+
+<section class="section-tight" style="padding-top:8px">
+  <div class="wrap contact-grid">
+    <!-- form -->
+    <div class="contact-card reveal">
+      <form id="contactForm">
+        <div class="field-row">
+          <div class="field"><label>Your name</label><input type="text" name="name" placeholder="Jane Doe" required></div>
+          <div class="field"><label>Email</label><input type="email" name="email" placeholder="you@email.com" required></div>
+        </div>
+        <div class="field"><label>Subject</label>
+          <select name="subject" id="cSubject">
+            <option>General support</option>
+            <option>Report a fundraiser</option>
+            <option>Partnerships</option>
+            <option>Press &amp; media</option>
+          </select>
+        </div>
+        <div class="field"><label>Message</label><textarea name="message" id="cMessage" placeholder="Tell us how we can help…" required></textarea></div>
+        <button class="btn btn-primary btn-lg" id="contactSubmit" type="submit">Send message</button>
+      </form>
+      <div class="response-note" style="margin-top:20px">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3.5 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>We typically respond within 1–2 business days.</span>
+      </div>
+    </div>
+
+    <!-- channels -->
+    <div class="reveal">
+      <button class="channel-card" data-channel="General support" style="width:100%;text-align:left">
+        <div class="cic"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="m4 7 8 5 8-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div><h4>General support</h4><p>Questions about giving, your account, or a campaign.</p></div>
+      </button>
+      <button class="channel-card" data-channel="Report a fundraiser" style="width:100%;text-align:left">
+        <div class="cic"><svg viewBox="0 0 24 24" fill="none"><path d="M5 21V4m0 1h11l-2 4 2 4H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div><h4>Report a fundraiser</h4><p>Flag a campaign for our team to review.</p></div>
+      </button>
+      <button class="channel-card" data-channel="Partnerships" style="width:100%;text-align:left">
+        <div class="cic"><svg viewBox="0 0 24 24" fill="none"><path d="m12 8 2-1.8a3 3 0 0 1 4 .2l3 3M2 9.5l3-3a3 3 0 0 1 4-.2L12 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="m6 12 3 3a1.6 1.6 0 0 0 2.3 0L13 13l2 2a1.6 1.6 0 0 0 2.3-2.3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div><h4>Partnerships</h4><p>Work with CareWay on community initiatives.</p></div>
+      </button>
+    </div>
+  </div>
+</section>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/ui.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
