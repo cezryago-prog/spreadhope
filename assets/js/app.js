@@ -15,29 +15,15 @@
   PAGES.home = function () {
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    /* ---- Featured bento grid (1 big + 3 cards + "view all" CTA) ---- */
-    const feat = qs("#featGrid");
-    if (feat) {
-      const list = D.all().slice(0, 4);
-      const card = (c, big) => `
-        <a class="feat-card${big ? " feat-big" : ""}" href="campaign.html?id=${c.id}">
-          <div class="feat-img">
-            <img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'">
-            <span class="feat-cat">${esc(c.category)}</span>
-          </div>
-          <div class="feat-b">
-            <div class="feat-t">${esc(c.title)}</div>
-            <div class="careflow feat-bar"><div class="careflow-track"><div class="careflow-fill" style="width:${D.pct(c)}%"></div></div></div>
-            <div class="feat-meta"><b>${money(c.raised)} <span>raised</span></b><span class="feat-fund">${D.pct(c)}% funded</span></div>
-          </div>
-        </a>`;
-      feat.innerHTML =
-        card(list[0], true) +
-        list.slice(1).map((c) => card(c, false)).join("") +
-        `<a class="feat-cta" href="browse-campaigns.html" aria-label="View all fundraisers">
-          <span class="feat-cta-t">View all<br>fundraisers</span>
-          <span class="feat-cta-ic">${I.arrow}</span>
-        </a>`;
+    /* ---- Explore rail — horizontal center-focus carousel (focused card grows) ---- */
+    const rail = qs("#exploreRail");
+    if (rail) {
+      const list = D.all().slice(0, 6);
+      rail.innerHTML = list.map((c) => campaignCard(c)).join("") +
+        `<a class="ccard end-card exp-end" href="browse-campaigns.html" aria-label="See all campaigns"><div class="end-inner"><div class="end-ic">${I.arrow}</div><div class="end-t">See all<br>campaigns</div><div class="end-sub">Explore every fundraiser</div></div></a>`;
+      qsa("#exploreRail .ccard").forEach((x) => x.classList.remove("reveal"));
+      qsa("#exploreRail .careflow-fill").forEach((f) => { f.style.width = f.dataset.fill + "%"; });
+      initCarousels();
     }
 
     /* ---- "A story of hope" — center-focus peek carousel, auto-advance 3s ---- */

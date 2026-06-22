@@ -38,6 +38,7 @@
     tk: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.35 2.06 1.6 3.46 3.5 3.78v2.62c-1.27.02-2.46-.36-3.5-1.04v6.27a5.62 5.62 0 1 1-5.62-5.62c.28 0 .56.02.83.07v2.74a2.9 2.9 0 1 0 2.03 2.77V3h2.76Z"/></svg>',
     link: '<svg viewBox="0 0 24 24" fill="none"><path d="M10.5 13.5a3.6 3.6 0 0 0 5.1 0l2.6-2.6a3.6 3.6 0 0 0-5.1-5.1l-1.3 1.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.5 10.5a3.6 3.6 0 0 0-5.1 0l-2.6 2.6a3.6 3.6 0 0 0 5.1 5.1l1.3-1.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
     info: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 11v5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    help: '<svg viewBox="0 0 24 24" fill="none"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.55L3.5 20.5l1.45-5.05A8.5 8.5 0 1 1 21 11.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8 1c0 1.7-2.4 2-2.4 3.4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16.7" r="1" fill="currentColor"/></svg>',
     copy: '<svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
     wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2a1 1 0 0 1 .7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.1 2.3 1.4 2.6 1.6.3.1.5.1.7-.1l.7-.9c.2-.3.4-.2.6-.1l1.8.9c.3.1.5.2.5.3.1.1.1.6-.1 1.1Z"/></svg>',
   };
@@ -319,10 +320,90 @@
     initProgress(root);
   }
 
+  /* ---------- Floating help / FAQ assistant ---------- */
+  const HELP_FAQ = [
+    { q: "How do donations work?", a: "Choose a campaign, select an amount, and complete your donation securely. After donating, you can share the campaign to help it reach more people." },
+    { q: "Is my donation secure?", a: "Yes. Donations are processed through secure payment methods. The site should never expose sensitive payment information directly." },
+    { q: "How can I know if a campaign is real?", a: "Look for verified story badges, organizer details, campaign updates, and clear information about how the funds will be used." },
+    { q: "Can I share a campaign?", a: "Yes. Each campaign should include a share option so you can send it to friends, family, or social media and help increase its reach." },
+    { q: "How do I start a fundraiser?", a: "Use the Start a Fundraiser option, follow the guided steps, add your story, goal, and images, then review your campaign before publishing." },
+    { q: "Can I update my campaign after publishing?", a: "Yes. Campaign organizers should be able to post updates, improve their story, and keep supporters informed about progress." },
+    { q: "Where does the money go?", a: "Funds should go toward the purpose described in the campaign. The campaign page should clearly show the organizer and explain how the donations will be used." },
+    { q: "What if I need more help?", a: "If your question is not listed here, you can contact the support team through the Contact Us page." },
+  ];
+
+  function renderHelp() {
+    const allowed = ["home", "browse", "campaign"];
+    if (!allowed.includes(document.body.dataset.page || "")) return;
+
+    const root = document.createElement("div");
+    root.className = "help-widget";
+    root.innerHTML = `
+      <div class="help-panel" id="helpPanel" role="dialog" aria-modal="false" aria-labelledby="helpTitle">
+        <div class="help-head">
+          <div class="help-head-tx">
+            <h2 id="helpTitle">How can we help?</h2>
+            <p>Find quick answers about campaigns, donations, and support.</p>
+          </div>
+          <button type="button" class="help-close" id="helpClose" aria-label="Close help panel">${I.close}</button>
+        </div>
+        <div class="help-body">
+          <ul class="help-faq">
+            ${HELP_FAQ.map((f, i) => `
+              <li class="help-item">
+                <button type="button" class="help-q" id="helpQ${i}" aria-expanded="false" aria-controls="helpA${i}">
+                  <span>${esc(f.q)}</span><i class="help-chev" aria-hidden="true">${I.chevronDown}</i>
+                </button>
+                <div class="help-a" id="helpA${i}" role="region" aria-labelledby="helpQ${i}"><div class="help-a-in"><p>${esc(f.a)}</p></div></div>
+              </li>`).join("")}
+          </ul>
+        </div>
+        <div class="help-foot">
+          <b>Didn't find what you need?</b>
+          <span>Our support team can help you with campaign, donation, or account questions.</span>
+          <a class="help-contact-btn" href="contact.html">Contact us ${I.arrow}</a>
+        </div>
+      </div>
+      <button type="button" class="help-fab" id="helpFab" aria-label="Open help and FAQ" aria-expanded="false" aria-controls="helpPanel">
+        <span class="help-fab-ic">${I.help}</span><span class="help-fab-tx">Need help?</span>
+      </button>`;
+    document.body.appendChild(root);
+
+    const fab = root.querySelector("#helpFab");
+    const closeBtn = root.querySelector("#helpClose");
+    const isOpen = () => root.classList.contains("open");
+    const setOpen = (v) => {
+      root.classList.toggle("open", v);
+      fab.setAttribute("aria-expanded", v ? "true" : "false");
+      if (v) setTimeout(() => closeBtn.focus(), 60);
+    };
+
+    fab.addEventListener("click", () => setOpen(!isOpen()));
+    closeBtn.addEventListener("click", () => { setOpen(false); fab.focus(); });
+
+    // single-open accordion
+    qsa(".help-q", root).forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const item = btn.closest(".help-item");
+        const wasOpen = item.classList.contains("is-open");
+        qsa(".help-item.is-open", root).forEach((it) => {
+          it.classList.remove("is-open");
+          it.querySelector(".help-q").setAttribute("aria-expanded", "false");
+        });
+        if (!wasOpen) { item.classList.add("is-open"); btn.setAttribute("aria-expanded", "true"); }
+      });
+    });
+
+    // close on Escape and on outside click
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && isOpen()) { setOpen(false); fab.focus(); } });
+    document.addEventListener("click", (e) => { if (isOpen() && !root.contains(e.target)) setOpen(false); });
+  }
+
   /* ---------- Boot ---------- */
   function boot() {
     renderHeader();
     renderFooter();
+    renderHelp();
     initReveal();
     initProgress();
   }
