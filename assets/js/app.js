@@ -15,33 +15,29 @@
   PAGES.home = function () {
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    /* ---- Mini campaign cards (replaces "Hope is growing") ---- */
-    const mini = qs("#miniCampaigns");
-    if (mini) {
-      const list = D.all().slice(0, 6);
-      mini.innerHTML = list.map((c) => `
-        <a class="mini-camp" href="campaign.html?id=${c.id}">
-          <div class="mini-img"><img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'"></div>
-          <div class="mini-b">
-            <div class="mini-t">${esc(c.title)}</div>
-            <div class="mini-r">${money(c.raised)} <span>raised</span></div>
+    /* ---- Featured bento grid (1 big + 3 cards + "view all" CTA) ---- */
+    const feat = qs("#featGrid");
+    if (feat) {
+      const list = D.all().slice(0, 4);
+      const card = (c, big) => `
+        <a class="feat-card${big ? " feat-big" : ""}" href="campaign.html?id=${c.id}">
+          <div class="feat-img">
+            <img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'">
+            <span class="feat-cat">${esc(c.category)}</span>
           </div>
-        </a>`).join("") + `
-        <a class="mini-camp mini-more" href="browse-campaigns.html" aria-label="See all fundraisers">
-          <div class="mini-more-in"><span class="mini-more-ic">${I.arrow}</span><span>See all<br>fundraisers</span></div>
+          <div class="feat-b">
+            <div class="feat-t">${esc(c.title)}</div>
+            <div class="careflow feat-bar"><div class="careflow-track"><div class="careflow-fill" style="width:${D.pct(c)}%"></div></div></div>
+            <div class="feat-meta"><b>${money(c.raised)} <span>raised</span></b><span class="feat-fund">${D.pct(c)}% funded</span></div>
+          </div>
         </a>`;
-      // edge fades: right fade until the last card, left fade once scrolled
-      const fade = mini.closest(".mini-fade");
-      if (fade) {
-        const updateFade = () => {
-          const max = mini.scrollWidth - mini.clientWidth;
-          fade.classList.toggle("has-left", mini.scrollLeft > 4);
-          fade.classList.toggle("has-right", mini.scrollLeft < max - 4);
-        };
-        mini.addEventListener("scroll", updateFade, { passive: true });
-        window.addEventListener("resize", updateFade, { passive: true });
-        requestAnimationFrame(updateFade);
-      }
+      feat.innerHTML =
+        card(list[0], true) +
+        list.slice(1).map((c) => card(c, false)).join("") +
+        `<a class="feat-cta" href="browse-campaigns.html" aria-label="View all fundraisers">
+          <span class="feat-cta-t">View all<br>fundraisers</span>
+          <span class="feat-cta-ic">${I.arrow}</span>
+        </a>`;
     }
 
     /* ---- "A story of hope" — center-focus peek carousel, auto-advance 3s ---- */
@@ -858,14 +854,13 @@
             <div class="amount-grid">
               ${amounts.map((a) => `<button type="button" class="amount-opt" data-amt="${a}">${money(a)}</button>`).join("")}
             </div>
-            <div class="dn-custom"><span class="cur">$</span><input type="text" inputmode="numeric" id="dCustom" placeholder="Enter another amount" aria-label="Custom amount"></div>
             <button class="btn btn-primary btn-lg btn-block" id="dNext0">Continue ${I.arrow}</button>
           </section>
 
           <section class="dn-pane" data-pane="1">
             <h1>Add your support</h1>
-            <p class="donate-sub">A few words mean a lot to ${esc(c.organizer.name)}. Totally optional.</p>
-            <div class="dn-field"><label for="dName">Your name <span class="hint">— optional</span></label><input type="text" id="dName" placeholder="Jane Doe"></div>
+            <p class="donate-sub">Tell ${esc(c.organizer.name)} who's behind this gift. Your name is required even for anonymous donations.</p>
+            <div class="dn-field"><label for="dName">Your name <span class="hint req">— required</span></label><input type="text" id="dName" placeholder="Jane Doe" required></div>
             <div class="dn-field"><label for="dMsg">Words of support <span class="hint">— optional</span></label><textarea id="dMsg" placeholder="Sending strength and hope…"></textarea></div>
             <label class="anon-row"><input type="checkbox" id="dAnon"> Donate anonymously</label>
             <div class="dn-nav"><button class="btn btn-ghost" id="dBack1">Back</button><button class="btn btn-primary" id="dNext1">Review ${I.arrow}</button></div>
@@ -906,15 +901,13 @@
       };
 
       const setAmount = (v) => { amount = v; qsa(".amount-opt").forEach((x) => x.classList.toggle("sel", +x.dataset.amt === v)); };
-      qsa(".amount-opt").forEach((b) => b.addEventListener("click", () => { qs("#dCustom").value = ""; setAmount(+b.dataset.amt); }));
-      qs("#dCustom").addEventListener("input", (e) => {
-        const v = parseInt(e.target.value.replace(/\D/g, ""), 10) || 0;
-        qsa(".amount-opt").forEach((x) => x.classList.remove("sel"));
-        amount = v;
-      });
+      qsa(".amount-opt").forEach((b) => b.addEventListener("click", () => { setAmount(+b.dataset.amt); }));
 
       qs("#dNext0").addEventListener("click", () => { if (!amount || amount < 1) { toast("Please choose an amount", "err"); return; } go(1); });
-      qs("#dNext1").addEventListener("click", () => { buildReview(); go(2); });
+      qs("#dNext1").addEventListener("click", () => {
+        if (!qs("#dName").value.trim()) { toast("Please enter your name", "err"); qs("#dName").focus(); return; }
+        buildReview(); go(2);
+      });
       qs("#dBack1").addEventListener("click", () => go(0));
       qs("#dBack2").addEventListener("click", () => go(1));
 
