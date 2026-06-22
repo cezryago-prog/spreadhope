@@ -1,8 +1,8 @@
 /* =====================================================================
-   CareWay — Data Layer (MOCK)
+   Spread Hope — Data Layer (MOCK)
    ---------------------------------------------------------------------
    This is the ONLY place mock data lives. The public API exposed on
-   window.CareWayData mirrors what a real async backend would offer, so
+   window.SpreadHopeData mirrors what a real async backend would offer, so
    swapping this file for real fetch()/Supabase calls later requires no
    changes in the UI code — every method already returns a Promise.
    ===================================================================== */
@@ -343,5 +343,5 @@
     },
   };
 
-  window.CareWayData = api;
+  window.SpreadHopeData = api;
 })();

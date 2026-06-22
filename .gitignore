@@ -10,3 +10,6 @@ desktop.ini
 .claude/
 *.log
 node_modules/
+
+# Local source-image dump (originals already live in assets/img/)
+images/

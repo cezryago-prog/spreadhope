@@ -3,59 +3,91 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Discover fundraisers · CareWay</title>
-<meta name="description" content="Find a cause that matters to you. Browse verified fundraisers on CareWay by category, status and more.">
+<title>Browse campaigns · Spread Hope</title>
+<meta name="description" content="Every story here is real. Browse verified fundraisers on Spread Hope by category, cause and more.">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/main.css">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/main.css?v=86">
 </head>
 <body data-page="browse">
 
-<section class="page-intro">
-  <div class="wrap">
-    <div class="breadcrumb"><a href="index.html">Home</a><svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Browse</span></div>
-    <h1>Discover fundraisers</h1>
-    <p>Find a cause that matters to you.</p>
+<!-- ============ HERO ============ -->
+<section class="bc-hero">
+  <div class="nh-hero-deco" aria-hidden="true">
+    <svg class="nh-deco-path" viewBox="0 0 460 300" preserveAspectRatio="none"><path d="M20 250 C 150 215 165 95 300 125 C 388 145 415 70 440 28" fill="none" stroke="#A9D6A1" stroke-width="2.5" stroke-dasharray="1 13" stroke-linecap="round"/></svg>
+  </div>
+  <div class="wrap bc-hero-grid">
+    <div class="bc-hero-copy reveal">
+      <h1>Browse<br>campaigns</h1>
+      <p>Every story here is real. Every contribution makes a difference.</p>
+    </div>
+    <div class="bc-hero-visual reveal" data-delay="1">
+      <div class="bc-hero-img">
+        <img src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=560&q=70" alt="Hands holding a heart" width="560" height="560" onerror="this.onerror=null;this.src='assets/img/hero.png'">
+      </div>
+    </div>
   </div>
 </section>
 
-<section class="section-tight" style="padding-top:0">
+<!-- ============ TOOLS + LIST ============ -->
+<section class="bc-main">
   <div class="wrap">
-    <!-- toolbar -->
-    <div class="browse-toolbar">
-      <div class="search-inline">
-        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        <input type="search" id="browseSearch" placeholder="Search by name, cause or place…" autocomplete="off">
-      </div>
-      <button class="filter-btn" id="filterBtn">
+    <div class="bc-search">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="search" id="browseSearch" placeholder="Search for campaigns, people or causes…" autocomplete="off">
+    </div>
+
+    <div class="bc-filterbar">
+      <div class="bc-chips" id="catChips"></div>
+      <button class="bc-filter-icon" id="filterToggle" aria-label="More filters">
         <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h10M18 7h2M4 12h2M10 12h10M4 17h7M15 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="12" r="2" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="17" r="2" stroke="currentColor" stroke-width="2"/></svg>
-        Filters<span id="filterCount"></span>
       </button>
     </div>
 
-    <div class="active-chips" id="activeChips"></div>
-    <div class="results-meta"><span id="resultsMeta"></span></div>
+    <div class="bc-listhead">
+      <div>
+        <h2>All campaigns</h2>
+        <p>Together, we can create real change.</p>
+      </div>
+      <div class="bc-sort">
+        <select id="sortSelect" aria-label="Sort campaigns"></select>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
 
-    <div class="card-grid cols-3" id="browseGrid"></div>
+    <div class="bc-list" id="browseGrid"></div>
 
-    <!-- empty state -->
     <div class="empty-state hide" id="emptyState">
       <div class="ic"><svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
       <h3>No campaigns found</h3>
-      <p>We couldn't find any fundraisers matching your filters. Try clearing them, or start a campaign of your own.</p>
+      <p>We couldn't find any fundraisers matching your search. Try clearing the filters.</p>
       <div class="acts">
         <button class="btn btn-soft" id="emptyClear">Clear filters</button>
         <a href="start.html" class="btn btn-primary">Start a campaign</a>
       </div>
     </div>
 
-    <div class="pagination" id="pagination"></div>
+    <div class="bc-pager" id="pagination"></div>
   </div>
 </section>
 
-<!-- filter sheet -->
+<!-- ============ STRONGER TOGETHER ============ -->
+<section class="nh-section" style="padding-top:0">
+  <div class="wrap">
+    <div class="nh-community reveal">
+      <div class="cic"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="3" stroke="currentColor" stroke-width="2"/><path d="M6 21a6 6 0 0 1 12 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="5" cy="10" r="2" stroke="currentColor" stroke-width="2"/><circle cx="19" cy="10" r="2" stroke="currentColor" stroke-width="2"/></svg></div>
+      <div class="ctx">
+        <h3>Stronger together</h3>
+        <p>Join a community of people spreading hope every day.</p>
+      </div>
+      <a href="start.html" class="btn btn-dark">Join the community</a>
+    </div>
+  </div>
+</section>
+
+<!-- filter drawer (bottom sheet on mobile) -->
 <div class="sheet-backdrop" id="sheetBackdrop"></div>
 <aside class="filter-sheet" id="filterSheet" role="dialog" aria-modal="true" aria-label="Filters">
   <div class="sheet-head">
@@ -69,8 +101,8 @@
   </div>
 </aside>
 
-<script src="assets/js/data.js"></script>
-<script src="assets/js/ui.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/data.js?v=86"></script>
+<script src="assets/js/ui.js?v=86"></script>
+<script src="assets/js/app.js?v=86"></script>
 </body>
 </html>

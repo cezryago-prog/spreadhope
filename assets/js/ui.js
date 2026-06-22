@@ -1,5 +1,5 @@
 /* =====================================================================
-   CareWay — Shared UI: chrome, icons, helpers, motion
+   Spread Hope — Shared UI: chrome, icons, helpers, motion
    ===================================================================== */
 (function () {
   "use strict";
@@ -35,6 +35,8 @@
     ig: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/></svg>',
     x: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.6 7.5L21.7 21h-5.9l-4.3-5.6L6.4 21H3.3l7-8L2.6 3h6l3.9 5.2L17.5 3Zm-1 16h1.6L7.6 4.7H5.9L16.5 19Z"/></svg>',
     li: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 3.5a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM3 9h3v12H3V9Zm5.5 0H11v1.6h.1c.4-.7 1.4-1.6 3-1.6 3.2 0 3.9 2 3.9 4.7V21h-3v-5.6c0-1.3 0-3-1.9-3s-2.1 1.4-2.1 2.9V21h-3V9Z"/></svg>',
+    tk: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.35 2.06 1.6 3.46 3.5 3.78v2.62c-1.27.02-2.46-.36-3.5-1.04v6.27a5.62 5.62 0 1 1-5.62-5.62c.28 0 .56.02.83.07v2.74a2.9 2.9 0 1 0 2.03 2.77V3h2.76Z"/></svg>',
+    link: '<svg viewBox="0 0 24 24" fill="none"><path d="M10.5 13.5a3.6 3.6 0 0 0 5.1 0l2.6-2.6a3.6 3.6 0 0 0-5.1-5.1l-1.3 1.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M13.5 10.5a3.6 3.6 0 0 0-5.1 0l-2.6 2.6a3.6 3.6 0 0 0 5.1 5.1l1.3-1.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
     info: '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 11v5M12 8h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
     copy: '<svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
     wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2a1 1 0 0 1 .7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.1 2.3 1.4 2.6 1.6.3.1.5.1.7-.1l.7-.9c.2-.3.4-.2.6-.1l1.8.9c.3.1.5.2.5.3.1.1.1.6-.1 1.1Z"/></svg>',
@@ -50,40 +52,42 @@
 
   /* ---------- Campaign card markup ---------- */
   function campaignCard(c, opts = {}) {
-    const p = window.CareWayData.pct(c);
+    const p = window.SpreadHopeData.pct(c);
     const statusBadge =
       c.status === "urgent" ? '<span class="badge-status urgent">Urgent</span>' :
       c.status === "almost" || p >= 80 ? '<span class="badge-status almost">Almost there</span>' : "";
     const href = `campaign.html?id=${c.id}`;
     return `
     <article class="ccard reveal ${opts.peek ? "peek" : ""}" data-pct="${p}">
+      <a class="stretch" href="${href}" aria-label="View ${esc(c.title)}"></a>
       <div class="ccard-img">
+        <img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" width="900" height="600"
+             onerror="this.onerror=null;this.src='${window.SpreadHopeData.fallbackImg(c.category)}'">
+        <span class="ccard-scrim" aria-hidden="true"></span>
         <div class="badges">
           <span class="badge-cat">${esc(c.category)}</span>
           ${statusBadge}
         </div>
-        <img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" width="900" height="563"
-             onerror="this.onerror=null;this.src='${window.CareWayData.fallbackImg(c.category)}'">
+        <h3 class="ccard-title">${esc(c.title)}</h3>
       </div>
       <div class="ccard-body">
-        <div class="loc">${I.pin}${esc(c.location)}</div>
-        <h3 class="ccard-title">${esc(c.title)}</h3>
-        <div class="ccard-meta">
-          <div class="careflow">
-            <div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div>
-            <div class="careflow-stats">
-              <div class="raised">${money(c.raised)} <span>raised of ${money(c.goal)}</span></div>
-              <div class="pct">${p}%</div>
-            </div>
+        <div class="careflow">
+          <div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div>
+          <div class="careflow-stats">
+            <div class="raised">${money(c.raised)} <span>of ${money(c.goal)}</span></div>
+            <div class="pct">${p}%</div>
           </div>
         </div>
-        <a class="stretch" href="${href}" aria-label="View ${esc(c.title)}"></a>
+        <div class="ccard-foot">
+          <span class="ccard-donors">${I.users}${c.donors} supporters</span>
+          <span class="ccard-go">Donate ${I.arrow}</span>
+        </div>
       </div>
     </article>`;
   }
 
   function featuredCard(c) {
-    const p = window.CareWayData.pct(c);
+    const p = window.SpreadHopeData.pct(c);
     return `
     <article class="ccard featured reveal" data-pct="${p}">
       <div class="ccard-img">
@@ -92,7 +96,7 @@
           ${c.status === "urgent" ? '<span class="badge-status urgent">Urgent</span>' : ""}
         </div>
         <img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" width="900" height="563"
-             onerror="this.onerror=null;this.src='${window.CareWayData.fallbackImg(c.category)}'">
+             onerror="this.onerror=null;this.src='${window.SpreadHopeData.fallbackImg(c.category)}'">
       </div>
       <div class="ccard-body">
         <div class="loc">${I.pin}${esc(c.location)} · ${c.donors} supporters</div>
@@ -133,7 +137,7 @@
     const active = document.body.dataset.page || "";
     const navLinks = NAV.map((n) => `<a href="${n.href}" class="${active === n.key ? "active" : ""}">${n.label}</a>`).join("");
     const drawerLinks = NAV.map((n) => `<a href="${n.href}" class="${active === n.key ? "active" : ""}">${n.label} ${I.chevron}</a>`).join("");
-    const brand = `<a class="brand" href="index.html" aria-label="CareWay home">${I.logo}<span class="wordmark">Care<b>Way</b></span></a>`;
+    const brand = `<a class="brand" href="index.html" aria-label="Spread Hope home"><img class="brand-logo" src="assets/img/logo-solo.png" alt="" width="56" height="56"><span class="wordmark">Spread Hope</span></a>`;
 
     const header = document.createElement("header");
     header.className = "site-header";
@@ -165,9 +169,7 @@
         <div class="drawer-foot">
           <div>Every story deserves a way forward.</div>
           <div class="socials">
-            <a href="#" aria-label="Facebook">${I.fb}</a>
             <a href="#" aria-label="Instagram">${I.ig}</a>
-            <a href="#" aria-label="X">${I.x}</a>
           </div>
         </div>
       </aside>`;
@@ -218,10 +220,10 @@
     const runSearch = async () => {
       const q = input.value.trim();
       if (!q) { results.innerHTML = ""; return; }
-      const rows = await window.CareWayData.search(q);
+      const rows = await window.SpreadHopeData.search(q);
       results.innerHTML = rows.length
         ? rows.map((c) => `<a class="search-res-item" href="campaign.html?id=${c.id}">
-            <img src="${c.cover}" alt="" onerror="this.src='${window.CareWayData.fallbackImg(c.category)}'">
+            <img src="${c.cover}" alt="" onerror="this.src='${window.SpreadHopeData.fallbackImg(c.category)}'">
             <div><div class="t">${esc(c.title)}</div><div class="m">${esc(c.category)} · ${esc(c.location)}</div></div></a>`).join("")
         : `<div style="padding:16px;color:var(--slate-gray)">No campaigns match “${esc(q)}”. <a href="browse-campaigns.html" style="color:var(--harbor-teal);font-weight:600">Browse all →</a></div>`;
     };
@@ -233,14 +235,9 @@
       if ((e.key === "/" || (e.key === "k" && (e.metaKey || e.ctrlKey))) && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { e.preventDefault(); openSearch(); }
     });
 
-    // header scroll behaviour
-    let lastY = 0;
+    // header scroll behaviour — stays pinned to top, only gains a subtle shadow on scroll
     const onScroll = () => {
-      const y = window.scrollY;
-      header.classList.toggle("is-scrolled", y > 8);
-      if (y > 320 && y > lastY) header.classList.add("is-hidden");
-      else header.classList.remove("is-hidden");
-      lastY = y;
+      header.classList.toggle("is-scrolled", window.scrollY > 8);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -248,10 +245,9 @@
 
   function renderFooter() {
     const groups = [
-      { h: "Discover", links: [["browse-campaigns.html", "Browse campaigns"], ["browse-campaigns.html?status=urgent", "Urgent fundraisers"], ["how-it-works.html", "How CareWay works"]] },
-      { h: "Create", links: [["start.html", "Start a campaign"], ["how-it-works.html", "Tips for organizers"], ["contact.html", "Get help"]] },
-      { h: "Company", links: [["about.html", "About us"], ["contact.html", "Contact"], ["how-it-works.html", "Trust & safety"]] },
-      { h: "Legal", links: [["terms.html", "Terms of service"], ["privacy.html", "Privacy policy"], ["contact.html", "Report a fundraiser"]] },
+      { h: "Explore", links: [["browse-campaigns.html", "All stories"], ["browse-campaigns.html?sort=funded", "Top fundraisers"], ["browse-campaigns.html", "Categories"], ["how-it-works.html", "How it works"]] },
+      { h: "Company", links: [["about.html", "About us"], ["how-it-works.html", "Community"], ["how-it-works.html", "Trust & safety"], ["contact.html", "Contact us"]] },
+      { h: "Support", links: [["contact.html", "Help center"], ["how-it-works.html", "Resources"], ["privacy.html", "Privacy policy"], ["terms.html", "Terms of service"]] },
     ];
     const footer = document.createElement("footer");
     footer.className = "site-footer";
@@ -259,19 +255,18 @@
       <div class="wrap">
         <div class="footer-top">
           <div class="footer-brand">
-            <a class="brand" href="index.html">${I.logo}<span class="wordmark">Care<b>Way</b></span></a>
-            <p>CareWay helps people share real stories and receive support through trusted fundraising pages.</p>
+            <a class="brand" href="index.html" aria-label="Spread Hope home"><img class="brand-namelogo" src="assets/img/logo-name.png" alt="Spread Hope" width="240" height="72"></a>
+            <p>We connect real people with real stories to create real change.</p>
             <div class="footer-socials">
-              <a href="#" aria-label="Facebook">${I.fb}</a>
               <a href="#" aria-label="Instagram">${I.ig}</a>
+              <a href="#" aria-label="Facebook">${I.fb}</a>
               <a href="#" aria-label="X">${I.x}</a>
-              <a href="#" aria-label="LinkedIn">${I.li}</a>
             </div>
           </div>
           ${groups.map((g) => `<div class="footer-col"><h4>${g.h}</h4><ul>${g.links.map((l) => `<li><a href="${l[0]}">${l[1]}</a></li>`).join("")}</ul></div>`).join("")}
         </div>
         <div class="footer-bottom">
-          <div>© 2026 CareWay · Every story deserves a way forward.</div>
+          <div>© 2026 Spread Hope. All rights reserved.</div>
           <div class="mini"><a href="terms.html">Terms</a><a href="privacy.html">Privacy</a><a href="contact.html">Contact</a></div>
         </div>
       </div>`;
@@ -314,7 +309,7 @@
   /* ---------- Web Share ---------- */
   function share(title, url) {
     url = url || location.href;
-    if (navigator.share) { navigator.share({ title: "CareWay — " + title, url }).catch(() => {}); }
+    if (navigator.share) { navigator.share({ title: "Spread Hope — " + title, url }).catch(() => {}); }
     else { navigator.clipboard.writeText(url).then(() => toast("Link copied to clipboard")); }
   }
 

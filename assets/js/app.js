@@ -1,9 +1,9 @@
 /* =====================================================================
-   CareWay — Page controllers (dispatched by <body data-page>)
+   Spread Hope — Page controllers (dispatched by <body data-page>)
    ===================================================================== */
 (function () {
   "use strict";
-  const D = window.CareWayData;
+  const D = window.SpreadHopeData;
   const { I, esc, money, initials, qs, qsa, campaignCard, featuredCard, skeletonCard, toast, share, observeNew } = window.CW;
   const param = (k) => new URLSearchParams(location.search).get(k);
 
@@ -13,18 +13,124 @@
      HOME
      ================================================================= */
   PAGES.home = function () {
-    const feat = qs("#featuredSlot");
-    if (feat) feat.innerHTML = featuredCard(D.featured());
-    const active = qs("#activeSlot");
-    if (active) active.innerHTML = D.active(3).map((c) => campaignCard(c)).join("");
-    const urgent = qs("#urgentSlot");
-    if (urgent) {
-      const u = D.urgent(3);
-      urgent.innerHTML = u.map((c, i) => campaignCard(c, { peek: i === 2 })).join("");
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    /* ---- Mini campaign cards (replaces "Hope is growing") ---- */
+    const mini = qs("#miniCampaigns");
+    if (mini) {
+      const list = D.all().slice(0, 6);
+      mini.innerHTML = list.map((c) => `
+        <a class="mini-camp" href="campaign.html?id=${c.id}">
+          <div class="mini-img"><img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'"></div>
+          <div class="mini-b">
+            <div class="mini-t">${esc(c.title)}</div>
+            <div class="mini-r">${money(c.raised)} <span>raised</span></div>
+          </div>
+        </a>`).join("") + `
+        <a class="mini-camp mini-more" href="browse-campaigns.html" aria-label="See all fundraisers">
+          <div class="mini-more-in"><span class="mini-more-ic">${I.arrow}</span><span>See all<br>fundraisers</span></div>
+        </a>`;
+      // edge fades: right fade until the last card, left fade once scrolled
+      const fade = mini.closest(".mini-fade");
+      if (fade) {
+        const updateFade = () => {
+          const max = mini.scrollWidth - mini.clientWidth;
+          fade.classList.toggle("has-left", mini.scrollLeft > 4);
+          fade.classList.toggle("has-right", mini.scrollLeft < max - 4);
+        };
+        mini.addEventListener("scroll", updateFade, { passive: true });
+        window.addEventListener("resize", updateFade, { passive: true });
+        requestAnimationFrame(updateFade);
+      }
     }
+
+    /* ---- "A story of hope" — center-focus peek carousel, auto-advance 3s ---- */
+    const track = qs("#sohTrack");
+    if (track) {
+      const camps = [D.featured(), ...D.active(4)].filter(Boolean);
+      const slide = (c) => {
+        const p = D.pct(c);
+        return `
+        <a class="soh-slide" href="campaign.html?id=${c.id}">
+          <div class="soh-media"><span class="heart">${I.heart}</span><img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'"></div>
+          <div class="soh-body">
+            <h3>${esc(c.title)}</h3>
+            <p>${esc(c.blurb)}</p>
+            <div class="soh-nums"><span class="r">${money(c.raised)}</span><span class="g">of ${money(c.goal)}</span></div>
+            <div class="careflow"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div></div>
+            <div class="soh-pct">${p}% funded</div>
+            <span class="btn btn-primary btn-block">Support this story ${I.arrow}</span>
+          </div>
+        </a>`;
+      };
+      const more = `<a class="soh-slide soh-more" href="browse-campaigns.html">
+        <div class="soh-more-in"><span class="soh-more-ic">${I.arrow}</span><span class="soh-more-t">Explore more stories</span><span class="soh-more-sub">See all fundraisers</span></div></a>`;
+      track.innerHTML = camps.map(slide).join("") + more;
+
+      const slides = qsa(".soh-slide", track);
+      const dotsWrap = qs("#sohDots");
+      const vp = track.parentElement;
+      let active = 0, timer = null;
+
+      const center = () => {
+        const el = slides[active];
+        const offset = el.offsetLeft - (vp.clientWidth - el.clientWidth) / 2;
+        track.style.transform = `translateX(${-offset}px)`;
+        slides.forEach((s, i) => s.classList.toggle("is-active", i === active));
+        if (dotsWrap) qsa("button", dotsWrap).forEach((d, i) => d.classList.toggle("on", i === active));
+        const fill = el.querySelector(".careflow-fill");
+        if (fill && fill.dataset.fill) fill.style.width = fill.dataset.fill + "%";
+      };
+      const start = () => { if (reduce) return; clearInterval(timer); timer = setInterval(() => { active = (active + 1) % slides.length; center(); }, 3000); };
+      const stop = () => clearInterval(timer);
+      const go = (i) => { active = (i + slides.length) % slides.length; center(); start(); };
+
+      if (dotsWrap) {
+        dotsWrap.innerHTML = slides.map((_, i) => `<button class="${i === 0 ? "on" : ""}" aria-label="Story ${i + 1}"></button>`).join("");
+        qsa("button", dotsWrap).forEach((d, i) => d.addEventListener("click", () => go(i)));
+      }
+      // swipe
+      let sx = null;
+      track.addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; stop(); }, { passive: true });
+      track.addEventListener("touchend", (e) => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 40) active = (active + (dx < 0 ? 1 : -1) + slides.length) % slides.length; center(); start(); }, { passive: true });
+      // pause on hover (desktop)
+      vp.addEventListener("mouseenter", stop);
+      vp.addEventListener("mouseleave", start);
+      window.addEventListener("resize", center, { passive: true });
+
+      requestAnimationFrame(() => { center(); requestAnimationFrame(center); });
+      start();
+    }
+
     observeNew();
-    initCareFlow();
   };
+
+  /* Carousel focus — the framed (leftmost in-view) card scales up; others shrink.
+     Updates as the user swipes the row or scrolls the section into view. */
+  function initCarousels() {
+    qsa(".hscroll").forEach((track) => {
+      const cards = qsa(".ccard", track);
+      if (!cards.length) return;
+      let raf = 0;
+      const update = () => {
+        raf = 0;
+        const tr = track.getBoundingClientRect();
+        let best = null, bestDist = Infinity;
+        cards.forEach((card) => {
+          const cr = card.getBoundingClientRect();
+          const inFrame = cr.right > tr.left + cr.width * 0.35 && cr.left < tr.right - cr.width * 0.35;
+          const dist = Math.abs(cr.left - tr.left); // distance of card's left edge from the frame's left
+          if (inFrame && dist < bestDist) { bestDist = dist; best = card; }
+        });
+        cards.forEach((c) => c.classList.toggle("is-active", c === best));
+      };
+      const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+      track.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll, { passive: true });
+      update();
+    });
+  }
 
   /* CareFlow animation — synced step cards + mockup */
   function initCareFlow() {
@@ -37,14 +143,33 @@
     const fill = qs(".careflow-fill", mock);
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    // faux cursor that points to where the user would tap
+    const flowCard = qs(".flow-card", mock);
+    let cursor = null, clickT = null;
+    if (flowCard && !reduce) {
+      cursor = document.createElement("div");
+      cursor.className = "flow-cursor";
+      flowCard.appendChild(cursor);
+    }
+    const moveCursor = (el) => {
+      if (!cursor || !el) return;
+      const fc = flowCard.getBoundingClientRect(), tr = el.getBoundingClientRect();
+      const x = tr.left - fc.left + tr.width / 2 - 11;
+      const y = tr.top - fc.top + tr.height / 2 - 11;
+      cursor.classList.add("show");
+      cursor.style.transform = `translate(${x}px, ${y}px)`;
+      clearTimeout(clickT);
+      clickT = setTimeout(() => { cursor.classList.add("click"); setTimeout(() => cursor.classList.remove("click"), 600); }, 850);
+    };
+
     let stage = 0;
     function setStage(s) {
       stage = s % 4;
       stepCards.forEach((c) => c.classList.toggle("active", +c.dataset.step === stage));
-      if (stage === 0) { chips.forEach((c) => c.classList.remove("sel")); donate.classList.remove("armed"); confirm.classList.remove("show"); fill.style.width = "32%"; }
-      if (stage === 1) { chips.forEach((c, i) => c.classList.toggle("sel", i === 1)); donate.classList.add("armed"); }
-      if (stage === 2) { donate.textContent = "Thank you ♥"; fill.style.width = "58%"; }
-      if (stage === 3) { confirm.classList.add("show"); }
+      if (stage === 0) { chips.forEach((c) => c.classList.remove("sel")); donate.classList.remove("armed"); confirm.classList.remove("show"); fill.style.width = "32%"; if (cursor) cursor.classList.remove("show"); }
+      if (stage === 1) { chips.forEach((c, i) => c.classList.toggle("sel", i === 1)); donate.classList.add("armed"); moveCursor(chips[1]); }
+      if (stage === 2) { donate.textContent = "Thank you ♥"; fill.style.width = "58%"; moveCursor(donate); }
+      if (stage === 3) { confirm.classList.add("show"); if (cursor) cursor.classList.remove("show"); }
       if (stage === 0) donate.textContent = "Choose an amount";
     }
 
@@ -67,13 +192,13 @@
      ================================================================= */
   PAGES.browse = function () {
     const grid = qs("#browseGrid");
-    const chipsBox = qs("#activeChips");
-    const resultsMeta = qs("#resultsMeta");
     const pager = qs("#pagination");
-    const filterBtn = qs("#filterBtn");
+    const searchInput = qs("#browseSearch");
+    const catChips = qs("#catChips");
+    const sortSelect = qs("#sortSelect");
     const sheet = qs("#filterSheet");
     const sheetBackdrop = qs("#sheetBackdrop");
-    const searchInput = qs("#browseSearch");
+    const empty = qs("#emptyState");
 
     const state = {
       q: param("q") || "",
@@ -81,25 +206,43 @@
       status: param("status") || "any",
       sort: param("sort") || "recent",
       page: 1,
+      perPage: 4,
     };
     if (searchInput) searchInput.value = state.q;
 
-    // build filter sheet options
+    /* ---- inline category chips ---- */
+    if (catChips) {
+      catChips.innerHTML = D.categories.map((c) => `<button class="bc-chip ${c === state.category ? "on" : ""}" data-cat="${esc(c)}">${esc(c)}</button>`).join("");
+      qsa(".bc-chip", catChips).forEach((b) => b.addEventListener("click", () => {
+        state.category = b.dataset.cat; state.page = 1;
+        qsa(".bc-chip", catChips).forEach((x) => x.classList.toggle("on", x === b));
+        sync(); load();
+      }));
+    }
+
+    /* ---- sort dropdown ("Newest" etc.) ---- */
+    const sortLabels = { recent: "Newest", supported: "Most funded", urgent: "Urgent first" };
+    if (sortSelect) {
+      sortSelect.innerHTML = D.sorts.map((s) => `<option value="${s.key}" ${s.key === state.sort ? "selected" : ""}>${esc(sortLabels[s.key] || s.label)}</option>`).join("");
+      sortSelect.addEventListener("change", () => { state.sort = sortSelect.value; state.page = 1; sync(); load(); });
+    }
+
+    /* ---- search ---- */
+    let st;
+    if (searchInput) searchInput.addEventListener("input", () => { clearTimeout(st); st = setTimeout(() => { state.q = searchInput.value.trim(); state.page = 1; sync(); load(); }, 280); });
+
+    /* ---- advanced filter drawer (status) behind the filter icon ---- */
+    let draft = { ...state };
     function buildSheet() {
       const body = qs("#sheetBody");
+      if (!body) return;
       const groupHTML = (title, opts, current, gkey) => `
-        <div class="fgroup">
-          <h4>${title}</h4>
-          <div class="fopts">${opts.map((o) => {
-            const key = typeof o === "string" ? o : o.key;
-            const label = typeof o === "string" ? o : o.label;
-            return `<button class="fopt ${current === key ? "sel" : ""}" data-group="${gkey}" data-key="${key}">${label}</button>`;
-          }).join("")}</div>
-        </div>`;
-      body.innerHTML =
-        groupHTML("Category", D.categories, state.category, "category") +
-        groupHTML("Status", D.statuses, state.status, "status") +
-        groupHTML("Sort by", D.sorts, state.sort, "sort");
+        <div class="fgroup"><h4>${title}</h4><div class="fopts">${opts.map((o) => {
+          const key = typeof o === "string" ? o : o.key;
+          const label = typeof o === "string" ? o : o.label;
+          return `<button class="fopt ${current === key ? "sel" : ""}" data-group="${gkey}" data-key="${key}">${label}</button>`;
+        }).join("")}</div></div>`;
+      body.innerHTML = groupHTML("Category", D.categories, draft.category, "category") + groupHTML("Status", D.statuses, draft.status, "status");
       qsa(".fopt", body).forEach((b) => b.addEventListener("click", () => {
         const g = b.dataset.group;
         qsa(`.fopt[data-group="${g}"]`, body).forEach((x) => x.classList.remove("sel"));
@@ -107,50 +250,19 @@
         draft[g] = b.dataset.key;
       }));
     }
-    let draft = { ...state };
-
-    function openSheet() { draft = { ...state }; buildSheet(); sheet.classList.add("open"); sheetBackdrop.classList.add("open"); window.CW.lockScroll(true); }
-    function closeSheet() { sheet.classList.remove("open"); sheetBackdrop.classList.remove("open"); window.CW.lockScroll(false); }
-    filterBtn.addEventListener("click", openSheet);
-    sheetBackdrop.addEventListener("click", closeSheet);
-    qs("#sheetClose").addEventListener("click", closeSheet);
-    qs("#sheetApply").addEventListener("click", () => { Object.assign(state, draft); state.page = 1; closeSheet(); sync(); load(); });
-    qs("#sheetClear").addEventListener("click", () => { draft = { q: state.q, category: "All", status: "any", sort: "recent", page: 1 }; buildSheet(); });
+    const filterBtn = qs("#filterToggle");
+    const openSheet = () => { draft = { ...state }; buildSheet(); sheet.classList.add("open"); sheetBackdrop.classList.add("open"); window.CW.lockScroll(true); };
+    const closeSheet = () => { sheet.classList.remove("open"); sheetBackdrop.classList.remove("open"); window.CW.lockScroll(false); };
+    if (filterBtn) filterBtn.addEventListener("click", openSheet);
+    if (sheetBackdrop) sheetBackdrop.addEventListener("click", closeSheet);
+    qs("#sheetClose")?.addEventListener("click", closeSheet);
+    qs("#sheetApply")?.addEventListener("click", () => {
+      Object.assign(state, { category: draft.category, status: draft.status }); state.page = 1;
+      qsa(".bc-chip", catChips).forEach((x) => x.classList.toggle("on", x.dataset.cat === state.category));
+      closeSheet(); sync(); load();
+    });
+    qs("#sheetClear")?.addEventListener("click", () => { draft.category = "All"; draft.status = "any"; buildSheet(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
-
-    let st;
-    if (searchInput) searchInput.addEventListener("input", () => { clearTimeout(st); st = setTimeout(() => { state.q = searchInput.value.trim(); state.page = 1; sync(); load(); }, 280); });
-
-    function activeFilterCount() {
-      let n = 0;
-      if (state.category !== "All") n++;
-      if (state.status !== "any") n++;
-      if (state.sort !== "recent") n++;
-      return n;
-    }
-
-    function renderChips() {
-      const chips = [];
-      if (state.q) chips.push(["q", `“${state.q}”`]);
-      if (state.category !== "All") chips.push(["category", state.category]);
-      if (state.status !== "any") chips.push(["status", D.statuses.find((s) => s.key === state.status).label]);
-      if (state.sort !== "recent") chips.push(["sort", D.sorts.find((s) => s.key === state.sort).label]);
-      chipsBox.innerHTML = chips.map(([k, label]) =>
-        `<span class="fchip">${esc(label)}<button data-clear="${k}" aria-label="Remove filter">${I.close}</button></span>`).join("") +
-        (chips.length ? `<button class="clear-all" id="clearAll">Clear all</button>` : "");
-      qsa("[data-clear]", chipsBox).forEach((b) => b.addEventListener("click", () => {
-        const k = b.dataset.clear;
-        if (k === "q") { state.q = ""; if (searchInput) searchInput.value = ""; }
-        else if (k === "category") state.category = "All";
-        else if (k === "status") state.status = "any";
-        else if (k === "sort") state.sort = "recent";
-        state.page = 1; sync(); load();
-      }));
-      const ca = qs("#clearAll");
-      if (ca) ca.addEventListener("click", () => { state.q = ""; state.category = "All"; state.status = "any"; state.sort = "recent"; state.page = 1; if (searchInput) searchInput.value = ""; sync(); load(); });
-      const count = activeFilterCount();
-      qs("#filterCount").innerHTML = count ? `<span class="count">${count}</span>` : "";
-    }
 
     function sync() {
       const u = new URLSearchParams();
@@ -161,38 +273,67 @@
       history.replaceState(null, "", location.pathname + (u.toString() ? "?" + u : ""));
     }
 
-    function showSkeletons() {
-      grid.innerHTML = Array.from({ length: 6 }).map(skeletonCard).join("");
-      resultsMeta.textContent = "Finding fundraisers…";
+    /* ---- horizontal list card (image left, content right) ---- */
+    function listCard(c) {
+      const p = D.pct(c);
+      return `
+      <a class="bc-card reveal" href="campaign.html?id=${c.id}">
+        <div class="bc-card-img">
+          <span class="bc-heart" aria-hidden="true">${I.heart}</span>
+          <img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'">
+        </div>
+        <div class="bc-card-body">
+          <h3>${esc(c.title)}</h3>
+          <p>${esc(c.blurb)}</p>
+          <div class="bc-card-nums"><span class="r">${money(c.raised)} <i>raised</i></span><span class="g">${money(c.goal)} <i>goal</i></span></div>
+          <div class="bc-card-bar"><div class="careflow"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div></div><span class="bc-card-pct">${p}%</span></div>
+        </div>
+      </a>`;
+    }
+
+    function skeletons() {
+      grid.innerHTML = Array.from({ length: state.perPage }).map(() => `
+        <div class="bc-card bc-skel"><div class="skel bc-card-img"></div>
+        <div class="bc-card-body"><div class="skel skel-line" style="width:65%;height:18px"></div>
+        <div class="skel skel-line" style="width:95%"></div><div class="skel skel-line" style="width:80%"></div>
+        <div class="skel skel-line" style="width:100%;height:8px;margin-top:14px"></div></div></div>`).join("");
       pager.innerHTML = "";
     }
 
     async function load() {
-      renderChips();
-      showSkeletons();
+      skeletons();
       const res = await D.list(state);
       if (!res.items.length) {
-        grid.innerHTML = "";
-        qs("#emptyState").classList.remove("hide");
-        resultsMeta.textContent = "";
-        pager.innerHTML = "";
-        return;
+        grid.innerHTML = ""; empty.classList.remove("hide"); pager.innerHTML = ""; return;
       }
-      qs("#emptyState").classList.add("hide");
-      grid.innerHTML = res.items.map((c) => campaignCard(c)).join("");
-      resultsMeta.innerHTML = `<strong>${res.total}</strong> fundraiser${res.total === 1 ? "" : "s"} found`;
+      empty.classList.add("hide");
+      grid.innerHTML = res.items.map(listCard).join("");
       observeNew(grid);
-      // pagination
+      // pagination — dots + "swipe to see more" hint
       if (res.pages > 1) {
-        let html = `<button ${state.page === 1 ? "disabled" : ""} data-pg="${state.page - 1}" aria-label="Previous">${I.chevron.replace('d="m9 6 6 6-6 6"', 'd="m15 6-6 6 6 6"')}</button>`;
-        for (let i = 1; i <= res.pages; i++) html += `<button class="${i === state.page ? "active" : ""}" data-pg="${i}">${i}</button>`;
-        html += `<button ${state.page === res.pages ? "disabled" : ""} data-pg="${state.page + 1}" aria-label="Next">${I.chevron}</button>`;
-        pager.innerHTML = html;
-        qsa("[data-pg]", pager).forEach((b) => b.addEventListener("click", () => { if (b.disabled) return; state.page = +b.dataset.pg; load(); window.scrollTo({ top: grid.offsetTop - 120, behavior: "smooth" }); }));
+        let dots = "";
+        for (let i = 1; i <= res.pages; i++) dots += `<button class="${i === state.page ? "on" : ""}" data-pg="${i}" aria-label="Page ${i}"></button>`;
+        pager.innerHTML = `<div class="bc-dots">${dots}</div>
+          <div class="bc-pager-hint">
+            <button class="bc-pg-arrow" data-pg="${state.page - 1}" ${state.page === 1 ? "disabled" : ""} aria-label="Previous">${I.chevron.replace('d="m9 6 6 6-6 6"', 'd="m15 6-6 6 6 6"')}</button>
+            <span>Swipe to see more campaigns</span>
+            <button class="bc-pg-arrow" data-pg="${state.page + 1}" ${state.page === res.pages ? "disabled" : ""} aria-label="Next">${I.arrow}</button>
+          </div>`;
+        qsa("[data-pg]", pager).forEach((b) => b.addEventListener("click", () => {
+          if (b.disabled) return;
+          state.page = +b.dataset.pg; load();
+          window.scrollTo({ top: grid.offsetTop - 110, behavior: "smooth" });
+        }));
       } else pager.innerHTML = "";
     }
 
-    qs("#emptyClear")?.addEventListener("click", () => { state.q = ""; state.category = "All"; state.status = "any"; state.sort = "recent"; state.page = 1; if (searchInput) searchInput.value = ""; sync(); load(); });
+    qs("#emptyClear")?.addEventListener("click", () => {
+      state.q = ""; state.category = "All"; state.status = "any"; state.sort = "recent"; state.page = 1;
+      if (searchInput) searchInput.value = "";
+      if (sortSelect) sortSelect.value = "recent";
+      qsa(".bc-chip", catChips).forEach((x) => x.classList.toggle("on", x.dataset.cat === "All"));
+      sync(); load();
+    });
 
     load();
   };
@@ -207,124 +348,181 @@
 
     D.get(id).then((c) => {
       if (!c) { location.replace("404.html"); return; }
-      document.title = `${c.title} · CareWay`;
+      document.title = `${c.title} · Spread Hope`;
       renderDetail(c);
     });
 
     function skeletonDetail() {
-      return `<div class="cd-grid">
-        <div><div class="skel" style="aspect-ratio:16/10;border-radius:24px"></div>
-        <div class="skel skel-line" style="width:50%;height:18px;margin-top:24px"></div>
-        <div class="skel skel-line" style="width:90%;height:30px;margin-top:12px"></div>
-        <div class="skel skel-line" style="width:70%;height:30px"></div></div>
-        <div class="skel" style="height:340px;border-radius:24px"></div></div>`;
+      return `<div class="skel" style="height:clamp(240px,48vw,360px)"></div>
+        <div class="cd-sheet"><div class="cd-inner">
+        <div class="skel skel-line" style="width:70%;height:26px;margin-top:8px"></div>
+        <div class="skel skel-line" style="width:92%;height:15px;margin-top:14px"></div>
+        <div class="skel" style="height:220px;border-radius:24px;margin-top:22px"></div>
+        <div class="skel skel-line" style="width:50%;height:20px;margin-top:30px"></div>
+        <div class="skel skel-line" style="width:96%;height:14px;margin-top:14px"></div>
+        <div class="skel skel-line" style="width:90%;height:14px"></div></div></div>`;
     }
 
     function renderDetail(c) {
       const p = D.pct(c);
       const gallery = (c.gallery && c.gallery.length ? c.gallery : [c.cover]);
-      const statusBadge = c.status === "urgent" ? '<span class="badge-status urgent">Urgent</span>' : (c.status === "almost" || p >= 80) ? '<span class="badge-status almost">Almost there</span>' : "";
+      // hero carousel slides: a "card" slide (plain dark bg) after every complete PAIR of photos
+      // (e.g. photo, photo, card, photo, photo, card … — a trailing lone photo gets no card)
+      const heroSlides = [];
+      gallery.forEach((src, i) => {
+        heroSlides.push({ type: "photo", src });
+        if ((i + 1) % 2 === 0) heroSlides.push({ type: "card" });
+      });
+      const story = [].concat(c.story.the_story || [], c.story.why || [], c.story.how || [], c.story.note || []);
+      const allSup = allSupporters(c);
+      const topSupporters = allSup.slice(0, 5);
+      const atRank = (s) => { const m = /(\d+)\s*(h|d|w|mo)/.exec(s || ""); if (!m) return 1e9; return +m[1] * (m[2] === "h" ? 1 : m[2] === "d" ? 24 : m[2] === "w" ? 168 : 720); };
+      const recentSupporters = allSup.slice().sort((a, b) => atRank(a.at) - atRank(b.at)).slice(0, 5);
+      const messages = (c.supporters || []).filter((s) => s.message);
+      const related = D.all().filter((x) => x.id !== c.id).sort((a, b) => D.pct(b) - D.pct(a)).slice(0, 6);
 
-      // supporters — fill to a believable count with deterministic seed
-      const supporters = buildSupporters(c);
-
-      root.innerHTML = `
-      <div class="breadcrumb"><a href="index.html">Home</a>${I.chevron}<a href="browse-campaigns.html">Campaigns</a>${I.chevron}<span>${esc(c.category)}</span></div>
-      <div class="cd-grid">
-        <div class="cd-main">
-          <div class="cd-gallery">
-            <div class="main-img"><img id="mainImg" src="${gallery[0]}" alt="${esc(c.title)}" width="900" height="563" onerror="this.src='${D.fallbackImg(c.category)}'"></div>
-          </div>
-          ${gallery.length > 1 ? `<div class="cd-thumbs">${gallery.map((g, i) => `<button class="${i === 0 ? "active" : ""}" data-img="${g}"><img src="${g}" alt="" loading="lazy" onerror="this.src='${D.fallbackImg(c.category)}'"></button>`).join("")}</div>` : ""}
-
-          <div class="cd-head">
-            <div class="cd-tags">
-              <span class="badge-cat" style="background:var(--sage-wash)">${esc(c.category)}</span>
-              ${statusBadge}
-              ${c.verified ? `<span class="verified">${I.checkBadge}Verified story</span>` : ""}
-            </div>
-            <h1>${esc(c.title)}</h1>
-            <div class="cd-metaline">
-              <span>${I.pin}${esc(c.location)}</span>
-              <span>${I.users}${c.donors} supporters</span>
-              <span>${I.clock}Created ${formatDate(c.createdAt)}</span>
-            </div>
-          </div>
-        </div>
-
-        <aside>
-          <div class="donate-panel is-rail">
-            <div class="dp-raised">${money(c.raised)}</div>
-            <div class="dp-goal">raised of <b>${money(c.goal)}</b> goal</div>
-            <div class="careflow"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div></div>
-            <div class="dp-stats">
-              <div class="dp-stat"><div class="n">${p}%</div><div class="l">funded</div></div>
-              <div class="dp-stat"><div class="n">${c.donors}</div><div class="l">supporters</div></div>
-              <div class="dp-stat"><div class="n">${daysAgo(c.createdAt)}</div><div class="l">days running</div></div>
-            </div>
-            <div class="dp-actions">
-              <button class="btn btn-primary btn-lg btn-block" id="donateBtn">${I.heart}Donate now</button>
-              <button class="btn btn-ghost btn-block" id="shareBtn">${I.share}Share this fundraiser</button>
-            </div>
-            <div class="donor-rotator" id="donorRotator"></div>
-          </div>
-        </aside>
-      </div>
-
-      <div class="story-section">
-        <h2>${esc(c.organizer.name)} is asking for your support</h2>
-        <div class="story-collapse collapsed" id="storyCollapse">
-          <div class="story-block">
-            <h3>The story</h3>${paras(c.story.the_story)}
-            <h3>Why support is needed</h3>${paras(c.story.why)}
-            <h3>How funds will help</h3>${paras(c.story.how)}
-            <h3>A note from the organizer</h3>${paras(c.story.note)}
-          </div>
-        </div>
-        <button class="btn btn-soft story-toggle" id="storyToggle">Read more</button>
-      </div>
-
-      ${clarityPanel()}
-
-      <div class="supporters-section story-section" style="max-width:760px">
-        <h2>Recent supporters</h2>
-        <div class="supporters-list">${supporters.map(supporterRow).join("")}</div>
-      </div>
-
-      <div class="organizer-card">
-        <img class="oav" src="${c.organizer.avatar}" alt="${esc(c.organizer.name)}" width="64" height="64" onerror="this.style.visibility='hidden'">
-        <div class="oinfo">
-          <div class="lbl">Organized by</div>
-          <div class="nm">${esc(c.organizer.name)}</div>
-          <div class="meta">${esc(c.organizer.relation)} · ${esc(c.location)} · ${c.verified ? "Identity verified" : "Pending verification"}</div>
-        </div>
-      </div>
-
-      <div class="share-section">
-        <h3>Help this story reach more people</h3>
-        <p>A share can be worth as much as a donation. Spread the word.</p>
-        <div class="share-btns">
-          <a href="#" data-sh="copy" aria-label="Copy link">${I.copy}</a>
-          <a href="#" data-sh="wa" aria-label="WhatsApp">${I.wa}</a>
-          <a href="#" data-sh="fb" aria-label="Facebook">${I.fb}</a>
-          <a href="#" data-sh="x" aria-label="X">${I.x}</a>
-        </div>
+      const supRow = (d) => `<div class="cd-sup-row">
+        <span class="cd-sup-av">${initials(d.name)}</span>
+        <span class="cd-sup-name">${esc(d.name)}</span>
+        <span class="cd-sup-amt">${money(d.amount)}</span>
       </div>`;
 
-      // sticky mobile bar
-      const sticky = document.createElement("div");
-      sticky.className = "sticky-donate";
-      sticky.innerHTML = `<div class="sd-info"><div class="r">${money(c.raised)} raised</div><div class="p">${p}% of ${money(c.goal)}</div></div><button class="btn btn-primary" id="stickyDonate">${I.heart}Donate</button>`;
-      document.body.appendChild(sticky);
+      root.innerHTML = `
+      <!-- 2 + 3. hero carousel (photos + story slides) + verification badge -->
+      <section class="cd-hero">
+        <div class="cd-hero-stage">
+          ${heroSlides.map((s, i) => s.type === "card"
+            ? `<div class="cd-hero-slide cd-hero-cardslide${i === 0 ? " on" : ""}" data-i="${i}">
+            <div class="cd-hcard">
+              <h2 class="cd-hcard-title">${esc(c.title)}</h2>
+              ${c.blurb ? `<p class="cd-hcard-desc">${esc(c.blurb)}</p>` : ""}
+              <div class="cd-hcard-stats">
+                <div class="cd-hcard-stat"><b>${money(c.raised)}</b><span>Raised</span></div>
+                <div class="cd-hcard-stat"><b>${p}%</b><span>Funded</span></div>
+                <div class="cd-hcard-stat"><b>${c.donors.toLocaleString("en-US")}</b><span>Supporters</span></div>
+              </div>
+              <button class="cd-hcard-btn" id="heroSupport">Support this fundraiser ${I.arrow}</button>
+            </div>
+          </div>`
+            : `<div class="cd-hero-slide${i === 0 ? " on" : ""}" data-i="${i}">
+            <img class="cd-hero-img" src="${s.src}" alt="${esc(c.title)}" loading="eager" decoding="async" onerror="this.onerror=null;this.src='assets/img/hero.png'">
+          </div>`).join("")}
+        </div>
+        <span class="cd-verified">${c.verified ? I.checkBadge : I.shield}${esc(c.organizer.name)}</span>
+        <div class="cd-hero-titlebar"><span class="cd-hero-cat2">${esc(c.category)}</span><h1 class="cd-hero-h1">${esc(c.title)}</h1></div>
+        ${heroSlides.length > 1 ? `<div class="cd-hero-dots">${heroSlides.map((g, i) => `<button class="${i === 0 ? "on" : ""}" data-i="${i}" aria-label="View slide ${i + 1}"></button>`).join("")}</div>` : ""}
+      </section>
+
+      <div class="cd-sheet">
+        <div class="cd-inner">
+
+          <div class="cd-cols">
+            <div class="cd-main">
+
+              <!-- 6. story -->
+              <section class="cd-block cd-story">
+                <h2>Campaign story</h2>
+                <div class="cd-story-body collapsed" id="storyCollapse">${paras(story)}</div>
+                <button class="cd-readmore" id="storyToggle">Read more</button>
+              </section>
+
+              <!-- 7. organizer -->
+              <section class="cd-organizer">
+                <div class="cd-org-head">
+                  <img class="cd-org-av" src="${c.organizer.avatar}" alt="${esc(c.organizer.name)}" onerror="this.style.visibility='hidden'">
+                  <div class="cd-org-info">
+                    <div class="cd-org-lbl">Organized by</div>
+                    <div class="cd-org-name">${esc(c.organizer.name)} ${c.verified ? `<i class="cd-org-vf" title="Verified">${I.checkBadge}</i>` : ""}</div>
+                    <div class="cd-org-rel">${esc(c.organizer.relation || c.location)}</div>
+                  </div>
+                </div>
+                <p class="cd-org-trust">${I.shield}<span>All donations go directly toward this campaign's stated purpose.</span></p>
+              </section>
+
+              <!-- 9. supporters -->
+              <section class="cd-block">
+                <div class="cd-block-head"><h2 id="supTitle">Recent supporters</h2><button class="cd-seeall" id="supToggle">Top supporters</button></div>
+                <div class="cd-supporters">
+                  <div id="cdSupRows">${recentSupporters.map(supRow).join("")}</div>
+                  <button class="cd-sup-seeall" id="supSeeAll">See all supporters</button>
+                </div>
+              </section>
+
+              <!-- 10. words of support -->
+              ${messages.length ? `<section class="cd-block">
+                <h2>Words of support</h2>
+                <div class="cd-words hscroll">${messages.map((d) => `<div class="cd-word"><div class="cd-word-msg">“${esc(d.message)}”</div><div class="cd-word-by">${I.heart}<span>${esc(d.name)}</span></div></div>`).join("")}</div>
+              </section>` : ""}
+
+            </div>
+
+            <!-- 5. donation card (sticky rail on desktop / first on mobile) -->
+            <aside class="cd-aside">
+              <div class="cd-fund">
+                <div class="cd-fund-top">
+                  <div class="cd-fund-amt">
+                    <div class="cd-fund-raised">${money(c.raised)}</div>
+                    <div class="cd-fund-goal">raised of <b>${money(c.goal)}</b> goal</div>
+                  </div>
+                  <div class="cd-fund-pct">${p}%</div>
+                </div>
+                <div class="careflow cd-fund-bar"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div></div>
+                ${(() => { const jd = recentSupporters.find((s) => s.name !== "Anonymous") || recentSupporters[0]; return jd ? `<div class="cd-fund-recent">${I.heart}<span><b>${esc(jd.name)}</b> just donated</span></div>` : ""; })()}
+                <button class="btn cd-donate btn-block" id="donateBtn">Donate now</button>
+                <button class="btn cd-share btn-block" id="shareBtn">Share this campaign</button>
+                <div class="cd-fund-trust">${I.shield}<span>${c.donors.toLocaleString("en-US")} people have supported this campaign.</span></div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </div>
+
+      <!-- 11. recommended -->
+      <section class="cd-more">
+        <div class="wrap">
+          <h2>You may also like</h2>
+          <div class="hscroll" id="cdMoreSlot"></div>
+        </div>
+      </section>`;
 
       window.CW.initProgress(root);
 
-      // gallery thumbs
-      qsa(".cd-thumbs button").forEach((b) => b.addEventListener("click", () => {
-        qsa(".cd-thumbs button").forEach((x) => x.classList.remove("active"));
-        b.classList.add("active");
-        qs("#mainImg").src = b.dataset.img;
-      }));
+      // hero carousel — auto every 3s, swipeable, dots reflect position
+      (function heroCarousel() {
+        const slides = qsa(".cd-hero-slide");
+        if (slides.length < 2) return;
+        const hero = qs(".cd-hero");
+        const dots = qsa(".cd-hero-dots button");
+        const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        let idx = 0, timer = null, cleanupT = null;
+        const show = (i) => {
+          const prev = idx;
+          idx = (i + slides.length) % slides.length;
+          if (prev !== idx) { slides[prev].classList.add("prev"); slides[prev].classList.remove("on"); }
+          slides[idx].classList.add("on");
+          slides[idx].classList.remove("prev");
+          hero.classList.toggle("on-card", slides[idx].classList.contains("cd-hero-cardslide"));
+          dots.forEach((d, j) => d.classList.toggle("on", j === idx));
+          // once the incoming slide has fully covered the screen, drop the held-opaque outgoing slide
+          clearTimeout(cleanupT);
+          cleanupT = setTimeout(() => slides.forEach((s, j) => { if (j !== idx) s.classList.remove("prev"); }), 600);
+        };
+        const start = () => { if (!reduce) timer = setInterval(() => show(idx + 1), 3000); };
+        const reset = () => { clearInterval(timer); start(); };
+        dots.forEach((d, j) => d.addEventListener("click", () => { show(j); reset(); }));
+        let sx = null;
+        hero.addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; clearInterval(timer); }, { passive: true });
+        hero.addEventListener("touchend", (e) => {
+          if (sx === null) return;
+          const dx = e.changedTouches[0].clientX - sx; sx = null;
+          if (Math.abs(dx) > 40) show(idx + (dx < 0 ? 1 : -1));
+          start();
+        }, { passive: true });
+        start();
+      })();
+
+      // hero info-card "Support this fundraiser" CTA
+      qs("#heroSupport")?.addEventListener("click", () => { location.href = "donate.html?id=" + c.id; });
 
       // story collapse
       const coll = qs("#storyCollapse");
@@ -335,39 +533,65 @@
         if (open) coll.scrollIntoView({ behavior: "smooth", block: "nearest" });
       });
 
-      // donate (mock)
-      const donate = () => toast("Donations open once a payment provider is connected.");
-      qs("#donateBtn").addEventListener("click", donate);
-      qs("#stickyDonate").addEventListener("click", donate);
+      // donate + share
+      qs("#donateBtn").addEventListener("click", () => { location.href = "donate.html?id=" + c.id; });
       qs("#shareBtn").addEventListener("click", () => share(c.title));
 
-      qsa("[data-sh]").forEach((a) => a.addEventListener("click", (e) => {
-        e.preventDefault();
-        const k = a.dataset.sh, url = location.href, t = encodeURIComponent("Support: " + c.title);
-        if (k === "copy") { navigator.clipboard.writeText(url).then(() => toast("Link copied")); }
-        else if (k === "wa") window.open(`https://wa.me/?text=${t}%20${encodeURIComponent(url)}`, "_blank");
-        else if (k === "fb") window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, "_blank");
-        else if (k === "x") window.open(`https://twitter.com/intent/tweet?text=${t}&url=${encodeURIComponent(url)}`, "_blank");
-      }));
+      // "See all" supporters modal
+      const fullList = allSupporters(c);
+      qs("#supSeeAll").addEventListener("click", () => {
+        const m = document.createElement("div");
+        m.className = "sup-modal-backdrop";
+        m.innerHTML = `<div class="sup-modal" role="dialog" aria-modal="true" aria-label="All supporters">
+          <div class="sup-modal-head"><h3>All supporters</h3><span class="sup-modal-meta">${fullList.length} contributions</span><button class="icon-btn" id="supModalClose" aria-label="Close">${I.close}</button></div>
+          <div class="sup-modal-list">${fullList.map(supporterRow).join("")}</div></div>`;
+        document.body.appendChild(m);
+        window.CW.lockScroll(true);
+        requestAnimationFrame(() => m.classList.add("open"));
+        const close = () => { m.classList.remove("open"); window.CW.lockScroll(false); setTimeout(() => m.remove(), 320); };
+        m.addEventListener("click", (e) => { if (e.target === m) close(); });
+        qs("#supModalClose", m).addEventListener("click", close);
+        const onEsc = (e) => { if (e.key === "Escape") { close(); document.removeEventListener("keydown", onEsc); } };
+        document.addEventListener("keydown", onEsc);
+      });
 
-      // donor rotator
-      rotateDonors(supporters);
-    }
+      // supporters: Recent <-> Top toggle
+      (() => {
+        const rows = qs("#cdSupRows");
+        const title = qs("#supTitle");
+        const tog = qs("#supToggle");
+        let top = false;
+        tog.addEventListener("click", () => {
+          top = !top;
+          title.textContent = top ? "Top supporters" : "Recent supporters";
+          tog.textContent = top ? "Recent supporters" : "Top supporters";
+          rows.innerHTML = (top ? topSupporters : recentSupporters).map(supRow).join("");
+        });
+      })();
 
-    function rotateDonors(list) {
-      const el = qs("#donorRotator");
-      if (!el || !list.length) { if (el) el.style.display = "none"; return; }
-      let i = 0;
-      const show = () => {
-        const d = list[i % list.length];
-        el.classList.remove("donor-rot-anim");
-        void el.offsetWidth;
-        el.innerHTML = `<div class="av">${initials(d.name)}</div><div class="tx"><b>${esc(d.name)}</b> gave ${money(d.amount)}${d.at ? " · " + esc(d.at) : ""}</div>`;
-        el.classList.add("donor-rot-anim");
-        i++;
-      };
-      show();
-      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) setInterval(show, 3400);
+      // words of support: auto-advance every 3s, loop back to start
+      (() => {
+        const row = qs(".cd-words");
+        if (!row || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        let paused = false;
+        ["pointerdown", "touchstart", "wheel"].forEach((ev) => row.addEventListener(ev, () => { paused = true; }, { passive: true }));
+        setInterval(() => {
+          if (paused) return;
+          const card = row.querySelector(".cd-word");
+          const gap = parseFloat(getComputedStyle(row).columnGap || getComputedStyle(row).gap) || 12;
+          const step = card ? card.getBoundingClientRect().width + gap : row.clientWidth;
+          if (row.scrollLeft + row.clientWidth >= row.scrollWidth - 4) row.scrollTo({ left: 0, behavior: "smooth" });
+          else row.scrollBy({ left: step, behavior: "smooth" });
+        }, 3000);
+      })();
+
+      // recommended campaigns carousel
+      const moreSlot = qs("#cdMoreSlot");
+      moreSlot.innerHTML = related.map((x) => campaignCard(x)).join("") +
+        `<a class="ccard end-card" href="browse-campaigns.html" aria-label="Browse all campaigns"><div class="end-inner"><div class="end-ic">${I.arrow}</div><div class="end-t">Browse all</div><div class="end-sub">Discover more causes</div></div></a>`;
+      qsa("#cdMoreSlot .ccard").forEach((x) => x.classList.remove("reveal"));
+      qsa("#cdMoreSlot .careflow-fill").forEach((f) => { f.style.width = f.dataset.fill + "%"; });
+      initCarousels();
     }
   };
 
@@ -399,17 +623,59 @@
     </div>`;
   }
 
-  function clarityPanel() {
-    const items = [
-      { ic: I.eye, h: "Reviewed before publishing", p: "Campaigns are checked before going live." },
-      { ic: I.compass, h: "Clear path for funds", p: "Support is directed toward the organizer's stated goal." },
-      { ic: I.flag, h: "Reports are taken seriously", p: "Concerns can be reviewed by the platform team." },
-    ];
-    return `<div class="clarity-panel story-section mt-0" style="max-width:none">
-      <h2>Support with clarity</h2>
-      <p>We design every fundraiser to keep giving transparent and trustworthy.</p>
-      <div class="clarity-items">${items.map((x) => `<div class="clarity-item"><div class="ci">${x.ic}</div><h4>${x.h}</h4><p>${x.p}</p></div>`).join("")}</div>
-      <a class="link-arrow" href="how-it-works.html">Learn how protection works ${I.arrow}</a>
+  // full donor list (for "All supporters" + modal) — deterministic, sorted by amount desc
+  function allSupporters(c) {
+    const out = buildSupporters(c).slice();
+    const firsts = ["Alex", "Jordan", "Sam", "Taylor", "Casey", "Morgan", "Jamie", "Robin", "Quinn", "Avery", "Riley", "Drew", "Skyler", "Parker", "Reese", "Sage", "Devon", "Harper", "Rowan", "Emerson", "Marisol", "Noah", "Hannah", "Sofia", "Grace"];
+    const inits = ["A.", "B.", "C.", "D.", "K.", "L.", "M.", "N.", "P.", "R.", "S.", "T.", "W."];
+    const amts = [25, 50, 100, 35, 75, 150, 40, 200, 60, 30, 500, 250, 20, 1000, 45, 80];
+    const ats = ["2h ago", "5h ago", "8h ago", "1d ago", "1d ago", "2d ago", "3d ago", "4d ago", "5d ago", "6d ago", "1w ago", "1w ago", "2w ago", "2w ago", "3w ago", "1mo ago"];
+    let seed = 0; for (const ch of c.id) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
+    const total = Math.max(c.donors, out.length);
+    let k = 0;
+    while (out.length < total) {
+      const anon = (seed + k * 5) % 7 === 0;
+      const name = anon ? "Anonymous" : `${firsts[(seed + k * 7) % firsts.length]} ${inits[(seed + k * 3) % inits.length]}`;
+      out.push({ name, amount: amts[(seed + k * 11) % amts.length], message: "", at: ats[(seed + k) % ats.length] });
+      k++;
+    }
+    return out.sort((a, b) => b.amount - a.amount);
+  }
+
+  // mini campaign preview content for the share section (this campaign) — reused in a stack
+  function miniShareInner(c) {
+    const p = D.pct(c);
+    return `<div class="share-card-img"><img src="${c.cover}" alt="" loading="lazy" onerror="this.src='${D.fallbackImg(c.category)}'"></div>
+      <div class="share-card-body">
+        <div class="sct">${esc(c.title)}</div>
+        <div class="careflow"><div class="careflow-track"><div class="careflow-fill" style="width:${p}%"></div></div></div>
+        <div class="scm">${money(c.raised)} <span>${p}%</span></div>
+      </div>`;
+  }
+
+  // donation-protected reassurance card
+  function claritySimple() {
+    const checks = ["Funds go to the organizer", "Campaigns are reviewed before going live", "Reports can be reviewed by our team"];
+    return `<div class="protect-card">
+      <div class="pc-head">
+        <div class="pc-ic">${I.shield}</div>
+        <div class="pc-tx"><h4>Donation protected</h4><p>Every donation on Spread Hope is backed by our trust standards.</p></div>
+      </div>
+      <ul class="pc-checks">${checks.map((t) => `<li>${I.check}${t}</li>`).join("")}</ul>
+      <a class="pc-learn" href="how-it-works.html">Learn how protection works ${I.arrow}</a>
+    </div>`;
+  }
+
+  // organizer card — avatar, label, name, location + report link
+  function organizerCardNew(c) {
+    return `<div class="organizer-card">
+      <img class="oav" src="${c.organizer.avatar}" alt="${esc(c.organizer.name)}" width="60" height="60" onerror="this.style.visibility='hidden'">
+      <div class="oinfo">
+        <div class="lbl">Organized by</div>
+        <div class="nm">${esc(c.organizer.name)}</div>
+        <div class="oloc">${I.pin}${esc(c.location)}</div>
+      </div>
+      <a class="report-link" href="contact.html?subject=report&campaign=${encodeURIComponent(c.title)}">${I.flag}Report this fundraiser</a>
     </div>`;
   }
 
@@ -506,14 +772,17 @@
       const loc = draft.location || "Your location";
       pv.innerHTML = `
         <div class="ccard">
-          <div class="ccard-img"><div class="badges"><span class="badge-cat">${esc(cat)}</span></div>
-            <img src="${cover}" alt="" onerror="this.src='${D.fallbackImg(draft.category || "Community")}'"></div>
-          <div class="ccard-body">
-            <div class="loc">${I.pin}${esc(loc)}</div>
+          <div class="ccard-img">
+            <img src="${cover}" alt="" onerror="this.src='${D.fallbackImg(draft.category || "Community")}'">
+            <span class="ccard-scrim" aria-hidden="true"></span>
+            <div class="badges"><span class="badge-cat">${esc(cat)}</span></div>
             <h3 class="ccard-title">${esc(title)}</h3>
+          </div>
+          <div class="ccard-body">
             <div class="careflow"><div class="careflow-track"><div class="careflow-fill" style="width:2%"></div></div>
-              <div class="careflow-stats"><div class="raised">$0 <span>raised of ${goal ? money(goal) : "$—"}</span></div><div class="pct">0%</div></div>
+              <div class="careflow-stats"><div class="raised">$0 <span>of ${goal ? money(goal) : "$—"}</span></div><div class="pct">0%</div></div>
             </div>
+            <div class="ccard-foot"><span class="ccard-donors">${I.pin}${esc(loc)}</span><span class="ccard-go">Preview</span></div>
           </div>
         </div>`;
     }
@@ -553,6 +822,122 @@
 
     bind();
     updatePreview();
+  };
+
+  /* =================================================================
+     DONATE (mock checkout — no real payment)
+     ================================================================= */
+  PAGES.donate = function () {
+    const id = param("id");
+    const root = qs("#donateRoot");
+    root.innerHTML = `<div class="skel" style="height:60px;width:60%;border-radius:12px"></div>`;
+    D.get(id).then((c) => {
+      if (!c) { location.replace("browse-campaigns.html"); return; }
+      document.title = `Donate · ${c.title} · Spread Hope`;
+      renderDonate(c);
+    });
+
+    function renderDonate(c) {
+      const pct = D.pct(c);
+      const amounts = [25, 50, 100, 250, 500, 1000];
+      root.innerHTML = `
+      <div class="breadcrumb"><a href="campaign.html?id=${c.id}">Back to campaign</a>${I.chevron}<span>Donate</span></div>
+      <div class="donate-grid">
+        <div class="donate-form">
+          <div class="dn-steps" id="dnSteps">
+            <span class="dn-step current" data-s="0"><i>1</i>Amount</span>
+            <span class="dn-line"></span>
+            <span class="dn-step" data-s="1"><i>2</i>Your support</span>
+            <span class="dn-line"></span>
+            <span class="dn-step" data-s="2"><i>3</i>Complete</span>
+          </div>
+
+          <section class="dn-pane active" data-pane="0">
+            <h1>Choose your support</h1>
+            <p class="donate-sub">Pick an amount that goes directly toward ${esc(c.organizer.name)}'s goal.</p>
+            <div class="amount-grid">
+              ${amounts.map((a) => `<button type="button" class="amount-opt" data-amt="${a}">${money(a)}</button>`).join("")}
+            </div>
+            <div class="dn-custom"><span class="cur">$</span><input type="text" inputmode="numeric" id="dCustom" placeholder="Enter another amount" aria-label="Custom amount"></div>
+            <button class="btn btn-primary btn-lg btn-block" id="dNext0">Continue ${I.arrow}</button>
+          </section>
+
+          <section class="dn-pane" data-pane="1">
+            <h1>Add your support</h1>
+            <p class="donate-sub">A few words mean a lot to ${esc(c.organizer.name)}. Totally optional.</p>
+            <div class="dn-field"><label for="dName">Your name <span class="hint">— optional</span></label><input type="text" id="dName" placeholder="Jane Doe"></div>
+            <div class="dn-field"><label for="dMsg">Words of support <span class="hint">— optional</span></label><textarea id="dMsg" placeholder="Sending strength and hope…"></textarea></div>
+            <label class="anon-row"><input type="checkbox" id="dAnon"> Donate anonymously</label>
+            <div class="dn-nav"><button class="btn btn-ghost" id="dBack1">Back</button><button class="btn btn-primary" id="dNext1">Review ${I.arrow}</button></div>
+          </section>
+
+          <section class="dn-pane" data-pane="2">
+            <h1>Complete your donation</h1>
+            <p class="donate-sub">One last look, then you're done.</p>
+            <div class="dn-review" id="dnReview"></div>
+            <button class="btn btn-primary btn-lg btn-block" id="dSubmit">Donate <span id="dAmtLabel"></span></button>
+            <div class="dn-secure">${I.shield}<span>Secure &amp; protected — funds go directly to ${esc(c.organizer.name)}.</span></div>
+            <button class="btn btn-ghost btn-block" id="dBack2" style="margin-top:12px">Back</button>
+          </section>
+        </div>
+
+        <aside class="donate-summary">
+          <div class="ds-card">
+            <div class="ds-img"><img src="${c.cover}" alt="${esc(c.title)}" onerror="this.src='${D.fallbackImg(c.category)}'"></div>
+            <div class="ds-body">
+              <div class="ds-eyebrow">You're supporting</div>
+              <div class="ds-title">${esc(c.title)}</div>
+              <div class="careflow"><div class="careflow-track"><div class="careflow-fill" style="width:${pct}%"></div></div></div>
+              <div class="ds-meta"><strong>${money(c.raised)}</strong> raised of ${money(c.goal)} · <span>${pct}%</span></div>
+            </div>
+          </div>
+        </aside>
+      </div>`;
+
+      let amount = 0, step = 0;
+      const panes = qsa(".dn-pane");
+      const steps = qsa("#dnSteps .dn-step");
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const go = (s) => {
+        step = s;
+        panes.forEach((p) => p.classList.toggle("active", +p.dataset.pane === s));
+        steps.forEach((st) => { const i = +st.dataset.s; st.classList.toggle("current", i === s); st.classList.toggle("done", i < s); });
+        window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+      };
+
+      const setAmount = (v) => { amount = v; qsa(".amount-opt").forEach((x) => x.classList.toggle("sel", +x.dataset.amt === v)); };
+      qsa(".amount-opt").forEach((b) => b.addEventListener("click", () => { qs("#dCustom").value = ""; setAmount(+b.dataset.amt); }));
+      qs("#dCustom").addEventListener("input", (e) => {
+        const v = parseInt(e.target.value.replace(/\D/g, ""), 10) || 0;
+        qsa(".amount-opt").forEach((x) => x.classList.remove("sel"));
+        amount = v;
+      });
+
+      qs("#dNext0").addEventListener("click", () => { if (!amount || amount < 1) { toast("Please choose an amount", "err"); return; } go(1); });
+      qs("#dNext1").addEventListener("click", () => { buildReview(); go(2); });
+      qs("#dBack1").addEventListener("click", () => go(0));
+      qs("#dBack2").addEventListener("click", () => go(1));
+
+      function buildReview() {
+        const name = qs("#dName").value.trim();
+        const anon = qs("#dAnon").checked;
+        const msg = qs("#dMsg").value.trim();
+        qs("#dAmtLabel").textContent = "· " + money(amount);
+        qs("#dnReview").innerHTML = `
+          <div class="dr-amount"><span>Your donation</span><b>${money(amount)}</b></div>
+          <div class="dr-row"><span>Supporting</span><b>${esc(c.title)}</b></div>
+          <div class="dr-row"><span>From</span><b>${anon ? "Anonymous" : (name ? esc(name) : "A kind supporter")}</b></div>
+          ${msg ? `<div class="dr-msg">“${esc(msg)}”</div>` : ""}`;
+      }
+
+      qs("#dSubmit").addEventListener("click", () => {
+        if (!amount || amount < 1) { toast("Please choose an amount to donate", "err"); go(0); return; }
+        const btn = qs("#dSubmit");
+        btn.disabled = true; btn.textContent = "Processing…";
+        // mock — no real payment provider; simulate then go to thank-you
+        setTimeout(() => { location.href = "thank-you.html?id=" + c.id + "&amt=" + amount; }, 700);
+      });
+    }
   };
 
   /* =================================================================
