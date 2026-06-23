@@ -2537,31 +2537,91 @@ i.serif, .serif-accent {
 }
 
 /* =====================================================================
-   Hero — mobile composition refinements (≤860px): tighter, more balanced
+   Hero — MOBILE REFORMULATION v3 (≤860px): rich, layered, alive "spread hope"
+   Short refined headline → tiny lead → a LAYERED image composition (depth blob
+   + breathing halo + ripples + drifting sparks + framed floating image +
+   floating micro-cards: Verified stories badge & impact pill) → premium CTA
+   with a discreet secondary link. Subtle motion, reduced-motion aware.
+   Desktop (≥861px) is fully untouched.
    ===================================================================== */
+.nh-hero-proof, .nh-h-sm, .nh-lead-sm, .nh-ripple, .nh-fc, .nh-spark, .nh-cta-sub, .nh-cta-arrow { display: none; }
+
 @media (max-width: 860px) {
-  .nh-hero { padding-bottom: clamp(30px, 6vw, 44px); }
-  .nh-hero-grid { grid-template-columns: 1.45fr 0.8fr; gap: 14px; align-items: center; }
+  .nh-hero { padding-top: calc(var(--header-h) + clamp(14px, 5vw, 28px)); padding-bottom: clamp(16px, 4.5vw, 28px); }
 
-  /* headline: slightly smaller + tighter → compact, elegant block */
-  .nh-hero-copy h1 { font-size: clamp(25px, 6.9vw, 31px); line-height: 1.05; margin-bottom: 11px; }
-  /* lead: more readable, less faded, comfortable line length */
-  .nh-hero-copy .lead { font-size: 14.8px; line-height: 1.55; color: #4f5f57; max-width: 32ch; margin-bottom: 18px; }
-  /* button: hugs its content, premium, not dominant */
-  .nh-hero-cta { align-items: flex-start; gap: 10px; margin-top: 4px; }
-  .nh-cta-main { width: auto; max-width: none; padding: 13px 26px; font-size: 15.5px; }
+  /* one centred, airy column */
+  .nh-hero-grid { display: flex; flex-direction: column; align-items: center; text-align: center; gap: clamp(15px, 4.2vw, 21px); max-width: 440px; margin-inline: auto; }
+  .nh-hero-copy { display: contents; }
 
-  /* circular image: a touch smaller, soft halo + gentler shadow → integrated */
-  .nh-hero-img { box-shadow: 0 0 0 5px rgba(255,255,255,.55), 0 14px 30px -16px rgba(35,78,82,.30); }
-  .nh-orb-2 { opacity: .58; filter: blur(2px); }
-  .nh-orb-3 { opacity: .4; filter: blur(4px); }
+  /* short, elegant headline + tiny lead */
+  .nh-h-lg, .nh-lead-lg { display: none; }
+  .nh-hero-copy h1 { order: 1; margin: 0; }
+  .nh-h-sm { display: block; font-family: var(--font-display); font-weight: 500; font-size: clamp(26px, 7.1vw, 32px); line-height: 1.16; letter-spacing: -.01em; color: var(--ink); }
+  .nh-h-sm .hl { color: var(--amber-deep); }
+  .nh-hero-copy .lead { order: 2; margin: 0 auto; max-width: 27ch; }
+  .nh-lead-sm { display: block; font-size: 13.8px; line-height: 1.55; color: var(--muted-green-gray); }
 
-  /* impact stat card: compact + lighter, cleaner alignment */
-  .nh-stat-card { margin-top: 18px; padding: 15px 17px; box-shadow: 0 14px 32px -18px rgba(35,78,82,.28); }
-  .nh-stat-big { font-size: 27px; }
-  .nh-stat-sub { font-size: 12.8px; margin-top: 3px; }
-  .nh-ava-row { margin-top: 12px; padding-top: 12px; gap: 10px; }
-  .nh-ava span { width: 28px; height: 28px; margin-left: -8px; border-width: 2px; }
-  .nh-ava .more { font-size: 9.5px; }
-  .nh-ava-tx { font-size: 12.3px; }
+  /* === layered image composition === */
+  .nh-hero-visual { order: 3; position: relative; width: min(74vw, 282px); aspect-ratio: 1; margin: clamp(16px,5.5vw,28px) auto clamp(22px,6vw,32px); overflow: visible; }
+  .nh-orb { display: none; }
+  .nh-verified { display: none; }
+  /* soft offset organic blob → depth */
+  .nh-hero-visual::after { content: ""; position: absolute; inset: -12% -16% -20% -10%; z-index: 0; border-radius: 46% 54% 52% 48% / 52% 46% 54% 48%; background: radial-gradient(circle at 62% 40%, rgba(169,191,174,.32), transparent 70%); filter: blur(7px); }
+  /* breathing halo of light */
+  .nh-hero-visual::before { content: ""; position: absolute; inset: -12%; z-index: 1; border-radius: 50%; background: radial-gradient(circle at 50% 45%, rgba(79,175,143,.22), rgba(169,191,174,.10) 50%, transparent 72%); animation: nh-halo 6s ease-in-out infinite; }
+  /* ripples radiating outward */
+  .nh-ripple { display: block; position: absolute; inset: 0; z-index: 2; border-radius: 50%; border: 1.5px solid rgba(79,175,143,.4); opacity: 0; transform: scale(.92); pointer-events: none; animation: nh-spread 5.6s ease-out infinite; }
+  .nh-ripple.r2 { animation-delay: 1.9s; }
+  .nh-ripple.r3 { animation-delay: 3.7s; }
+  /* drifting hope sparks */
+  .nh-spark { display: block; position: absolute; z-index: 2; width: 8px; height: 8px; border-radius: 50%; background: var(--warm-sun); opacity: 0; pointer-events: none; }
+  .nh-spark.s1 { left: 4%; top: 58%; background: var(--fresh-green); animation: nh-drift 6.5s ease-in-out .5s infinite; }
+  .nh-spark.s2 { right: 2%; top: 38%; width: 6px; height: 6px; animation: nh-drift 7.6s ease-in-out 2.4s infinite; }
+  .nh-spark.s3 { right: 24%; bottom: -3%; width: 5px; height: 5px; background: var(--sage-light); animation: nh-drift 8.2s ease-in-out 4s infinite; }
+  /* main image with a layered translucent frame; gently floats */
+  .nh-hero-img { width: 100%; height: 100%; max-width: none; border-radius: 50%; position: relative; z-index: 3;
+    box-shadow: 0 0 0 7px rgba(255,255,255,.62), 0 0 0 15px rgba(169,191,174,.22), 0 24px 48px -22px rgba(35,78,82,.36);
+    animation: nh-floatimg 7s ease-in-out infinite; }
+  .nh-hero-img img { object-position: center 28%; }
+
+  /* floating micro-cards peeking on the image edges */
+  .nh-fc { display: inline-flex; align-items: center; gap: 6px; z-index: 5; padding: 6px 12px; border-radius: var(--r-pill); background: var(--cream-2); border: 1px solid rgba(35,78,82,.07); box-shadow: 0 12px 26px -14px rgba(35,78,82,.3); font-family: var(--font-head); font-weight: 600; font-size: 11.5px; color: var(--ink); white-space: nowrap; }
+  .nh-fc-verified { position: absolute; top: 5%; left: -3%; color: var(--deep-meadow); animation: nh-floatA 5.4s ease-in-out infinite; }
+  .nh-fc-verified svg { width: 14px; height: 14px; color: var(--fresh-green); }
+  .nh-hero-proof { display: inline-flex; align-items: center; gap: 8px; position: absolute; bottom: -3%; left: 50%; z-index: 5;
+    padding: 6px 14px 6px 7px; border-radius: var(--r-pill); background: var(--cream-2); border: 1px solid rgba(35,78,82,.07);
+    box-shadow: 0 14px 30px -14px rgba(35,78,82,.34); transform: translateX(-50%); animation: nh-floatB 5.6s ease-in-out infinite; }
+  .nh-proof-ava { display: flex; flex: none; }
+  .nh-proof-ava span { width: 22px; height: 22px; border-radius: 50%; margin-left: -7px; border: 2px solid var(--cream-2); background-size: cover; background-position: center; }
+  .nh-proof-ava span:first-child { margin-left: 0; }
+  .nh-proof-ava .more { background: var(--sage-light); color: var(--deep-meadow); display: grid; place-items: center; font-family: var(--font-head); font-weight: 700; font-size: 7.5px; }
+  .nh-proof-tx { font-family: var(--font-head); font-size: 11.5px; line-height: 1.2; color: var(--muted-green-gray); white-space: nowrap; }
+  .nh-proof-tx b { color: var(--ink); font-weight: 700; }
+  .nh-stat-wrap { display: none; }
+
+  /* premium CTA + discreet secondary link */
+  .nh-hero-cta { order: 4; flex-direction: column; align-items: center; gap: 12px; margin: 0; }
+  .nh-cta-main { width: auto; max-width: none; padding: 15px 32px; font-size: 15px; font-weight: 700; letter-spacing: .01em; display: inline-flex; align-items: center; gap: 8px; border-radius: var(--r-pill);
+    box-shadow: 0 8px 18px -7px rgba(255,168,90,.55), 0 2px 5px -2px rgba(35,78,82,.14), inset 0 1px 0 rgba(255,255,255,.45);
+    transition: transform .18s var(--ease), box-shadow .18s var(--ease), filter .18s var(--ease); }
+  .nh-cta-main:hover { transform: translateY(-1.5px); box-shadow: 0 12px 24px -8px rgba(255,168,90,.6), 0 3px 7px -2px rgba(35,78,82,.16), inset 0 1px 0 rgba(255,255,255,.45); }
+  .nh-cta-main:active { transform: translateY(0) scale(.985); box-shadow: 0 5px 12px -5px rgba(255,168,90,.5), inset 0 1px 0 rgba(255,255,255,.4); }
+  .nh-cta-arrow { display: inline-block; width: 17px; height: 17px; flex: none; transition: transform .2s var(--ease); }
+  .nh-cta-main:hover .nh-cta-arrow { transform: translateX(2px); }
+  .nh-cta-sub { display: inline-block; font-family: var(--font-head); font-weight: 600; font-size: 13.5px; color: var(--deep-meadow); opacity: .8; border-bottom: 1px solid rgba(35,78,82,.28); padding-bottom: 1px; }
+  .nh-cta-sub:hover { opacity: 1; }
+}
+
+/* "hope spreading" motion */
+@keyframes nh-spread { 0% { opacity: 0; transform: scale(.9); } 15% { opacity: .5; } 100% { opacity: 0; transform: scale(1.42); } }
+@keyframes nh-halo { 0%,100% { opacity: .8; transform: scale(1); } 50% { opacity: 1; transform: scale(1.05); } }
+@keyframes nh-floatimg { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes nh-floatA { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-3.5px); } }
+@keyframes nh-floatB { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(-4px); } }
+@keyframes nh-drift { 0% { opacity: 0; transform: translateY(8px) scale(.7); } 25% { opacity: .65; } 60% { opacity: .45; } 100% { opacity: 0; transform: translateY(-28px) scale(1); } }
+@media (prefers-reduced-motion: reduce) {
+  .nh-ripple { animation: none; opacity: .2; transform: scale(1.15); }
+  .nh-hero-visual::before, .nh-hero-img, .nh-fc-verified, .nh-spark { animation: none !important; }
+  .nh-hero-proof { animation: none !important; transform: translateX(-50%); }
+  .nh-spark { opacity: 0; }
 }
