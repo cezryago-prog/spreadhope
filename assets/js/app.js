@@ -22,7 +22,7 @@
       rail.innerHTML = list.map((c) => campaignCard(c)).join("") +
         `<a class="ccard end-card exp-end" href="browse-campaigns.html" aria-label="See all campaigns"><div class="end-inner"><div class="end-ic">${I.arrow}</div><div class="end-t">See all<br>campaigns</div><div class="end-sub">Explore every fundraiser</div></div></a>`;
       qsa("#exploreRail .ccard").forEach((x) => x.classList.remove("reveal"));
-      qsa("#exploreRail .careflow-fill").forEach((f) => { f.style.width = f.dataset.fill + "%"; });
+      qsa("#exploreRail .careflow-fill").forEach((f) => { f.style.setProperty("--fill", f.dataset.fill + "%"); });
       initCarousels();
     }
 

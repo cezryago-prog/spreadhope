@@ -528,13 +528,61 @@ i.serif, .serif-accent {
 .exp-end .end-t { color: var(--deep-meadow); }
 .exp-end .end-sub { color: var(--muted-green-gray); }
 
-/* explore rail: visible horizontal scrollbar on desktop so mouse users can navigate */
+/* explore fills use a CSS var so progress can (re)animate on activation */
+.explore-rail .careflow-fill { width: var(--fill, 0%); }
+.nh-head-link { display: none; }   /* desktop-only "See all" (mobile keeps the See-all card) */
+
+/* =====================================================================
+   "Fundraisers to explore" — DESKTOP interactive showcase (≥861px).
+   Expanding panels (one active at a time, hover switches), no scrollbar,
+   fills the width, active card stays vivid. Mobile keeps the carousel.
+   ===================================================================== */
 @media (min-width: 861px) {
-  .explore-rail { padding-bottom: 18px; scrollbar-width: thin; scrollbar-color: var(--sage-mist) var(--sage-wash); }
-  .explore-rail::-webkit-scrollbar { display: block; height: 10px; }
-  .explore-rail::-webkit-scrollbar-track { background: var(--sage-wash); border-radius: 999px; }
-  .explore-rail::-webkit-scrollbar-thumb { background: var(--sage-mist); border-radius: 999px; border: 2px solid var(--sage-wash); }
-  .explore-rail::-webkit-scrollbar-thumb:hover { background: var(--fresh-green); }
+  .explore-rail { display: flex; gap: clamp(12px, 1.2vw, 18px); overflow: visible;
+    height: clamp(380px, 40vw, 444px); padding: 6px 2px 8px;
+    scroll-snap-type: none; scrollbar-width: none; -ms-overflow-style: none; }
+  .explore-rail::-webkit-scrollbar { display: none; }
+  /* only the first 4 campaign panels on desktop; hide the rest + the "See all" card */
+  .explore-rail > .ccard:nth-of-type(n+5), .explore-rail > .exp-end { display: none; }
+
+  .explore-rail > .ccard {
+    flex: .9 1 0; min-width: 0; height: 100%; margin: 0; transform: none !important; opacity: 1 !important;
+    scroll-snap-align: none; isolation: isolate;
+    transition: flex-grow .55s var(--ease), box-shadow .45s var(--ease), border-color .45s var(--ease);
+  }
+  .explore-rail > .ccard:hover { box-shadow: var(--sh-lg); border-color: var(--sage-soft); }
+
+  /* image fills the panel; body collapses when inactive */
+  .explore-rail > .ccard .ccard-img { flex: 1 1 auto; aspect-ratio: auto; height: auto; min-height: 0; }
+  .explore-rail > .ccard .ccard-img img { transition: transform .6s var(--ease), filter .5s var(--ease); filter: brightness(.93) saturate(.97); }
+  .explore-rail > .ccard .ccard-scrim { transition: opacity .45s var(--ease); opacity: 1; }
+  .explore-rail > .ccard .ccard-title { font-size: clamp(16px, 1.5vw, 20px); transition: font-size .4s var(--ease); }
+  .explore-rail > .ccard .ccard-body { flex: none; max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; overflow: hidden;
+    transition: max-height .55s var(--ease), opacity .4s var(--ease), padding .55s var(--ease); }
+  .explore-rail > .ccard .careflow-fill { width: 0; }
+
+  /* ACTIVE = first card by default, OR whichever card is hovered (only one at a time) */
+  .explore-rail:not(:has(> .ccard:hover)) > .ccard:first-child,
+  .explore-rail > .ccard:hover { flex-grow: 3.5; }
+  .explore-rail:not(:has(> .ccard:hover)) > .ccard:first-child .ccard-body,
+  .explore-rail > .ccard:hover .ccard-body { max-height: 230px; opacity: 1; padding-top: 16px; padding-bottom: 18px; }
+  .explore-rail:not(:has(> .ccard:hover)) > .ccard:first-child .ccard-scrim,
+  .explore-rail > .ccard:hover .ccard-scrim { opacity: .26; }
+  .explore-rail:not(:has(> .ccard:hover)) > .ccard:first-child .ccard-img img,
+  .explore-rail > .ccard:hover .ccard-img img { filter: brightness(1.03) saturate(1.07); transform: scale(1.04); }
+  .explore-rail:not(:has(> .ccard:hover)) > .ccard:first-child .careflow-fill,
+  .explore-rail > .ccard:hover .careflow-fill { width: var(--fill, 0%); }
+
+  /* a touch more presence + a section "See all" link */
+  .nh-mini .nh-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .nh-head-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-head); font-weight: 700; font-size: 14.5px; color: var(--fresh-green); white-space: nowrap; transition: gap .25s var(--ease), color .2s; }
+  .nh-head-link:hover { gap: 10px; color: var(--teal-deep); }
+}
+@media (min-width: 1240px) { .nh-mini .wrap { max-width: 1300px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .explore-rail > .ccard, .explore-rail > .ccard .ccard-body, .explore-rail > .ccard .ccard-img img,
+  .explore-rail > .ccard .ccard-scrim, .explore-rail > .ccard .ccard-title { transition: none !important; }
 }
 
 .ccard {
