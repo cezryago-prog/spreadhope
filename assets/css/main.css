@@ -530,7 +530,7 @@ i.serif, .serif-accent {
 
 /* explore fills use a CSS var so progress can (re)animate on activation */
 .explore-rail .careflow-fill { width: var(--fill, 0%); }
-.nh-head-link { display: none; }   /* desktop-only "See all" (mobile keeps the See-all card) */
+.explore-rail .badge-status { display: none; }   /* no urgent / almost-there tag in the explore cards */
 
 /* =====================================================================
    "Fundraisers to explore" — DESKTOP interactive showcase (≥861px).
@@ -542,8 +542,8 @@ i.serif, .serif-accent {
     height: clamp(380px, 40vw, 444px); padding: 6px 2px 8px;
     scroll-snap-type: none; scrollbar-width: none; -ms-overflow-style: none; }
   .explore-rail::-webkit-scrollbar { display: none; }
-  /* only the first 4 campaign panels on desktop; hide the rest + the "See all" card */
-  .explore-rail > .ccard:nth-of-type(n+5), .explore-rail > .exp-end { display: none; }
+  /* desktop panels: 4 campaigns + the "See all" card at the end (hide campaigns 5 & 6) */
+  .explore-rail > .ccard:nth-of-type(5), .explore-rail > .ccard:nth-of-type(6) { display: none; }
 
   .explore-rail > .ccard {
     flex: .9 1 0; min-width: 0; height: 100%; margin: 0; transform: none !important; opacity: 1 !important;
@@ -573,10 +573,9 @@ i.serif, .serif-accent {
   .explore-rail:not(:has(> .ccard:hover)) > .ccard:first-child .careflow-fill,
   .explore-rail > .ccard:hover .careflow-fill { width: var(--fill, 0%); }
 
-  /* a touch more presence + a section "See all" link */
-  .nh-mini .nh-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
-  .nh-head-link { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-head); font-weight: 700; font-size: 14.5px; color: var(--fresh-green); white-space: nowrap; transition: gap .25s var(--ease), color .2s; }
-  .nh-head-link:hover { gap: 10px; color: var(--teal-deep); }
+  /* "See all" end-card as a panel (it has no image/body, so center its content full-height) */
+  .explore-rail > .exp-end { align-items: center; justify-content: center; }
+  .explore-rail > .exp-end .end-inner { padding: 24px; }
 }
 @media (min-width: 1240px) { .nh-mini .wrap { max-width: 1300px; } }
 
