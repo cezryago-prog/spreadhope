@@ -15,6 +15,20 @@
   PAGES.home = function () {
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+    /* ---- Hero background mosaic (mobile): a darkened "wall of campaigns" ---- */
+    const mosaic = qs("#heroMosaic");
+    if (mosaic) {
+      const pics = [];
+      D.all().forEach((c) => { if (c.cover) pics.push(c.cover); if (c.gallery && c.gallery[0]) pics.push(c.gallery[0]); });
+      let h = "";
+      for (let i = 0; i < 24; i++) {
+        const raw = pics[i % pics.length] || D.fallbackImg("medical");
+        const src = raw.replace(/([?&]w=)\d+/, "$1260");   // small tiles → lighter
+        h += `<div class="mtile"><img src="${src}" alt="" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='assets/img/hero.png'"></div>`;
+      }
+      mosaic.innerHTML = h;
+    }
+
     /* ---- Explore rail — horizontal center-focus carousel (focused card grows) ---- */
     const rail = qs("#exploreRail");
     if (rail) {
@@ -84,8 +98,252 @@
       start();
     }
 
+    initHowItWorks();
+
     observeNew();
   };
+
+  /* =================================================================
+     HOW IT WORKS — interactive donation-journey walkthrough
+     (intro state slides away → animated phone mockup plays 6 steps)
+     ================================================================= */
+  function initHowItWorks() {
+    const stage = qs("#hiwStage");
+    if (!stage) return;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const DWELL = 3600; // ms each step holds during autoplay
+    const STEPS = [
+      { t: "Find a campaign", d: "Search by cause or browse categories to discover real, verified stories that need support right now." },
+      { t: "Open the story", d: "See the photos, the goal, how much is raised, and the people behind the campaign — all in one clear place." },
+      { t: "Tap Donate", d: "When a story moves you, start your gift with a single tap. No account and no sign-up needed." },
+      { t: "Choose your amount", d: "Pick a suggested amount or enter your own. Every cent goes straight toward the cause." },
+      { t: "Confirm securely", d: "Review your gift and confirm. Your donation is protected and sent safely in seconds." },
+      { t: "Share to help more", d: "Giving doesn't end at donating — share the campaign so the story reaches even more people who can help." },
+    ];
+    const total = STEPS.length;
+
+    // a real campaign to make the mockup feel genuine
+    const c = D.featured() || D.all()[0];
+    const pct = D.pct(c);
+    const cover = c.cover;
+    const fb = D.fallbackImg(c.category);
+    const list = D.all();
+    const img = (i) => (list[i % list.length] && list[i % list.length].cover) || cover;
+    const titleOf = (i) => (list[i % list.length] && list[i % list.length].title) || c.title;
+    const onerr = `onerror="this.onerror=null;this.src='${fb}'"`;
+    const cur = `<span class="hs-cursor" aria-hidden="true"></span>`;
+
+    /* ---- build the six phone screens ---- */
+    const miniRow = (idx, pickClass) => {
+      const p = D.pct(list[idx % list.length] || c);
+      return `<div class="hs-mini ${pickClass || ""}">
+        <span class="hs-mini-img"><img src="${img(idx)}" alt="" loading="lazy" ${onerr}></span>
+        <span class="hs-mini-tx"><b>${esc(titleOf(idx))}</b><i class="hs-mini-bar"><span style="width:${p}%"></span></i></span>
+      </div>`;
+    };
+
+    const screens = [
+      // 0 — Find a campaign
+      `<div class="hiw-scr hs-find">
+        <div class="hs-top"><span class="hs-top-t">Discover</span><span class="hs-top-ic">${I.search}</span></div>
+        <div class="hs-search"><span class="hs-search-ic">${I.search}</span><span class="hs-typed">medical care</span><i class="hs-caret"></i></div>
+        <div class="hs-chips"><span class="hs-chip on">Medical</span><span class="hs-chip">Education</span><span class="hs-chip">Emergency</span><span class="hs-chip">Family</span></div>
+        <div class="hs-cards">${miniRow(0)}${miniRow(1, "pick")}${miniRow(2)}</div>
+        ${cur}
+      </div>`,
+
+      // 1 — Open the story
+      `<div class="hiw-scr hs-story">
+        <div class="hs-cover"><img src="${cover}" alt="${esc(c.title)}" loading="lazy" ${onerr}><span class="hs-cover-cat">${esc(c.category)}</span><span class="hs-cover-heart">${I.heart}</span></div>
+        <div class="hs-story-body">
+          <h4>${esc(c.title)}</h4>
+          <div class="hs-nums"><b>${money(c.raised)}</b><span>raised of ${money(c.goal)}</span></div>
+          <div class="hs-bar2"><span data-fill="${pct}"></span></div>
+          <div class="hs-lines"><i></i><i></i><i style="width:72%"></i></div>
+          <span class="hs-donate">Donate now</span>
+        </div>
+        ${cur}
+      </div>`,
+
+      // 2 — Tap Donate (focus / click)
+      `<div class="hiw-scr hs-tap">
+        <div class="hs-tap-card">
+          <span class="hs-tap-cat">${esc(c.category)} · ${pct}% funded</span>
+          <span class="hs-tap-title">${esc(c.title)}</span>
+          <span class="hs-donate big">Donate now ${I.heart}</span>
+          <span class="hs-tap-ripple" aria-hidden="true"></span>
+          <span class="hs-tap-ripple two" aria-hidden="true"></span>
+        </div>
+        <div class="hs-tap-note">Opening your secure donation…</div>
+        ${cur}
+      </div>`,
+
+      // 3 — Choose your amount
+      `<div class="hiw-scr hs-amount">
+        <div class="hs-top"><span class="hs-top-t">Choose your support</span></div>
+        <div class="hs-amt-grid">
+          <span class="hs-amt">$10</span><span class="hs-amt">$25</span>
+          <span class="hs-amt pick">$50</span><span class="hs-amt">$100</span>
+        </div>
+        <div class="hs-amt-custom"><span>Custom amount</span><i>$ —</i></div>
+        <div class="hs-amt-summary">You're giving <b>$50</b> to <span>${esc(c.organizer.name)}</span></div>
+        <span class="hs-donate">Continue ${I.arrow}</span>
+        ${cur}
+      </div>`,
+
+      // 4 — Confirm securely (success)
+      `<div class="hiw-scr hs-confirm">
+        <div class="hs-check" aria-hidden="true"><svg viewBox="0 0 52 52"><circle class="hs-check-c" cx="26" cy="26" r="23" fill="none"/><path class="hs-check-k" fill="none" d="M15 27l8 8 15-16"/></svg></div>
+        <div class="hs-confirm-t">Donation confirmed</div>
+        <div class="hs-confirm-amt">$50 to ${esc(c.title)}</div>
+        <div class="hs-confirm-secure">${I.shield}<span>Sent securely · funds go directly to the cause</span></div>
+        <span class="hs-spark sp1"></span><span class="hs-spark sp2"></span><span class="hs-spark sp3"></span><span class="hs-spark sp4"></span>
+      </div>`,
+
+      // 5 — Share to help more
+      `<div class="hiw-scr hs-share">
+        <div class="hs-share-head"><div class="hs-share-em">📣</div><div class="hs-share-t">You did it — now spread hope</div><div class="hs-share-sub">Sharing helps this story reach more people who can help.</div></div>
+        <div class="hs-share-row">
+          <span class="hs-share-btn b1">${I.copy}<em>Copy link</em></span>
+          <span class="hs-share-btn b2">${I.wa}<em>WhatsApp</em></span>
+          <span class="hs-share-btn b3">${I.fb}<em>Facebook</em></span>
+          <span class="hs-share-btn b4">${I.x}<em>X</em></span>
+        </div>
+        <div class="hs-share-proof">${I.users}<span><b>+3 friends</b> just opened your link</span></div>
+        ${cur}
+      </div>`,
+    ];
+
+    qs("#hiwScreens").innerHTML = screens.join("");
+
+    /* ---- lateral stepper ---- */
+    qs("#hiwStepper").innerHTML = STEPS.map((s, i) =>
+      `<li class="hiw-st" data-i="${i}"><button type="button" class="hiw-st-btn"><span class="hiw-st-dot">${i + 1}</span><span class="hiw-st-label">${esc(s.t)}</span></button></li>`
+    ).join("");
+
+    const scrEls = qsa(".hiw-scr");
+    const stepEls = qsa(".hiw-st");
+    const bar = qs("#hiwBar");
+    const numEl = qs("#hiwNum");
+    const titleEl = qs("#hiwTitle");
+    const descEl = qs("#hiwDesc");
+    const playBtn = qs("#hiwPlay");
+    const playLabel = qs(".hiw-play-label", playBtn);
+    const intro = qs("#hiwIntro");
+    const demo = qs("#hiwDemo");
+
+    let i = 0, playing = false, timer = null, started = false;
+
+    // animate the stage height between the (shorter) intro and the (taller) demo
+    function syncHeight() {
+      const h = stage.classList.contains("show-demo") ? demo.offsetHeight : intro.offsetHeight;
+      stage.style.minHeight = h + "px";
+    }
+
+    function fillBar(animate) {
+      const from = (i / total) * 100, to = ((i + 1) / total) * 100;
+      if (playing && animate && !reduce) {
+        bar.style.transition = "none"; bar.style.width = from + "%";
+        void bar.offsetWidth;
+        bar.style.transition = `width ${DWELL}ms linear`; bar.style.width = to + "%";
+      } else {
+        bar.style.transition = "width .45s var(--ease)"; bar.style.width = to + "%";
+      }
+    }
+
+    function render(animate) {
+      scrEls.forEach((s, n) => s.classList.toggle("on", n === i));
+      stepEls.forEach((s, n) => { s.classList.toggle("on", n === i); s.classList.toggle("done", n < i); });
+      numEl.textContent = i + 1;
+      titleEl.textContent = STEPS[i].t;
+      descEl.textContent = STEPS[i].d;
+      // animate the story progress bar when its screen shows
+      const sb = scrEls[i].querySelector(".hs-bar2 span[data-fill]");
+      if (sb) { sb.style.width = "0%"; requestAnimationFrame(() => { sb.style.width = sb.dataset.fill + "%"; }); }
+      fillBar(animate);
+    }
+
+    function schedule() {
+      clearTimeout(timer);
+      if (playing && !reduce) timer = setTimeout(() => go((i + 1) % total, true), DWELL);
+    }
+    function go(n, animate) {
+      i = (n + total) % total;
+      render(animate);
+      schedule();
+    }
+    function setPlaying(on) {
+      playing = on;
+      playBtn.classList.toggle("paused", !on);
+      playBtn.setAttribute("aria-label", on ? "Pause walkthrough" : "Play walkthrough");
+      if (playLabel) playLabel.textContent = on ? "Pause" : "Play";
+      if (on) { fillBar(true); schedule(); } else { clearTimeout(timer); freezeBar(); }
+    }
+    function freezeBar() {
+      const w = getComputedStyle(bar).width;
+      bar.style.transition = "none"; bar.style.width = w;
+    }
+
+    /* ---- open / close the walkthrough ---- */
+    function open() {
+      if (!stage.classList.contains("show-demo")) {
+        stage.classList.add("show-demo");
+        intro.setAttribute("aria-hidden", "true");
+        demo.setAttribute("aria-hidden", "false");
+        qs("#hiwStart").setAttribute("aria-expanded", "true");
+        syncHeight();
+      }
+      i = 0;
+      if (!started) { started = true; }
+      if (reduce) { playing = false; render(false); playBtn.classList.add("paused"); if (playLabel) playLabel.textContent = "Play"; }
+      else { setPlaying(true); render(true); }
+      // bring the section into a comfortable view
+      const top = stage.getBoundingClientRect().top + window.scrollY - 90;
+      window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
+    }
+    function close() {
+      stage.classList.remove("show-demo");
+      intro.setAttribute("aria-hidden", "false");
+      demo.setAttribute("aria-hidden", "true");
+      qs("#hiwStart").setAttribute("aria-expanded", "false");
+      setPlaying(false);
+      syncHeight();
+    }
+
+    /* ---- wire controls ---- */
+    qs("#hiwStart").addEventListener("click", open);
+    qs("#hiwClose").addEventListener("click", close);
+    qs("#hiwNext").addEventListener("click", () => { setPlaying(false); go(i + 1, false); });
+    qs("#hiwPrev").addEventListener("click", () => { setPlaying(false); go(i - 1, false); });
+    qs("#hiwReplay").addEventListener("click", () => { i = 0; if (reduce) render(false); else setPlaying(true), render(true); });
+    playBtn.addEventListener("click", () => setPlaying(!playing));
+    stepEls.forEach((el) => el.querySelector("button").addEventListener("click", () => { setPlaying(false); go(+el.dataset.i, false); }));
+
+    // keyboard nav while focused inside the demo
+    demo.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") { setPlaying(false); go(i + 1, false); }
+      else if (e.key === "ArrowLeft") { setPlaying(false); go(i - 1, false); }
+    });
+
+    // pause autoplay while the section is off-screen (saves CPU, keeps timing honest)
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver((es) => {
+        es.forEach((e) => {
+          if (!stage.classList.contains("show-demo")) return;
+          if (e.isIntersecting) { if (playing) schedule(); }
+          else { clearTimeout(timer); freezeBar(); }
+        });
+      }, { threshold: 0.25 });
+      io.observe(demo);
+    }
+
+    // prime first screen text (so it's correct if opened with reduced motion)
+    render(false);
+    syncHeight();
+    window.addEventListener("load", syncHeight);
+    window.addEventListener("resize", syncHeight, { passive: true });
+  }
 
   /* Carousel focus — the framed (leftmost in-view) card scales up; others shrink.
      Updates as the user swipes the row or scrolls the section into view. */

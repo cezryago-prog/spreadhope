@@ -10,12 +10,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="image" href="assets/img/hero.png">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/main.css?v=105">
+<link rel="stylesheet" href="assets/css/main.css?v=110">
 </head>
 <body data-page="home">
 
 <!-- ============ HERO ============ -->
 <section class="nh-hero">
+  <div class="nh-hero-mosaic" aria-hidden="true"><div class="nh-hero-mosaic-grid" id="heroMosaic"></div></div>
   <div class="nh-hero-deco" aria-hidden="true">
     <svg class="nh-deco-path" viewBox="0 0 460 300" preserveAspectRatio="none"><path d="M20 250 C 150 215 165 95 300 125 C 388 145 415 70 440 28" fill="none" stroke="#A9D6A1" stroke-width="2.5" stroke-dasharray="1 13" stroke-linecap="round"/></svg>
   </div>
@@ -86,27 +87,86 @@
   </div>
 </section>
 
-<!-- ============ HOW IT WORKS ============ -->
-<section class="nh-section nh-how">
+<!-- ============ HOW IT WORKS (interactive walkthrough) ============ -->
+<section class="nh-section nh-how" id="howItWorks">
   <div class="wrap">
-    <div class="nh-head reveal"><h2>How it works</h2><p>Giving hope is simple. Here's how it works.</p></div>
-    <div class="nh-steps">
-      <div class="nh-step reveal" data-delay="1">
-        <div class="sic"><svg viewBox="0 0 24 24" fill="none"><path d="M5 19h14M6 15.5 15.5 6a2 2 0 0 1 3 3L9 18.5l-4 1 1-4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <h3>1. Share</h3><p>Share your story and create your fundraiser.</p>
+    <div class="hiw-stage" id="hiwStage">
+
+      <!-- ---- STATE 1 · intro ---- -->
+      <div class="hiw-intro" id="hiwIntro">
+        <div class="hiw-intro-copy reveal">
+          <span class="nh-eyebrow">Step by step</span>
+          <h2>How it works</h2>
+          <p class="hiw-lead">See how easy it is to find a story, give with confidence, and spread hope further — all in a few gentle taps.</p>
+          <p class="hiw-note">Take a 30-second guided walkthrough of the whole donation journey, right here on this page.</p>
+          <button class="btn btn-primary btn-lg hiw-start" id="hiwStart" aria-expanded="false" aria-controls="hiwDemo">
+            See the donation journey
+            <svg class="nh-cta-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <div class="hiw-meta"><span>6 steps</span><i></i><span>~30 seconds</span><i></i><span>no sign-up</span></div>
+        </div>
+
+        <div class="hiw-intro-visual reveal" data-delay="1" aria-hidden="true">
+          <span class="hiw-iv-glow"></span>
+          <div class="hiw-iv-phone">
+            <div class="hiw-iv-screen">
+              <span class="hiw-iv-search"></span>
+              <span class="hiw-iv-row r1"></span>
+              <span class="hiw-iv-row r2"></span>
+              <span class="hiw-iv-row r3"></span>
+              <span class="hiw-iv-cta"></span>
+            </div>
+          </div>
+          <span class="hiw-iv-chip c1">🔍 Find</span>
+          <span class="hiw-iv-chip c2">💛 Donate</span>
+          <span class="hiw-iv-chip c3">📣 Share</span>
+        </div>
       </div>
-      <div class="nh-step reveal" data-delay="2">
-        <div class="sic"><svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="12" r="2.6" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="6" r="2.6" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2.6" stroke="currentColor" stroke-width="2"/><path d="m8.3 10.8 7.4-3.6M8.3 13.2l7.4 3.6" stroke="currentColor" stroke-width="2"/></svg></div>
-        <h3>2. Spread</h3><p>Invite your friends, family, and community.</p>
+
+      <!-- ---- STATE 2 · animated walkthrough (filled by app.js) ---- -->
+      <div class="hiw-demo" id="hiwDemo" aria-hidden="true">
+        <div class="hiw-demo-side">
+          <div class="hiw-demo-head">
+            <span class="hiw-stepno">Step <b id="hiwNum">1</b> <em>of 6</em></span>
+            <button class="hiw-close" id="hiwClose" type="button">Back to overview</button>
+          </div>
+
+          <ol class="hiw-stepper" id="hiwStepper" aria-label="Walkthrough steps"></ol>
+
+          <div class="hiw-step-text" aria-live="polite">
+            <h3 id="hiwTitle"></h3>
+            <p id="hiwDesc"></p>
+          </div>
+
+          <div class="hiw-progress" aria-hidden="true"><span class="hiw-bar" id="hiwBar"></span></div>
+
+          <div class="hiw-controls">
+            <button class="hiw-ctrl" id="hiwPrev" type="button" aria-label="Previous step">
+              <svg viewBox="0 0 24 24" fill="none"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="hiw-ctrl hiw-ctrl-play" id="hiwPlay" type="button" aria-label="Pause walkthrough">
+              <svg class="ic-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="7" y="5" width="3.4" height="14" rx="1.2"/><rect x="13.6" y="5" width="3.4" height="14" rx="1.2"/></svg>
+              <svg class="ic-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>
+              <span class="hiw-play-label">Pause</span>
+            </button>
+            <button class="hiw-ctrl" id="hiwNext" type="button" aria-label="Next step">
+              <svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="hiw-ctrl hiw-ctrl-replay" id="hiwReplay" type="button" aria-label="Replay from the start">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>Replay</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="hiw-demo-screen">
+          <div class="hiw-phone" id="hiwPhone">
+            <span class="hiw-phone-cam" aria-hidden="true"></span>
+            <div class="hiw-screens" id="hiwScreens"></div>
+          </div>
+        </div>
       </div>
-      <div class="nh-step reveal" data-delay="3">
-        <div class="sic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.6-9.3-9C1.3 8.4 2.6 5 6 5c2 0 3.2 1.2 4 2.4C10.8 6.2 12 5 14 5c3.4 0 4.7 3.4 3.3 6-2.3 4.4-9.3 9-9.3 9Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></div>
-        <h3>3. Support</h3><p>People support your story and contribute.</p>
-      </div>
-      <div class="nh-step reveal" data-delay="4">
-        <div class="sic"><svg viewBox="0 0 24 24" fill="none"><path d="M12 21c0-5 0-7 2.5-9.5M12 21c0-3-1-5-3.5-7M12 21V10m0 0c0-2.8 2-5 5-5-.2 2.8-2.2 5-5 5Zm0 0C12 7.2 10 5 7 5c.2 2.8 2.2 5 5 5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-        <h3>4. Impact</h3><p>Together, you create real change.</p>
-      </div>
+
     </div>
   </div>
 </section>
@@ -131,8 +191,8 @@
   </div>
 </section>
 
-<script src="assets/js/data.js?v=105"></script>
-<script src="assets/js/ui.js?v=105"></script>
-<script src="assets/js/app.js?v=105"></script>
+<script src="assets/js/data.js?v=110"></script>
+<script src="assets/js/ui.js?v=110"></script>
+<script src="assets/js/app.js?v=110"></script>
 </body>
 </html>
