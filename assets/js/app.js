@@ -4,7 +4,7 @@
 (function () {
   "use strict";
   const D = window.SpreadHopeData;
-  const { I, esc, money, initials, qs, qsa, campaignCard, featuredCard, skeletonCard, toast, share, observeNew } = window.CW;
+  const { I, esc, money, moneyK, initials, qs, qsa, campaignCard, featuredCard, skeletonCard, toast, share, observeNew } = window.CW;
   const param = (k) => new URLSearchParams(location.search).get(k);
 
   const PAGES = {};
@@ -105,126 +105,119 @@
 
   /* =================================================================
      HOW IT WORKS — interactive donation-journey walkthrough
-     (intro state slides away → animated phone mockup plays 6 steps)
+     intro → animated device (phone on mobile / browser on desktop) plays
+     5 steps with precise taps; ends on a Replay overlay (no auto-loop).
      ================================================================= */
   function initHowItWorks() {
     const stage = qs("#hiwStage");
     if (!stage) return;
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const DWELL = 3600; // ms each step holds during autoplay
+    const DWELL = 3800; // ms each step holds during autoplay
     const STEPS = [
-      { t: "Find a campaign", d: "Search by cause or browse categories to discover real, verified stories that need support right now." },
-      { t: "Open the story", d: "See the photos, the goal, how much is raised, and the people behind the campaign — all in one clear place." },
-      { t: "Tap Donate", d: "When a story moves you, start your gift with a single tap. No account and no sign-up needed." },
-      { t: "Choose your amount", d: "Pick a suggested amount or enter your own. Every cent goes straight toward the cause." },
-      { t: "Confirm securely", d: "Review your gift and confirm. Your donation is protected and sent safely in seconds." },
-      { t: "Share to help more", d: "Giving doesn't end at donating — share the campaign so the story reaches even more people who can help." },
+      { t: "Find a campaign", d: "Browse verified stories by cause and pick one that speaks to you." },
+      { t: "Open the story", d: "See the photos, the goal and the progress — then tap Donate, right on the page." },
+      { t: "Choose your amount", d: "Pick how much to give. Every cent goes straight toward the cause." },
+      { t: "Confirm securely", d: "Review and confirm — your gift is protected and sent in seconds." },
+      { t: "Share to help more", d: "Share the campaign so the story reaches even more people who can help." },
     ];
     const total = STEPS.length;
 
-    // a real campaign to make the mockup feel genuine
+    // a real campaign keeps the mockup genuine
     const c = D.featured() || D.all()[0];
     const pct = D.pct(c);
     const cover = c.cover;
     const fb = D.fallbackImg(c.category);
     const list = D.all();
-    const img = (i) => (list[i % list.length] && list[i % list.length].cover) || cover;
-    const titleOf = (i) => (list[i % list.length] && list[i % list.length].title) || c.title;
     const onerr = `onerror="this.onerror=null;this.src='${fb}'"`;
-    const cur = `<span class="hs-cursor" aria-hidden="true"></span>`;
+    const refresh = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-    /* ---- build the six phone screens ---- */
-    const miniRow = (idx, pickClass) => {
-      const p = D.pct(list[idx % list.length] || c);
-      return `<div class="hs-mini ${pickClass || ""}">
-        <span class="hs-mini-img"><img src="${img(idx)}" alt="" loading="lazy" ${onerr}></span>
-        <span class="hs-mini-tx"><b>${esc(titleOf(idx))}</b><i class="hs-mini-bar"><span style="width:${p}%"></span></i></span>
+    const browseCard = (idx, cls) => {
+      const cc = list[idx % list.length] || c;
+      const p = D.pct(cc);
+      return `<div class="sb-card ${cls || ""}">
+        <span class="sb-card-img"><img src="${cc.cover}" alt="" loading="lazy" ${onerr}><i class="sb-card-cat">${esc(cc.category)}</i></span>
+        <span class="sb-card-tx">
+          <b>${esc(cc.title)}</b>
+          <i class="sb-card-bar"><span style="width:${p}%"></span></i>
+          <em class="sb-card-meta">${moneyK(cc.raised)} · ${p}%</em>
+        </span>
       </div>`;
     };
 
     const screens = [
-      // 0 — Find a campaign
-      `<div class="hiw-scr hs-find">
-        <div class="hs-top"><span class="hs-top-t">Discover</span><span class="hs-top-ic">${I.search}</span></div>
-        <div class="hs-search"><span class="hs-search-ic">${I.search}</span><span class="hs-typed">medical care</span><i class="hs-caret"></i></div>
-        <div class="hs-chips"><span class="hs-chip on">Medical</span><span class="hs-chip">Education</span><span class="hs-chip">Emergency</span><span class="hs-chip">Family</span></div>
-        <div class="hs-cards">${miniRow(0)}${miniRow(1, "pick")}${miniRow(2)}</div>
-        ${cur}
+      // 0 — Browse campaigns (richer listing)
+      `<div class="hiw-scr scr-browse">
+        <div class="sb-top"><span class="sb-title">Discover campaigns</span><span class="sb-ic">${I.search}</span></div>
+        <div class="sb-search"><span class="sb-search-ic">${I.search}</span><span class="sb-typed">medical care</span><i class="sb-caret"></i></div>
+        <div class="sb-chips"><span class="sb-chip on">Medical</span><span class="sb-chip">Education</span><span class="sb-chip">Emergency</span><span class="sb-chip">Family</span><span class="sb-chip">Animals</span></div>
+        <div class="sb-grid">${browseCard(0)}${browseCard(1, "pick")}${browseCard(2)}${browseCard(3)}${browseCard(4)}${browseCard(5)}</div>
       </div>`,
 
-      // 1 — Open the story
-      `<div class="hiw-scr hs-story">
-        <div class="hs-cover"><img src="${cover}" alt="${esc(c.title)}" loading="lazy" ${onerr}><span class="hs-cover-cat">${esc(c.category)}</span><span class="hs-cover-heart">${I.heart}</span></div>
-        <div class="hs-story-body">
-          <h4>${esc(c.title)}</h4>
-          <div class="hs-nums"><b>${money(c.raised)}</b><span>raised of ${money(c.goal)}</span></div>
-          <div class="hs-bar2"><span data-fill="${pct}"></span></div>
-          <div class="hs-lines"><i></i><i></i><i style="width:72%"></i></div>
-          <span class="hs-donate">Donate now</span>
+      // 1 — Campaign page (Donate happens here)
+      `<div class="hiw-scr scr-camp">
+        <div class="sc-media"><img src="${cover}" alt="${esc(c.title)}" loading="lazy" ${onerr}><span class="sc-cat">${esc(c.category)}</span><span class="sc-heart">${I.heart}</span></div>
+        <div class="sc-body">
+          <h4 class="sc-title">${esc(c.title)}</h4>
+          <p class="sc-desc">${esc(c.blurb)}</p>
+          <div class="sc-stats"><b>${money(c.raised)}</b><span>raised of ${money(c.goal)}</span><i class="sc-pct">${pct}%</i></div>
+          <div class="sc-bar"><span data-fill="${pct}"></span></div>
+          <button class="sc-donate" type="button">Donate now ${I.heart}</button>
         </div>
-        ${cur}
       </div>`,
 
-      // 2 — Tap Donate (focus / click)
-      `<div class="hiw-scr hs-tap">
-        <div class="hs-tap-card">
-          <span class="hs-tap-cat">${esc(c.category)} · ${pct}% funded</span>
-          <span class="hs-tap-title">${esc(c.title)}</span>
-          <span class="hs-donate big">Donate now ${I.heart}</span>
-          <span class="hs-tap-ripple" aria-hidden="true"></span>
-          <span class="hs-tap-ripple two" aria-hidden="true"></span>
+      // 2 — Choose your amount (fixed amounts, no custom)
+      `<div class="hiw-scr scr-amount">
+        <div class="sa-head"><b>Choose your support</b><small>Every gift goes to ${esc(c.organizer.name)}</small></div>
+        <div class="sa-grid">
+          <span class="sa-amt">$10</span><span class="sa-amt">$25</span><span class="sa-amt pick">$50</span>
+          <span class="sa-amt">$100</span><span class="sa-amt">$500</span><span class="sa-amt">$1,000</span>
         </div>
-        <div class="hs-tap-note">Opening your secure donation…</div>
-        ${cur}
+        <div class="sa-summary">You're giving <b>$50</b> to <span>${esc(c.title)}</span></div>
+        <button class="sc-donate" type="button">Continue ${I.arrow}</button>
       </div>`,
 
-      // 3 — Choose your amount
-      `<div class="hiw-scr hs-amount">
-        <div class="hs-top"><span class="hs-top-t">Choose your support</span></div>
-        <div class="hs-amt-grid">
-          <span class="hs-amt">$10</span><span class="hs-amt">$25</span>
-          <span class="hs-amt pick">$50</span><span class="hs-amt">$100</span>
+      // 3 — Confirm securely (success)
+      `<div class="hiw-scr scr-confirm">
+        <div class="sf-check" aria-hidden="true"><svg viewBox="0 0 52 52"><circle class="sf-c" cx="26" cy="26" r="23" fill="none"/><path class="sf-k" fill="none" d="M15 27l8 8 15-16"/></svg></div>
+        <div class="sf-t">Donation confirmed</div>
+        <div class="sf-amt">$50 to ${esc(c.title)}</div>
+        <div class="sf-secure">${I.shield}<span>Sent securely · funds go directly to the cause</span></div>
+        <span class="sf-spark s1"></span><span class="sf-spark s2"></span><span class="sf-spark s3"></span><span class="sf-spark s4"></span>
+      </div>`,
+
+      // 4 — Share the campaign (preview card + 5 share options)
+      `<div class="hiw-scr scr-share">
+        <div class="ss-head"><b>Thank you — now spread hope</b><small>Sharing helps this story reach more people.</small></div>
+        <div class="ss-preview">
+          <span class="ss-prev-img"><img src="${cover}" alt="" loading="lazy" ${onerr}></span>
+          <span class="ss-prev-tx"><b>${esc(c.title)}</b><i class="ss-prev-bar"><span style="width:${pct}%"></span></i><em>${money(c.raised)} raised · ${pct}%</em></span>
         </div>
-        <div class="hs-amt-custom"><span>Custom amount</span><i>$ —</i></div>
-        <div class="hs-amt-summary">You're giving <b>$50</b> to <span>${esc(c.organizer.name)}</span></div>
-        <span class="hs-donate">Continue ${I.arrow}</span>
-        ${cur}
-      </div>`,
-
-      // 4 — Confirm securely (success)
-      `<div class="hiw-scr hs-confirm">
-        <div class="hs-check" aria-hidden="true"><svg viewBox="0 0 52 52"><circle class="hs-check-c" cx="26" cy="26" r="23" fill="none"/><path class="hs-check-k" fill="none" d="M15 27l8 8 15-16"/></svg></div>
-        <div class="hs-confirm-t">Donation confirmed</div>
-        <div class="hs-confirm-amt">$50 to ${esc(c.title)}</div>
-        <div class="hs-confirm-secure">${I.shield}<span>Sent securely · funds go directly to the cause</span></div>
-        <span class="hs-spark sp1"></span><span class="hs-spark sp2"></span><span class="hs-spark sp3"></span><span class="hs-spark sp4"></span>
-      </div>`,
-
-      // 5 — Share to help more
-      `<div class="hiw-scr hs-share">
-        <div class="hs-share-head"><div class="hs-share-em">📣</div><div class="hs-share-t">You did it — now spread hope</div><div class="hs-share-sub">Sharing helps this story reach more people who can help.</div></div>
-        <div class="hs-share-row">
-          <span class="hs-share-btn b1">${I.copy}<em>Copy link</em></span>
-          <span class="hs-share-btn b2">${I.wa}<em>WhatsApp</em></span>
-          <span class="hs-share-btn b3">${I.fb}<em>Facebook</em></span>
-          <span class="hs-share-btn b4">${I.x}<em>X</em></span>
+        <div class="ss-row">
+          <span class="ss-btn b-copy">${I.copy}<em>Copy link</em></span>
+          <span class="ss-btn b-wa">${I.wa}<em>WhatsApp</em></span>
+          <span class="ss-btn b-fb">${I.fb}<em>Facebook</em></span>
+          <span class="ss-btn b-tw">${I.x}<em>Twitter</em></span>
+          <span class="ss-btn b-ig">${I.ig}<em>Instagram</em></span>
         </div>
-        <div class="hs-share-proof">${I.users}<span><b>+3 friends</b> just opened your link</span></div>
-        ${cur}
       </div>`,
     ];
 
-    qs("#hiwScreens").innerHTML = screens.join("");
+    const endHTML = `<div class="hiw-end" id="hiwEnd" aria-hidden="true">
+      <div class="hiw-end-ic">${I.check}</div>
+      <div class="hiw-end-t">That's the whole journey</div>
+      <div class="hiw-end-d">Find a story, give securely, and spread hope.</div>
+      <button class="hiw-end-btn" id="hiwReplayScreen" type="button">${refresh}Replay walkthrough</button>
+    </div>`;
 
-    /* ---- lateral stepper ---- */
-    qs("#hiwStepper").innerHTML = STEPS.map((s, i) =>
-      `<li class="hiw-st" data-i="${i}"><button type="button" class="hiw-st-btn"><span class="hiw-st-dot">${i + 1}</span><span class="hiw-st-label">${esc(s.t)}</span></button></li>`
-    ).join("");
+    const screensEl = qs("#hiwScreens");
+    screensEl.innerHTML = screens.join("") + `<span class="hiw-tap" aria-hidden="true"></span>` + endHTML;
 
-    const scrEls = qsa(".hiw-scr");
-    const stepEls = qsa(".hiw-st");
-    const bar = qs("#hiwBar");
+    const scrEls = qsa(".hiw-scr", screensEl);
+    const tapEl = qs(".hiw-tap", screensEl);
+    const endEl = qs("#hiwEnd");
+    const device = qs("#hiwDevice");
+    const progress = qs("#hiwProgress");
     const numEl = qs("#hiwNum");
     const titleEl = qs("#hiwTitle");
     const descEl = qs("#hiwDesc");
@@ -233,59 +226,132 @@
     const intro = qs("#hiwIntro");
     const demo = qs("#hiwDemo");
 
-    let i = 0, playing = false, timer = null, started = false;
+    // segmented progress (one per step, doubles as step navigation)
+    progress.innerHTML = STEPS.map((s, n) => `<button class="hiw-seg" type="button" data-i="${n}" aria-label="${esc(s.t)}"><span class="hiw-seg-fill"></span></button>`).join("");
+    const segs = qsa(".hiw-seg", progress).map((b) => ({ btn: b, fill: qs(".hiw-seg-fill", b) }));
 
-    // animate the stage height between the (shorter) intro and the (taller) demo
+    let i = 0, playing = false, timer = null, tapTimer = null, finished = false;
+
     function syncHeight() {
       const h = stage.classList.contains("show-demo") ? demo.offsetHeight : intro.offsetHeight;
       stage.style.minHeight = h + "px";
     }
 
-    function fillBar(animate) {
-      const from = (i / total) * 100, to = ((i + 1) / total) * 100;
-      if (playing && animate && !reduce) {
-        bar.style.transition = "none"; bar.style.width = from + "%";
-        void bar.offsetWidth;
-        bar.style.transition = `width ${DWELL}ms linear`; bar.style.width = to + "%";
-      } else {
-        bar.style.transition = "width .45s var(--ease)"; bar.style.width = to + "%";
-      }
+    /* ---- precise tap / highlight per step ---- */
+    function targetFor(n) {
+      const s = scrEls[n];
+      if (n === 0) return qs(".sb-card.pick", s);
+      if (n === 1) return qs(".sc-donate", s);
+      if (n === 2) return qs(".sa-amt.pick", s);
+      if (n === 4) return qs(".ss-btn.b-copy", s);
+      return null;
+    }
+    function markFor(n) {
+      const s = scrEls[n];
+      if (n === 0) qs(".sb-card.pick", s)?.classList.add("is-sel");
+      if (n === 1) qs(".sc-donate", s)?.classList.add("is-press");
+      if (n === 2) qs(".sa-amt.pick", s)?.classList.add("is-sel");
+      if (n === 4) qs(".ss-btn.b-copy", s)?.classList.add("is-press");
+    }
+    function clearMarks() {
+      qsa(".is-sel, .is-press", screensEl).forEach((e) => e.classList.remove("is-sel", "is-press"));
+    }
+    function pointAt(target, click) {
+      if (!target) { tapEl.classList.remove("show", "click"); return; }
+      const sr = screensEl.getBoundingClientRect(), tr = target.getBoundingClientRect();
+      tapEl.style.left = (tr.left - sr.left + tr.width / 2) + "px";
+      tapEl.style.top = (tr.top - sr.top + tr.height / 2) + "px";
+      tapEl.classList.add("show");
+      if (click) { tapEl.classList.remove("click"); void tapEl.offsetWidth; tapEl.classList.add("click"); }
     }
 
-    function render(animate) {
-      scrEls.forEach((s, n) => s.classList.toggle("on", n === i));
-      stepEls.forEach((s, n) => { s.classList.toggle("on", n === i); s.classList.toggle("done", n < i); });
+    /* ---- segmented progress ---- */
+    function paintSegs() {
+      segs.forEach((s, n) => {
+        if (n === i) return; // current handled separately
+        s.fill.style.transition = "width .35s var(--ease)";
+        s.fill.style.width = (n < i ? 100 : 0) + "%";
+        s.btn.classList.toggle("on", false);
+      });
+      segs[i].btn.classList.add("on");
+    }
+    function fillCurrentSeg(animate) {
+      const f = segs[i].fill;
+      if (playing && animate && !reduce) {
+        f.style.transition = "none"; f.style.width = "0%";
+        void f.offsetWidth;
+        f.style.transition = `width ${DWELL}ms linear`; f.style.width = "100%";
+      } else {
+        f.style.transition = "width .35s var(--ease)"; f.style.width = "100%";
+      }
+    }
+    function freezeSeg() {
+      const f = segs[i].fill, w = getComputedStyle(f).width;
+      f.style.transition = "none"; f.style.width = w;
+    }
+
+    /* ---- render a step ---- */
+    function show(n, animate) {
+      clearTimeout(tapTimer);
+      clearMarks();
+      tapEl.classList.remove("show", "click");
+      i = Math.max(0, Math.min(total - 1, n));
+      scrEls.forEach((s, n2) => s.classList.toggle("on", n2 === i));
       numEl.textContent = i + 1;
       titleEl.textContent = STEPS[i].t;
       descEl.textContent = STEPS[i].d;
-      // animate the story progress bar when its screen shows
-      const sb = scrEls[i].querySelector(".hs-bar2 span[data-fill]");
+      paintSegs();
+      fillCurrentSeg(animate);
+      // animate the campaign progress bar when its screen shows
+      const sb = scrEls[i].querySelector("[data-fill]");
       if (sb) { sb.style.width = "0%"; requestAnimationFrame(() => { sb.style.width = sb.dataset.fill + "%"; }); }
-      fillBar(animate);
+      // schedule the precise tap + highlight for this step
+      const target = targetFor(i);
+      if (target && !reduce) {
+        const delay = playing ? DWELL * 0.45 : 620;
+        tapTimer = setTimeout(() => { pointAt(target, true); markFor(i); }, delay);
+      } else if (target && reduce) {
+        markFor(i);
+      }
     }
 
-    function schedule() {
-      clearTimeout(timer);
-      if (playing && !reduce) timer = setTimeout(() => go((i + 1) % total, true), DWELL);
-    }
-    function go(n, animate) {
-      i = (n + total) % total;
-      render(animate);
-      schedule();
-    }
-    function setPlaying(on) {
-      playing = on;
+    /* ---- playback ---- */
+    function setPlayUI(on) {
       playBtn.classList.toggle("paused", !on);
       playBtn.setAttribute("aria-label", on ? "Pause walkthrough" : "Play walkthrough");
       if (playLabel) playLabel.textContent = on ? "Pause" : "Play";
-      if (on) { fillBar(true); schedule(); } else { clearTimeout(timer); freezeBar(); }
     }
-    function freezeBar() {
-      const w = getComputedStyle(bar).width;
-      bar.style.transition = "none"; bar.style.width = w;
+    function schedule() {
+      clearTimeout(timer);
+      if (!playing || reduce) return;
+      timer = setTimeout(() => { if (i >= total - 1) finish(); else { show(i + 1, true); schedule(); } }, DWELL);
+    }
+    function exitFinished() {
+      if (!finished) return;
+      finished = false;
+      device.classList.remove("is-finished");
+      endEl.setAttribute("aria-hidden", "true");
+    }
+    function play() {
+      if (finished) { exitFinished(); i = 0; }
+      playing = true; setPlayUI(true);
+      show(i, true); schedule();
+    }
+    function pause() {
+      playing = false; setPlayUI(false);
+      clearTimeout(timer); freezeSeg();
+    }
+    function finish() {
+      finished = true; playing = false;
+      clearTimeout(timer); clearTimeout(tapTimer);
+      setPlayUI(false);
+      tapEl.classList.remove("show", "click");
+      segs.forEach((s) => { s.fill.style.transition = "width .35s var(--ease)"; s.fill.style.width = "100%"; });
+      device.classList.add("is-finished");
+      endEl.setAttribute("aria-hidden", "false");
     }
 
-    /* ---- open / close the walkthrough ---- */
+    /* ---- open / close ---- */
     function open() {
       if (!stage.classList.contains("show-demo")) {
         stage.classList.add("show-demo");
@@ -294,11 +360,9 @@
         qs("#hiwStart").setAttribute("aria-expanded", "true");
         syncHeight();
       }
-      i = 0;
-      if (!started) { started = true; }
-      if (reduce) { playing = false; render(false); playBtn.classList.add("paused"); if (playLabel) playLabel.textContent = "Play"; }
-      else { setPlaying(true); render(true); }
-      // bring the section into a comfortable view
+      exitFinished(); i = 0;
+      if (reduce) { playing = false; setPlayUI(false); show(0, false); }
+      else play();
       const top = stage.getBoundingClientRect().top + window.scrollY - 90;
       window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
     }
@@ -307,39 +371,39 @@
       intro.setAttribute("aria-hidden", "false");
       demo.setAttribute("aria-hidden", "true");
       qs("#hiwStart").setAttribute("aria-expanded", "false");
-      setPlaying(false);
+      pause();
       syncHeight();
     }
 
     /* ---- wire controls ---- */
     qs("#hiwStart").addEventListener("click", open);
     qs("#hiwClose").addEventListener("click", close);
-    qs("#hiwNext").addEventListener("click", () => { setPlaying(false); go(i + 1, false); });
-    qs("#hiwPrev").addEventListener("click", () => { setPlaying(false); go(i - 1, false); });
-    qs("#hiwReplay").addEventListener("click", () => { i = 0; if (reduce) render(false); else setPlaying(true), render(true); });
-    playBtn.addEventListener("click", () => setPlaying(!playing));
-    stepEls.forEach((el) => el.querySelector("button").addEventListener("click", () => { setPlaying(false); go(+el.dataset.i, false); }));
+    qs("#hiwNext").addEventListener("click", () => { if (finished) return; if (i >= total - 1) finish(); else { pause(); show(i + 1, false); } });
+    qs("#hiwPrev").addEventListener("click", () => { exitFinished(); pause(); show(i - 1, false); });
+    playBtn.addEventListener("click", () => { if (finished || !playing) play(); else pause(); });
+    qs("#hiwReplayScreen").addEventListener("click", play);
+    segs.forEach((s) => s.btn.addEventListener("click", () => { exitFinished(); pause(); show(+s.btn.dataset.i, false); }));
 
     // keyboard nav while focused inside the demo
     demo.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") { setPlaying(false); go(i + 1, false); }
-      else if (e.key === "ArrowLeft") { setPlaying(false); go(i - 1, false); }
+      if (e.key === "ArrowRight") { if (i >= total - 1) finish(); else { pause(); show(i + 1, false); } }
+      else if (e.key === "ArrowLeft") { exitFinished(); pause(); show(i - 1, false); }
     });
 
-    // pause autoplay while the section is off-screen (saves CPU, keeps timing honest)
+    // pause autoplay while the section is off-screen
     if ("IntersectionObserver" in window) {
       const io = new IntersectionObserver((es) => {
         es.forEach((e) => {
-          if (!stage.classList.contains("show-demo")) return;
+          if (!stage.classList.contains("show-demo") || finished) return;
           if (e.isIntersecting) { if (playing) schedule(); }
-          else { clearTimeout(timer); freezeBar(); }
+          else { clearTimeout(timer); freezeSeg(); }
         });
       }, { threshold: 0.25 });
       io.observe(demo);
     }
 
-    // prime first screen text (so it's correct if opened with reduced motion)
-    render(false);
+    // prime first screen (correct if opened with reduced motion)
+    show(0, false);
     syncHeight();
     window.addEventListener("load", syncHeight);
     window.addEventListener("resize", syncHeight, { passive: true });
@@ -608,10 +672,13 @@
       const gallery = (c.gallery && c.gallery.length ? c.gallery : [c.cover]);
       // hero carousel slides: a "card" slide (plain dark bg) after every complete PAIR of photos
       // (e.g. photo, photo, card, photo, photo, card … — a trailing lone photo gets no card)
+      // desktop = contained 2-col editorial hero (photos only); mobile keeps the
+      // full-bleed carousel that intersperses an info "card" slide after every pair
+      const isDesk = matchMedia("(min-width: 861px)").matches;
       const heroSlides = [];
       gallery.forEach((src, i) => {
         heroSlides.push({ type: "photo", src });
-        if ((i + 1) % 2 === 0) heroSlides.push({ type: "card" });
+        if (!isDesk && (i + 1) % 2 === 0) heroSlides.push({ type: "card" });
       });
       const story = [].concat(c.story.the_story || [], c.story.why || [], c.story.how || [], c.story.note || []);
       const allSup = allSupporters(c);
@@ -630,6 +697,7 @@
       root.innerHTML = `
       <!-- 2 + 3. hero carousel (photos + story slides) + verification badge -->
       <section class="cd-hero">
+        <div class="cd-hero-media">
         <div class="cd-hero-stage">
           ${heroSlides.map((s, i) => s.type === "card"
             ? `<div class="cd-hero-slide cd-hero-cardslide${i === 0 ? " on" : ""}" data-i="${i}">
@@ -649,8 +717,31 @@
           </div>`).join("")}
         </div>
         <span class="cd-verified">${c.verified ? I.checkBadge : I.shield}${esc(c.organizer.name)}</span>
-        <div class="cd-hero-titlebar"><span class="cd-hero-cat2">${esc(c.category)}</span><h1 class="cd-hero-h1">${esc(c.title)}</h1></div>
+        <div class="cd-hero-titlebar"><span class="cd-hero-cat2">${esc(c.category)}</span><div class="cd-hero-h1">${esc(c.title)}</div></div>
         ${heroSlides.length > 1 ? `<div class="cd-hero-dots">${heroSlides.map((g, i) => `<button class="${i === 0 ? "on" : ""}" data-i="${i}" aria-label="View slide ${i + 1}"></button>`).join("")}</div>` : ""}
+        </div><!-- /cd-hero-media -->
+
+        <div class="cd-hero-panel">
+          <div class="cd-hero-head">
+            <span class="cd-cat">${esc(c.category)}</span>
+            <h1 class="cd-hero-h1d">${esc(c.title)}</h1>
+            ${c.blurb ? `<p class="cd-hero-lead">${esc(c.blurb)}</p>` : ""}
+            <div class="cd-hero-org">${c.verified ? I.checkBadge : I.shield}<span>by <b>${esc(c.organizer.name)}</b>${c.location ? ` · ${esc(c.location)}` : ""}</span></div>
+          </div>
+          <div class="cd-fund">
+            <div class="cd-fund-top">
+              <div class="cd-fund-amt">
+                <div class="cd-fund-raised">${money(c.raised)}</div>
+                <div class="cd-fund-goal">raised of <b>${money(c.goal)}</b> goal</div>
+              </div>
+              <div class="cd-fund-pct">${p}%</div>
+            </div>
+            <div class="careflow cd-fund-bar"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div></div>
+            ${(() => { const jd = recentSupporters.find((s) => s.name && s.name !== "Anonymous") || recentSupporters[0]; return jd ? `<div class="cd-fund-recent">${I.heart}<span class="cd-recent-name"><b>${esc(jd.name)}</b> just donated</span></div>` : ""; })()}
+            <button class="btn cd-donate btn-block" id="donateBtn">Donate now</button>
+            <button class="btn cd-share btn-block" id="shareBtn">Share this campaign</button>
+          </div>
+        </div>
       </section>
 
       <div class="cd-sheet">
@@ -695,33 +786,15 @@
               </section>` : ""}
 
             </div>
-
-            <!-- 5. donation card (sticky rail on desktop / first on mobile) -->
-            <aside class="cd-aside">
-              <div class="cd-fund">
-                <div class="cd-fund-top">
-                  <div class="cd-fund-amt">
-                    <div class="cd-fund-raised">${money(c.raised)}</div>
-                    <div class="cd-fund-goal">raised of <b>${money(c.goal)}</b> goal</div>
-                  </div>
-                  <div class="cd-fund-pct">${p}%</div>
-                </div>
-                <div class="careflow cd-fund-bar"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div></div>
-                ${(() => { const jd = recentSupporters.find((s) => s.name !== "Anonymous") || recentSupporters[0]; return jd ? `<div class="cd-fund-recent">${I.heart}<span><b>${esc(jd.name)}</b> just donated</span></div>` : ""; })()}
-                <button class="btn cd-donate btn-block" id="donateBtn">Donate now</button>
-                <button class="btn cd-share btn-block" id="shareBtn">Share this campaign</button>
-                <div class="cd-fund-trust">${I.shield}<span>${c.donors.toLocaleString("en-US")} people have supported this campaign.</span></div>
-              </div>
-            </aside>
           </div>
         </div>
       </div>
 
-      <!-- 11. recommended -->
+      <!-- 11. recommended — interactive showcase (desktop) / scroll carousel (mobile) -->
       <section class="cd-more">
         <div class="wrap">
-          <h2>You may also like</h2>
-          <div class="hscroll" id="cdMoreSlot"></div>
+          <div class="cd-more-head"><h2>You may also like</h2><p>More stories gaining momentum — give them a moment too.</p></div>
+          <div class="cd-show" id="cdMoreSlot"></div>
         </div>
       </section>`;
 
@@ -777,6 +850,22 @@
       qs("#donateBtn").addEventListener("click", () => { location.href = "donate.html?id=" + c.id; });
       qs("#shareBtn").addEventListener("click", () => share(c.title));
 
+      // rotating "just donated" — cycles through real donor names only
+      (() => {
+        const el = qs(".cd-recent-name");
+        if (!el) return;
+        const names = [...new Set(allSupporters(c).filter((s) => s.name && s.name !== "Anonymous").map((s) => s.name))];
+        if (names.length < 2 || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        const wrap = el.closest(".cd-fund-recent");
+        let k = names.indexOf(el.textContent.replace(/ just donated$/, "").trim());
+        if (k < 0) k = 0;
+        setInterval(() => {
+          k = (k + 1) % names.length;
+          wrap.classList.add("swap");
+          setTimeout(() => { el.innerHTML = `<b>${esc(names[k])}</b> just donated`; wrap.classList.remove("swap"); }, 240);
+        }, 2800);
+      })();
+
       // "See all" supporters modal
       const fullList = allSupporters(c);
       qs("#supSeeAll").addEventListener("click", () => {
@@ -825,15 +914,65 @@
         }, 3000);
       })();
 
-      // recommended campaigns carousel
+      // recommended — interactive showcase (one card highlighted at a time)
       const moreSlot = qs("#cdMoreSlot");
-      moreSlot.innerHTML = related.map((x) => campaignCard(x)).join("") +
-        `<a class="ccard end-card" href="browse-campaigns.html" aria-label="Browse all campaigns"><div class="end-inner"><div class="end-ic">${I.arrow}</div><div class="end-t">Browse all</div><div class="end-sub">Discover more causes</div></div></a>`;
-      qsa("#cdMoreSlot .ccard").forEach((x) => x.classList.remove("reveal"));
-      qsa("#cdMoreSlot .careflow-fill").forEach((f) => { f.style.width = f.dataset.fill + "%"; });
-      initCarousels();
+      const showItems = related.slice(0, 4);
+      const showCard = (x, idx) => {
+        const sp = D.pct(x);
+        return `<a class="cd-show-card${idx === 0 ? " is-active" : ""}" href="campaign.html?id=${x.id}" data-i="${idx}" aria-label="View ${esc(x.title)}">
+          <div class="cd-show-img"><img src="${x.cover}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(x.category)}'"><span class="cd-show-scrim"></span></div>
+          <span class="cd-show-cat">${esc(x.category)}</span>
+          <div class="cd-show-info">
+            <h3 class="cd-show-title">${esc(x.title)}</h3>
+            <div class="cd-show-row">
+              <div class="cd-show-nums"><b>${money(x.raised)}</b><span>of ${money(x.goal)}</span></div>
+              <div class="cd-show-ring" style="--p:${sp}"><span class="cd-show-ring-pct">${sp}%</span></div>
+            </div>
+            <span class="cd-show-cta">View campaign ${I.arrow}</span>
+          </div>
+        </a>`;
+      };
+      moreSlot.innerHTML = showItems.map(showCard).join("");
+      initShowcase(moreSlot);
     }
   };
+
+  /* "You may also like" desktop showcase — one card highlighted at a time,
+     auto-rotating in a loop; hover takes over, loop resumes after mouse-out. */
+  function initShowcase(rail) {
+    const cards = qsa(".cd-show-card", rail);
+    if (cards.length < 2) return;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isDesktop = () => matchMedia("(min-width: 861px)").matches;
+    let active = 0, timer = null, hovering = false;
+
+    const setActive = (n) => {
+      active = (n + cards.length) % cards.length;
+      cards.forEach((c, i) => c.classList.toggle("is-active", i === active));
+    };
+    const start = () => {
+      clearInterval(timer);
+      if (reduce || !isDesktop()) return;
+      timer = setInterval(() => { if (!hovering) setActive(active + 1); }, 3600);
+    };
+    const stop = () => clearInterval(timer);
+
+    cards.forEach((c, i) => {
+      c.addEventListener("mouseenter", () => { if (!isDesktop()) return; hovering = true; setActive(i); });
+    });
+    rail.addEventListener("mouseleave", () => { hovering = false; });
+
+    setActive(0);
+    start();
+
+    if ("IntersectionObserver" in window) {
+      const io = new IntersectionObserver((es) => {
+        es.forEach((e) => { if (e.isIntersecting) start(); else stop(); });
+      }, { threshold: 0.2 });
+      io.observe(rail);
+    }
+    window.addEventListener("resize", start, { passive: true });
+  }
 
   function buildSupporters(c) {
     const real = (c.supporters || []).slice();

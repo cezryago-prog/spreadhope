@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/main.css?v=110">
+<link rel="stylesheet" href="assets/css/main.css?v=116">
 </head>
 <body data-page="browse">
 
@@ -41,19 +41,16 @@
 
     <div class="bc-filterbar">
       <div class="bc-chips" id="catChips"></div>
-      <button class="bc-filter-icon" id="filterToggle" aria-label="More filters">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h10M18 7h2M4 12h2M10 12h10M4 17h7M15 17h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2" stroke="currentColor" stroke-width="2"/><circle cx="8" cy="12" r="2" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="17" r="2" stroke="currentColor" stroke-width="2"/></svg>
-      </button>
+      <div class="bc-sort">
+        <select id="sortSelect" aria-label="Sort campaigns"></select>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
     </div>
 
     <div class="bc-listhead">
       <div>
         <h2>All campaigns</h2>
         <p>Together, we can create real change.</p>
-      </div>
-      <div class="bc-sort">
-        <select id="sortSelect" aria-label="Sort campaigns"></select>
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
     </div>
 
@@ -101,8 +98,8 @@
   </div>
 </aside>
 
-<script src="assets/js/data.js?v=110"></script>
-<script src="assets/js/ui.js?v=110"></script>
-<script src="assets/js/app.js?v=110"></script>
+<script src="assets/js/data.js?v=116"></script>
+<script src="assets/js/ui.js?v=116"></script>
+<script src="assets/js/app.js?v=116"></script>
 </body>
 </html>

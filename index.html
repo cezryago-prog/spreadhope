@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="image" href="assets/img/hero.png">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/main.css?v=110">
+<link rel="stylesheet" href="assets/css/main.css?v=116">
 </head>
 <body data-page="home">
 
@@ -103,7 +103,7 @@
             See the donation journey
             <svg class="nh-cta-arrow" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
-          <div class="hiw-meta"><span>6 steps</span><i></i><span>~30 seconds</span><i></i><span>no sign-up</span></div>
+          <div class="hiw-meta"><span>5 steps</span><i></i><span>~30 seconds</span><i></i><span>no sign-up</span></div>
         </div>
 
         <div class="hiw-intro-visual reveal" data-delay="1" aria-hidden="true">
@@ -125,21 +125,33 @@
 
       <!-- ---- STATE 2 · animated walkthrough (filled by app.js) ---- -->
       <div class="hiw-demo" id="hiwDemo" aria-hidden="true">
-        <div class="hiw-demo-side">
-          <div class="hiw-demo-head">
-            <span class="hiw-stepno">Step <b id="hiwNum">1</b> <em>of 6</em></span>
-            <button class="hiw-close" id="hiwClose" type="button">Back to overview</button>
+
+        <!-- tutorial header bar -->
+        <div class="hiw-bar-top">
+          <button class="hiw-back" id="hiwClose" type="button">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Back to overview
+          </button>
+          <span class="hiw-stepno">Step <b id="hiwNum">1</b> <em>of 5</em></span>
+        </div>
+
+        <!-- device: phone (mobile) / browser window (desktop) -->
+        <div class="hiw-device" id="hiwDevice">
+          <span class="hiw-cam" aria-hidden="true"></span>
+          <div class="hiw-browserbar" aria-hidden="true">
+            <span class="hiw-bdots"><i></i><i></i><i></i></span>
+            <span class="hiw-url"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>spreadhope.org</span>
           </div>
+          <div class="hiw-screens" id="hiwScreens"></div>
+        </div>
 
-          <ol class="hiw-stepper" id="hiwStepper" aria-label="Walkthrough steps"></ol>
-
+        <!-- step text + progress + controls (centered below the animation) -->
+        <div class="hiw-belowstage">
           <div class="hiw-step-text" aria-live="polite">
             <h3 id="hiwTitle"></h3>
             <p id="hiwDesc"></p>
           </div>
-
-          <div class="hiw-progress" aria-hidden="true"><span class="hiw-bar" id="hiwBar"></span></div>
-
+          <div class="hiw-progress" id="hiwProgress" aria-hidden="true"></div>
           <div class="hiw-controls">
             <button class="hiw-ctrl" id="hiwPrev" type="button" aria-label="Previous step">
               <svg viewBox="0 0 24 24" fill="none"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -152,17 +164,6 @@
             <button class="hiw-ctrl" id="hiwNext" type="button" aria-label="Next step">
               <svg viewBox="0 0 24 24" fill="none"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </button>
-            <button class="hiw-ctrl hiw-ctrl-replay" id="hiwReplay" type="button" aria-label="Replay from the start">
-              <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v4h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span>Replay</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="hiw-demo-screen">
-          <div class="hiw-phone" id="hiwPhone">
-            <span class="hiw-phone-cam" aria-hidden="true"></span>
-            <div class="hiw-screens" id="hiwScreens"></div>
           </div>
         </div>
       </div>
@@ -191,8 +192,8 @@
   </div>
 </section>
 
-<script src="assets/js/data.js?v=110"></script>
-<script src="assets/js/ui.js?v=110"></script>
-<script src="assets/js/app.js?v=110"></script>
+<script src="assets/js/data.js?v=116"></script>
+<script src="assets/js/ui.js?v=116"></script>
+<script src="assets/js/app.js?v=116"></script>
 </body>
 </html>
