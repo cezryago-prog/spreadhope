@@ -100,6 +100,19 @@
 
     initHowItWorks();
 
+    /* ---- background grass videos — play while in view, pause off-screen (autoplay fallback) ---- */
+    if (!reduce) {
+      const playInView = (v) => {
+        if (!v) return;
+        v.muted = true;
+        const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+        if ("IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) tryPlay(); else v.pause(); }), { threshold: 0.12 }).observe(v);
+        else tryPlay();
+      };
+      playInView(qs(".nh-final-video"));   // final CTA (both viewports)
+      playInView(qs(".nh-how-video"));     // how-it-works (mobile only; display:none on desktop won't intersect)
+    }
+
     observeNew();
   };
 
@@ -745,6 +758,11 @@
       </section>
 
       <div class="cd-sheet">
+        <div class="cd-sheet-video-wrap" aria-hidden="true">
+          <video class="cd-sheet-video" autoplay loop muted playsinline preload="none" aria-hidden="true">
+            <source src="assets/video/graminha.mp4" type="video/mp4">
+          </video>
+        </div>
         <div class="cd-inner">
 
           <div class="cd-cols">
@@ -792,13 +810,27 @@
 
       <!-- 11. recommended — interactive showcase (desktop) / scroll carousel (mobile) -->
       <section class="cd-more">
+        <video class="cd-more-video" autoplay loop muted playsinline preload="none" aria-hidden="true">
+          <source src="assets/video/video-bom.mp4" type="video/mp4">
+        </video>
         <div class="wrap">
           <div class="cd-more-head"><h2>You may also like</h2><p>More stories gaining momentum — give them a moment too.</p></div>
           <div class="cd-show" id="cdMoreSlot"></div>
+          <div class="cd-show-dots" id="cdShowDots" aria-hidden="true"></div>
         </div>
       </section>`;
 
       window.CW.initProgress(root);
+
+      /* background videos — play while in view, pause off-screen (autoplay fallback) */
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        qsa(".cd-sheet-video, .cd-more-video", root).forEach((v) => {
+          v.muted = true;
+          const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+          if ("IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) tryPlay(); else v.pause(); }), { threshold: 0.12 }).observe(v);
+          else tryPlay();
+        });
+      }
 
       // hero carousel — auto every 3s, swipeable, dots reflect position
       (function heroCarousel() {
@@ -972,6 +1004,23 @@
       io.observe(rail);
     }
     window.addEventListener("resize", start, { passive: true });
+
+    /* ---- mobile: dot pagination synced to the swipe carousel ---- */
+    const dotsWrap = qs("#cdShowDots");
+    if (dotsWrap) {
+      dotsWrap.innerHTML = cards.map((_, i) => `<button class="cd-show-dot${i === 0 ? " on" : ""}" type="button" aria-label="Campaign ${i + 1}"></button>`).join("");
+      const dots = qsa(".cd-show-dot", dotsWrap);
+      let raf = 0;
+      const syncDots = () => {
+        raf = 0;
+        const rr = rail.getBoundingClientRect(), mid = rr.left + rr.width / 2;
+        let best = 0, bd = Infinity;
+        cards.forEach((c, i) => { const cr = c.getBoundingClientRect(); const d = Math.abs(cr.left + cr.width / 2 - mid); if (d < bd) { bd = d; best = i; } });
+        dots.forEach((d, i) => d.classList.toggle("on", i === best));
+      };
+      rail.addEventListener("scroll", () => { if (!raf) raf = requestAnimationFrame(syncDots); }, { passive: true });
+      dots.forEach((d, i) => d.addEventListener("click", () => cards[i].scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" })));
+    }
   }
 
   function buildSupporters(c) {
