@@ -167,6 +167,11 @@
         <div class="drawer-sep"></div>
         <a href="start.html" class="btn btn-primary btn-block">Start a Campaign</a>
         <a href="browse-campaigns.html" class="btn btn-ghost btn-block">Browse fundraisers</a>
+        <nav class="drawer-mininav">
+          <a href="privacy.html"${active === "privacy" ? ' class="active"' : ""}>Privacy Policy</a>
+          <a href="terms.html"${active === "terms" ? ' class="active"' : ""}>Terms of Service</a>
+          <a href="contact.html"${active === "contact" ? ' class="active"' : ""}>Contact us</a>
+        </nav>
         <div class="drawer-foot">
           <div>Every story deserves a way forward.</div>
           <div class="socials">
@@ -246,9 +251,9 @@
 
   function renderFooter() {
     const groups = [
-      { h: "Explore", links: [["browse-campaigns.html", "All stories"], ["browse-campaigns.html?sort=funded", "Top fundraisers"], ["browse-campaigns.html", "Categories"], ["how-it-works.html", "How it works"]] },
-      { h: "Company", links: [["about.html", "About us"], ["how-it-works.html", "Community"], ["how-it-works.html", "Trust & safety"], ["contact.html", "Contact us"]] },
-      { h: "Support", links: [["contact.html", "Help center"], ["how-it-works.html", "Resources"], ["privacy.html", "Privacy policy"], ["terms.html", "Terms of service"]] },
+      { h: "Explore", links: [["browse-campaigns.html", "All stories"], ["browse-campaigns.html?sort=funded", "Top fundraisers"], ["how-it-works.html", "How it works"]] },
+      { h: "Company", links: [["about.html", "About us"], ["contact.html", "Contact us"], ["contact.html", "Help center"]] },
+      { h: "Legal", links: [["privacy.html", "Privacy policy"], ["terms.html", "Terms of service"]] },
     ];
     const footer = document.createElement("footer");
     footer.className = "site-footer";

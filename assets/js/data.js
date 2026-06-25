@@ -57,6 +57,8 @@
         { name: "Priya N.", amount: 100, message: "Get well soon, we're rooting for you.", at: "5h ago" },
         { name: "The Okafor family", amount: 250, message: "", at: "1d ago" },
         { name: "Dan R.", amount: 50, message: "One step at a time.", at: "1d ago" },
+        { name: "A grateful patient", amount: 120, message: "You cared for me on my worst night — sending strength for yours.", at: "8h ago" },
+        { name: "Maya & Sol", amount: 60, message: "Cheering every single step of your recovery, Leila.", at: "2d ago" },
       ],
     },
     {
@@ -88,6 +90,8 @@
         { name: "Regular since '14", amount: 200, message: "Best cinnamon rolls in Texas. Reopen soon!", at: "3h ago" },
         { name: "Anonymous", amount: 1000, message: "", at: "8h ago" },
         { name: "Marisol G.", amount: 75, message: "We miss the morning smell already.", at: "2d ago" },
+        { name: "Corner café owner", amount: 200, message: "From one small kitchen to another — we've got you.", at: "10h ago" },
+        { name: "Sunrise regular", amount: 40, message: "Save me the first loaf when you reopen. ❤", at: "2d ago" },
       ],
     },
     {
@@ -114,6 +118,9 @@
       supporters: [
         { name: "Anonymous", amount: 300, message: "Go change the world, Jonas.", at: "6h ago" },
         { name: "Former classmate", amount: 40, message: "", at: "1d ago" },
+        { name: "Mrs. Alvarez", amount: 150, message: "Watching you grow has been a privilege — go build great things.", at: "7h ago" },
+        { name: "Engineering alum", amount: 100, message: "First-gen too. You belong in that classroom.", at: "1d ago" },
+        { name: "Neighbor down the street", amount: 30, message: "So proud of you, kiddo.", at: "2d ago" },
       ],
     },
     {
@@ -138,6 +145,8 @@
       supporters: [
         { name: "Anonymous", amount: 50, message: "", at: "1h ago" },
         { name: "Carla & Tom", amount: 120, message: "For everyone working the late shift in the kitchen.", at: "4h ago" },
+        { name: "Former volunteer", amount: 60, message: "That warm bowl meant everything to me once. Paying it forward.", at: "9h ago" },
+        { name: "Denver local", amount: 45, message: "No one should be cold and hungry. Thank you for showing up.", at: "1d ago" },
       ],
     },
     {
@@ -162,6 +171,8 @@
       supporters: [
         { name: "Dog person forever", amount: 60, message: "Give them all a treat from me.", at: "2h ago" },
         { name: "Anonymous", amount: 150, message: "", at: "1d ago" },
+        { name: "Foster mom of three", amount: 80, message: "These pups deserve every chance — sending love and treats.", at: "6h ago" },
+        { name: "Rescue supporter", amount: 50, message: "Thank you for opening your doors when no one else would.", at: "1d ago" },
       ],
     },
     {
@@ -186,6 +197,8 @@
       supporters: [
         { name: "Anonymous", amount: 100, message: "Hang in there. Better days ahead.", at: "5h ago" },
         { name: "A fellow parent", amount: 25, message: "", at: "1d ago" },
+        { name: "Former coworker", amount: 100, message: "You worked harder than anyone I knew. This will turn around.", at: "5h ago" },
+        { name: "Someone who's been there", amount: 40, message: "We lost a home once too. Hold on — better days are coming.", at: "1d ago" },
       ],
     },
     {
@@ -210,6 +223,8 @@
       supporters: [
         { name: "Anonymous", amount: 30, message: "", at: "3h ago" },
         { name: "Green thumb", amount: 75, message: "Plant something beautiful.", at: "2d ago" },
+        { name: "Maple St. neighbor", amount: 50, message: "This garden raised my kids as much as I did. Let's keep it growing.", at: "8h ago" },
+        { name: "Weekend volunteer", amount: 35, message: "Count me in for the first planting day. 🌱", at: "1d ago" },
       ],
     },
     {
@@ -234,6 +249,8 @@
       supporters: [
         { name: "Anonymous", amount: 200, message: "May his first word be a happy one.", at: "1h ago" },
         { name: "Deaf & proud", amount: 50, message: "Whatever path Noah chooses, we're cheering.", at: "6h ago" },
+        { name: "An audiologist", amount: 150, message: "Early support changes everything. Rooting for you, Noah.", at: "9h ago" },
+        { name: "Mom of a CI kid", amount: 60, message: "The day he turns to his name is unforgettable — it's coming. 💙", at: "1d ago" },
       ],
     },
     {
@@ -258,6 +275,8 @@
       supporters: [
         { name: "Anonymous", amount: 500, message: "", at: "2h ago" },
         { name: "From higher ground", amount: 100, message: "We're with you, Mill Valley.", at: "7h ago" },
+        { name: "Neighboring town", amount: 200, message: "Our crews are coming this weekend. You're not alone.", at: "10h ago" },
+        { name: "Lost everything in '21", amount: 45, message: "Recovery is slow but real — sending strength to every family.", at: "1d ago" },
       ],
     },
   ];
