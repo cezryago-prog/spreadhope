@@ -2171,13 +2171,13 @@ i.serif, .serif-accent {
 .nh-community .btn { white-space: nowrap; }
 
 /* ---- Final CTA (soft light-green band) ---- */
-.nh-final { background: var(--sage-wash) url(../img/be-reason-bg.png) center/cover no-repeat; color: var(--deep-meadow); text-align: center; position: relative; overflow: hidden; padding-top: clamp(34px, 7vw, 60px); }
+.nh-final { background: var(--sage-wash) url(../img/be-reason-bg.png) center/cover no-repeat; color: var(--deep-meadow); text-align: center; position: relative; overflow: hidden; padding-top: clamp(34px, 7vw, 60px); padding-bottom: clamp(118px, 30vw, 170px); }
 /* looping grass-in-the-wind video as the living backdrop (photo bg = poster/fallback) */
 .nh-final-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
 /* soft cream halo behind the copy for readability; backdrop stays visible at the edges */
 .nh-final::before { content:""; position:absolute; inset:0; z-index:1; background: radial-gradient(135% 92% at 50% 47%, rgba(250,248,241,.7) 0%, rgba(250,248,241,.34) 46%, rgba(250,248,241,0) 78%); }
 /* top fade in the section's base color so it melts into the section above (no hard edge) */
-.nh-final::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background: linear-gradient(to bottom, var(--cream-base) 0%, rgba(250,248,241,.78) 16%, rgba(250,248,241,.38) 30%, rgba(250,248,241,0) 48%, rgba(35,78,82,0) 66%, rgba(35,78,82,.55) 86%, var(--deep-meadow) 100%); }
+.nh-final::after { content:""; position:absolute; inset:0; z-index:1; pointer-events:none; background: linear-gradient(to bottom, var(--cream-base) 0%, rgba(250,248,241,.74) 11%, rgba(250,248,241,0) 30%, rgba(35,78,82,0) 50%, rgba(35,78,82,.10) 64%, rgba(35,78,82,.26) 75%, rgba(35,78,82,.46) 84%, rgba(35,78,82,.68) 91%, rgba(35,78,82,.86) 96%, var(--deep-meadow) 100%); }
 .nh-final .wrap { position: relative; z-index: 2; }
 .nh-final h2 { color: var(--deep-meadow); font-size: clamp(28px, 5vw, 44px); line-height: 1.12; max-width: 18ch; margin: 0 auto 26px; text-shadow: 0 1px 16px rgba(255,255,255,.6); }
 .nh-final h2 .hl { color: var(--amber-deep); }
@@ -2481,7 +2481,7 @@ i.serif, .serif-accent {
 /* bird-in-flight video as the section background (sticky so it parallaxes & keeps the birds at natural scale); cream veil keeps the copy readable */
 .cd-sheet-video-wrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; clip-path: inset(0 round var(--r-xl) var(--r-xl) 0 0); }
 .cd-sheet-video { position: sticky; top: 0; width: 100%; height: 100svh; object-fit: cover; pointer-events: none; }
-.cd-sheet::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(250,248,241,.84) 0%, rgba(250,248,241,.76) 42%, rgba(250,248,241,.8) 78%, rgba(250,248,241,.92) 100%); }
+.cd-sheet::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(250,248,241,.84) 0%, rgba(250,248,241,.76) 42%, rgba(250,248,241,.82) 80%, rgba(250,248,241,.96) 94%, rgba(250,248,241,1) 100%); }
 .cd-inner { position: relative; z-index: 2; max-width: 1040px; margin-inline: auto; padding: clamp(26px, 6vw, 40px) var(--gutter) 0; }
 
 /* hero media wrapper + side panel (mobile: panel is the cream sheet that overlaps the image) */
@@ -2515,9 +2515,10 @@ i.serif, .serif-accent {
 .cd-seeall { font-family: var(--font-head); font-weight: 600; font-size: 14px; color: var(--fresh-green); cursor: pointer; }
 .cd-seeall:hover { color: var(--teal-deep); }
 
-/* story */
+/* story — frosted glass card so the grass video reads softly blurred behind the copy */
+.cd-story { background: rgba(250,248,241,.58); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.55); border-radius: var(--r-xl); padding: clamp(18px, 4.5vw, 28px); box-shadow: var(--sh-sm); }
 .cd-story h2 { margin-bottom: 12px; }
-.cd-story-body { color: var(--ink); font-size: clamp(15px, 2.7vw, 16.5px); line-height: 1.75; }
+.cd-story-body { color: var(--ink); font-size: clamp(15px, 2.7vw, 16.5px); line-height: 1.75; overflow: hidden; transition: max-height .6s cubic-bezier(.22,.61,.36,1); }
 .cd-story-body p { margin-bottom: 1em; }
 .cd-story-body p:last-child { margin-bottom: 0; }
 .cd-story-body.collapsed { max-height: 230px; overflow: hidden; -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent); mask-image: linear-gradient(180deg, #000 62%, transparent); }
@@ -2525,7 +2526,7 @@ i.serif, .serif-accent {
 .cd-readmore:hover { color: var(--teal-deep); }
 
 /* organizer */
-.cd-organizer { background: rgba(169,214,161,.18); border: 1px solid rgba(169,214,161,.45); border-radius: var(--r-xl); padding: clamp(18px, 4vw, 24px); }
+.cd-organizer { background: var(--sage-wash); border: 1px solid rgba(169,214,161,.45); border-radius: var(--r-xl); padding: clamp(18px, 4vw, 24px); }
 .cd-org-head { display: flex; align-items: center; gap: 14px; }
 .cd-org-av { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; flex: none; background: var(--sage-light); }
 .cd-org-info { flex: 1; min-width: 0; }
@@ -2588,7 +2589,7 @@ i.serif, .serif-accent {
 .cd-more { position: relative; overflow: hidden; isolation: isolate; padding: clamp(30px, 6vw, 56px) 0 clamp(16px, 4vw, 36px); }
 /* background grass video + light cream mask (brightens the footage so the section reads airy) */
 .cd-more-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; filter: blur(2px) brightness(1.12) saturate(.9); }
-.cd-more::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(250,248,241,.74) 0%, rgba(250,248,241,.56) 50%, rgba(250,248,241,.72) 100%); }
+.cd-more::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(180deg, rgba(250,248,241,1) 0%, rgba(250,248,241,.97) 5%, rgba(250,248,241,.68) 22%, rgba(250,248,241,.56) 50%, rgba(250,248,241,.72) 100%); }
 .cd-more > .wrap { position: relative; z-index: 2; }
 .cd-more-head { margin-bottom: 18px; }
 .cd-more-head h2 { margin-bottom: 6px; }
@@ -2653,6 +2654,8 @@ i.serif, .serif-accent {
 @media (max-width: 860px) {
   /* sheet now has an opaque cream + video bg, so it must not ride up over the fund/share card above (legacy negative margin) */
   .cd-sheet { margin-top: 0; }
+  /* seamless How-it-works(video) -> A-story-of-hope seam: solid cream-base top overlaps the video section by 2px (covers any sub-pixel/video clip edge), then eases into the page bg */
+  .soh-section { position: relative; z-index: 1; margin-top: -2px; background: linear-gradient(180deg, var(--cream-base) 0, var(--cream-base) 50px, rgba(250,248,241,0) 190px); }
   .cd-more { padding-top: clamp(28px, 6vw, 48px); padding-bottom: clamp(28px, 7vw, 48px); }
   .cd-more-head { margin-bottom: 16px; }
   .cd-more-head p { max-width: 38ch; }

@@ -873,9 +873,41 @@
       const coll = qs("#storyCollapse");
       const tog = qs("#storyToggle");
       tog.addEventListener("click", () => {
-        const open = coll.classList.toggle("collapsed");
-        tog.textContent = open ? "Read more" : "Show less";
-        if (open) coll.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const collapsing = !coll.classList.contains("collapsed");
+        if (reduce) {
+          coll.classList.toggle("collapsed");
+          coll.style.maxHeight = "";
+          tog.textContent = collapsing ? "Read more" : "Show less";
+          if (collapsing) coll.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          return;
+        }
+        // clear any pending end-state listener from a rapid re-click
+        coll.removeEventListener("transitionend", coll._storyTE || (() => {}));
+        if (collapsing) {
+          // full -> 230px
+          coll.style.maxHeight = coll.scrollHeight + "px";
+          coll.getBoundingClientRect();              // reflow
+          coll.classList.add("collapsed");           // brings back the fade mask
+          coll.style.maxHeight = "230px";
+          tog.textContent = "Read more";
+          coll.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        } else {
+          // 230px -> full, then release the cap so reflows stay correct
+          coll.style.maxHeight = "230px";            // pin current height
+          coll.classList.remove("collapsed");        // drop the mask
+          const full = coll.scrollHeight;
+          coll.getBoundingClientRect();              // reflow
+          coll.style.maxHeight = full + "px";
+          tog.textContent = "Show less";
+          const te = (e) => {
+            if (e.propertyName !== "max-height") return;
+            coll.style.maxHeight = "none";
+            coll.removeEventListener("transitionend", te);
+          };
+          coll._storyTE = te;
+          coll.addEventListener("transitionend", te);
+        }
       });
 
       // donate + share
