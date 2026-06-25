@@ -332,7 +332,8 @@ i.serif, .serif-accent {
   gap: 10px;
   margin-right: auto;
 }
-/* header / drawer: solo mark logo + serif wordmark */
+/* header / drawer: full name lockup (leaf + wordmark), natural color on the light bar */
+.brand-headerlogo { height: 42px; width: auto; flex: none; display: block; }
 .brand-logo { height: 50px; width: auto; flex: none; display: block; }
 .brand .wordmark {
   font-family: var(--font-display);
@@ -1106,9 +1107,9 @@ i.serif, .serif-accent {
 .skel { position: relative; overflow: hidden; background: var(--soft-sand); border-radius: var(--r-sm); }
 .skel::after {
   content:""; position:absolute; inset:0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.38), transparent);
   transform: translateX(-100%);
-  animation: shimmer 1.5s infinite;
+  animation: shimmer 1.65s cubic-bezier(.4,0,.2,1) infinite;
 }
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 @media (prefers-reduced-motion: reduce){ .skel::after { animation: none; } }
@@ -1116,6 +1117,48 @@ i.serif, .serif-accent {
 .skel-card .skel-img { aspect-ratio: 16/10; border-radius: 0; }
 .skel-card .skel-body { padding: 18px; }
 .skel-line { height: 13px; border-radius: 6px; margin-bottom: 10px; }
+
+/* reusable skeleton primitives (built on .skel) — used by page-specific ghosts */
+.sk-text { height: 13px; border-radius: 6px; }
+.sk-title { height: 22px; border-radius: 8px; }
+.sk-img { border-radius: var(--r-lg); }
+.sk-btn { height: 46px; border-radius: var(--r-pill); }
+.sk-pill { height: 30px; width: 96px; border-radius: var(--r-pill); }
+.sk-circle { border-radius: 50%; }
+.sk-bar { height: 10px; border-radius: var(--r-pill); }
+/* slightly warmer tint so ghosts sit on the cream page without looking grey/dead */
+.sk-soft { background: var(--sage-wash); }
+[aria-busy="true"] { cursor: progress; }
+
+/* ---- page ghost layouts (mirror the real structure; mobile-first) ---- */
+.ghost { animation: ghost-in .3s ease both; }
+.exp-ghost { pointer-events: none; }
+@keyframes ghost-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce){ .ghost { animation: none; } }
+
+/* campaign detail ghost */
+.gd-hero { width: 100%; aspect-ratio: 4/3; border-radius: 0; }
+.gd-wrap { max-width: 1040px; margin-inline: auto; padding: clamp(20px,5vw,34px) var(--gutter) 0; }
+.gd-panel { display: flex; flex-direction: column; gap: 12px; margin-top: 18px; }
+.gd-fund { border: 1px solid var(--line-soft); background: var(--cream-2); border-radius: var(--r-xl); padding: clamp(18px,4vw,24px); display: flex; flex-direction: column; gap: 14px; margin-top: 8px; }
+.gd-row { display: flex; gap: 12px; }
+.gd-block { margin-top: clamp(28px,6vw,40px); display: flex; flex-direction: column; gap: 12px; }
+.gd-card { border: 1px solid var(--line-soft); background: var(--cream-2); border-radius: var(--r-xl); padding: clamp(18px,4vw,24px); display:flex; flex-direction:column; gap:12px; }
+.gd-thumbs { display: grid; grid-template-columns: repeat(2,1fr); gap: 14px; }
+.gd-thumb { aspect-ratio: 4/3; border-radius: var(--r-lg); }
+@media (min-width: 861px) {
+  .gd-cols { display: grid; grid-template-columns: 1.08fr .92fr; gap: clamp(24px,3vw,44px); align-items: start; }
+  .gd-hero { aspect-ratio: auto; height: clamp(360px,42vw,520px); border-radius: var(--r-xl); }
+}
+
+/* donate / checkout ghost */
+.gn-wrap { display: grid; grid-template-columns: 1fr; gap: clamp(20px,4vw,30px); }
+.gn-amounts { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.gn-amt { height: 56px; border-radius: var(--r-lg); }
+.gn-summary { border: 1px solid var(--line-soft); background: var(--cream-2); border-radius: var(--r-xl); padding: clamp(18px,4vw,24px); display:flex; flex-direction:column; gap:14px; }
+@media (min-width: 861px) {
+  .gn-wrap { grid-template-columns: 1.4fr .9fr; align-items: start; }
+}
 
 /* =====================================================================
    PAGE INTRO (inner pages)
@@ -3379,4 +3422,11 @@ i.serif, .serif-accent {
   .sf-c, .sf-k { stroke-dashoffset: 0; }
   .ss-btn { opacity: 1 !important; transform: none !important; }
   .hiw-tap { display: none; }
+}
+
+/* ---- perf: skip rendering/compositing of heavy sections while they're off-screen ---- */
+/* (cd-sheet is intentionally excluded — it hosts the sticky background video) */
+.soh-section, .nh-final, .cd-more {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 620px;
 }

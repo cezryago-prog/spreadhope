@@ -275,9 +275,6 @@
     { key: "urgent", label: "Urgent first" },
   ];
 
-  // small artificial latency so skeleton/loading states are real
-  const delay = (ms) => new Promise((r) => setTimeout(r, ms));
-
   function pct(c) { return Math.min(100, Math.round((c.raised / c.goal) * 100)); }
 
   // ---- Public async API (backend-shaped) ----------------------------
@@ -292,7 +289,6 @@
     pct,
 
     async list({ q = "", category = "All", status = "any", sort = "recent", page = 1, perPage = 9 } = {}) {
-      await delay(520);
       let rows = CAMPAIGNS.slice();
       if (q) {
         const needle = q.toLowerCase();
@@ -314,7 +310,6 @@
     },
 
     async get(id) {
-      await delay(420);
       return CAMPAIGNS.find((c) => c.id === id) || null;
     },
 
@@ -325,7 +320,6 @@
     all() { return CAMPAIGNS.slice(); },
 
     async search(q) {
-      await delay(180);
       if (!q) return [];
       const needle = q.toLowerCase();
       return CAMPAIGNS.filter((c) => (c.title + c.category + c.location).toLowerCase().includes(needle)).slice(0, 5);
@@ -333,12 +327,10 @@
 
     // Simulated submission — no backend. Returns a fake reference id.
     async submitCampaign(draft) {
-      await delay(900);
       try { sessionStorage.setItem("careway:lastDraft", JSON.stringify(draft)); } catch (e) {}
       return { ok: true, ref: "CW-" + Math.random().toString(36).slice(2, 8).toUpperCase() };
     },
     async sendContact(payload) {
-      await delay(700);
       return { ok: true };
     },
   };

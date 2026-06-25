@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="image" href="assets/img/hero.png">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/main.css?v=154">
+<link rel="stylesheet" href="assets/css/main.css?v=162">
 </head>
 <body data-page="home">
 
@@ -83,7 +83,12 @@
       <span class="nh-eyebrow">Explore</span>
       <h2>Fundraisers to explore</h2><p>Real campaigns gaining momentum right now.</p>
     </div>
-    <div class="hscroll explore-rail" id="exploreRail"></div>
+    <div class="hscroll explore-rail" id="exploreRail" aria-busy="true">
+      <!-- static ghost cards: visible instantly on cold load, replaced by JS when ready -->
+      <div class="ccard exp-ghost ghost"><div class="skel skel-img sk-soft" style="aspect-ratio:16/10"></div><div style="padding:15px 17px;display:flex;flex-direction:column;gap:11px"><div class="skel sk-text" style="width:80%"></div><div class="skel sk-text" style="width:55%"></div><div class="skel sk-bar" style="width:100%;margin-top:6px"></div><div class="skel sk-text" style="width:40%;height:11px"></div></div></div>
+      <div class="ccard exp-ghost ghost"><div class="skel skel-img sk-soft" style="aspect-ratio:16/10"></div><div style="padding:15px 17px;display:flex;flex-direction:column;gap:11px"><div class="skel sk-text" style="width:80%"></div><div class="skel sk-text" style="width:55%"></div><div class="skel sk-bar" style="width:100%;margin-top:6px"></div><div class="skel sk-text" style="width:40%;height:11px"></div></div></div>
+      <div class="ccard exp-ghost ghost"><div class="skel skel-img sk-soft" style="aspect-ratio:16/10"></div><div style="padding:15px 17px;display:flex;flex-direction:column;gap:11px"><div class="skel sk-text" style="width:80%"></div><div class="skel sk-text" style="width:55%"></div><div class="skel sk-bar" style="width:100%;margin-top:6px"></div><div class="skel sk-text" style="width:40%;height:11px"></div></div></div>
+    </div>
   </div>
 </section>
 
@@ -199,8 +204,8 @@
   </div>
 </section>
 
-<script src="assets/js/data.js?v=154"></script>
-<script src="assets/js/ui.js?v=154"></script>
-<script src="assets/js/app.js?v=154"></script>
+<script src="assets/js/data.js?v=162"></script>
+<script src="assets/js/ui.js?v=162"></script>
+<script src="assets/js/app.js?v=162"></script>
 </body>
 </html>

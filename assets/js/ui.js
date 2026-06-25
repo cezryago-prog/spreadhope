@@ -138,7 +138,7 @@
     const active = document.body.dataset.page || "";
     const navLinks = NAV.map((n) => `<a href="${n.href}" class="${active === n.key ? "active" : ""}">${n.label}</a>`).join("");
     const drawerLinks = NAV.map((n) => `<a href="${n.href}" class="${active === n.key ? "active" : ""}">${n.label} ${I.chevron}</a>`).join("");
-    const brand = `<a class="brand" href="index.html" aria-label="Spread Hope home"><img class="brand-logo" src="assets/img/logo-solo.png" alt="" width="56" height="56"><span class="wordmark">Spread Hope</span></a>`;
+    const brand = `<a class="brand" href="index.html" aria-label="Spread Hope home"><img class="brand-headerlogo" src="assets/img/logo-name.png" alt="Spread Hope" width="200" height="63"></a>`;
 
     const header = document.createElement("header");
     header.className = "site-header";

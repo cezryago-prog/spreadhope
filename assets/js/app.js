@@ -35,6 +35,7 @@
       const list = D.all().slice(0, 6);
       rail.innerHTML = list.map((c) => campaignCard(c)).join("") +
         `<a class="ccard end-card exp-end" href="browse-campaigns.html" aria-label="See all campaigns"><div class="end-inner"><div class="end-ic">${I.arrow}</div><div class="end-t">See all<br>campaigns</div><div class="end-sub">Explore every fundraiser</div></div></a>`;
+      rail.removeAttribute("aria-busy");
       qsa("#exploreRail .ccard").forEach((x) => x.classList.remove("reveal"));
       qsa("#exploreRail .careflow-fill").forEach((f) => { f.style.setProperty("--fill", f.dataset.fill + "%"); });
       initCarousels();
@@ -609,8 +610,9 @@
     }
 
     function skeletons() {
+      grid.setAttribute("aria-busy", "true");
       grid.innerHTML = Array.from({ length: state.perPage }).map(() => `
-        <div class="bc-card bc-skel"><div class="skel bc-card-img"></div>
+        <div class="bc-card bc-skel ghost"><div class="skel bc-card-img sk-soft"></div>
         <div class="bc-card-body"><div class="skel skel-line" style="width:65%;height:18px"></div>
         <div class="skel skel-line" style="width:95%"></div><div class="skel skel-line" style="width:80%"></div>
         <div class="skel skel-line" style="width:100%;height:8px;margin-top:14px"></div></div></div>`).join("");
@@ -620,6 +622,7 @@
     async function load() {
       skeletons();
       const res = await D.list(state);
+      grid.removeAttribute("aria-busy");
       if (!res.items.length) {
         grid.innerHTML = ""; empty.classList.remove("hide"); pager.innerHTML = ""; return;
       }
@@ -661,23 +664,64 @@
   PAGES.campaign = function () {
     const id = param("id");
     const root = qs("#campaignRoot");
+    root.setAttribute("aria-busy", "true");
     root.innerHTML = skeletonDetail();
 
     D.get(id).then((c) => {
       if (!c) { location.replace("404.html"); return; }
       document.title = `${c.title} · Spread Hope`;
       renderDetail(c);
+      root.removeAttribute("aria-busy");
     });
 
+    // ghost that mirrors the real editorial hero + fund card + story/organizer/supporters/related
     function skeletonDetail() {
-      return `<div class="skel" style="height:clamp(240px,48vw,360px)"></div>
-        <div class="cd-sheet"><div class="cd-inner">
-        <div class="skel skel-line" style="width:70%;height:26px;margin-top:8px"></div>
-        <div class="skel skel-line" style="width:92%;height:15px;margin-top:14px"></div>
-        <div class="skel" style="height:220px;border-radius:24px;margin-top:22px"></div>
-        <div class="skel skel-line" style="width:50%;height:20px;margin-top:30px"></div>
-        <div class="skel skel-line" style="width:96%;height:14px;margin-top:14px"></div>
-        <div class="skel skel-line" style="width:90%;height:14px"></div></div></div>`;
+      const ln = (w, h) => `<div class="skel sk-text" style="width:${w};${h ? "height:" + h + ";" : ""}"></div>`;
+      const fund = `<div class="gd-fund">
+          ${ln("40%", "13px")}
+          <div class="gd-row" style="justify-content:space-between;align-items:flex-end">
+            <div style="flex:1"><div class="skel sk-title" style="width:55%;height:30px"></div></div>
+            <div class="skel sk-text" style="width:48px;height:20px"></div>
+          </div>
+          <div class="skel sk-bar" style="width:100%"></div>
+          <div class="skel sk-btn" style="width:100%"></div>
+          <div class="skel sk-btn" style="width:100%;height:46px"></div>
+        </div>`;
+      return `<div class="ghost">
+        <div class="skel gd-hero sk-soft"></div>
+        <div class="gd-wrap">
+          <div class="gd-cols">
+            <div class="gd-panel">
+              <div class="skel sk-pill" style="width:96px"></div>
+              <div class="skel sk-title" style="width:88%;height:30px"></div>
+              <div class="skel sk-title" style="width:64%;height:30px"></div>
+              ${ln("96%")}${ln("90%")}${ln("70%")}
+              <div class="gd-row" style="align-items:center;margin-top:6px">
+                <div class="skel sk-circle" style="width:44px;height:44px"></div>
+                <div style="flex:1;display:flex;flex-direction:column;gap:8px">${ln("50%")}${ln("32%")}</div>
+              </div>
+            </div>
+            ${fund}
+          </div>
+          <div class="gd-block">
+            <div class="skel sk-title" style="width:42%"></div>
+            ${ln("100%")}${ln("97%")}${ln("99%")}${ln("80%")}
+          </div>
+          <div class="gd-card">
+            <div class="gd-row" style="align-items:center">
+              <div class="skel sk-circle" style="width:54px;height:54px"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:9px">${ln("45%")}${ln("28%")}</div>
+            </div>
+            ${ln("90%")}
+          </div>
+          <div class="gd-block">
+            <div class="skel sk-title" style="width:48%"></div>
+            <div class="gd-thumbs">
+              <div class="skel gd-thumb sk-soft"></div><div class="skel gd-thumb sk-soft"></div>
+            </div>
+          </div>
+        </div>
+      </div>`;
     }
 
     function renderDetail(c) {
@@ -826,7 +870,9 @@
       if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
         qsa(".cd-sheet-video, .cd-more-video", root).forEach((v) => {
           v.muted = true;
-          const tryPlay = () => { const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+          // slow the campaign-story background grass slightly for a calmer feel
+          if (v.classList.contains("cd-sheet-video")) v.playbackRate = 0.7;
+          const tryPlay = () => { v.playbackRate = v.classList.contains("cd-sheet-video") ? 0.7 : 1; const p = v.play(); if (p && p.catch) p.catch(() => {}); };
           if ("IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) tryPlay(); else v.pause(); }), { threshold: 0.12 }).observe(v);
           else tryPlay();
         });
@@ -982,16 +1028,11 @@
       const moreSlot = qs("#cdMoreSlot");
       const showItems = related.slice(0, 4);
       const showCard = (x, idx) => {
-        const sp = D.pct(x);
         return `<a class="cd-show-card${idx === 0 ? " is-active" : ""}" href="campaign.html?id=${x.id}" data-i="${idx}" aria-label="View ${esc(x.title)}">
           <div class="cd-show-img"><img src="${x.cover}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(x.category)}'"><span class="cd-show-scrim"></span></div>
           <span class="cd-show-cat">${esc(x.category)}</span>
           <div class="cd-show-info">
             <h3 class="cd-show-title">${esc(x.title)}</h3>
-            <div class="cd-show-row">
-              <div class="cd-show-nums"><b>${money(x.raised)}</b><span>of ${money(x.goal)}</span></div>
-              <div class="cd-show-ring" style="--p:${sp}"><span class="cd-show-ring-pct">${sp}%</span></div>
-            </div>
             <span class="cd-show-cta">View campaign ${I.arrow}</span>
           </div>
         </a>`;
@@ -1290,12 +1331,48 @@
   PAGES.donate = function () {
     const id = param("id");
     const root = qs("#donateRoot");
-    root.innerHTML = `<div class="skel" style="height:60px;width:60%;border-radius:12px"></div>`;
+    root.setAttribute("aria-busy", "true");
+    root.innerHTML = skeletonDonate();
     D.get(id).then((c) => {
       if (!c) { location.replace("browse-campaigns.html"); return; }
       document.title = `Donate · ${c.title} · Spread Hope`;
       renderDonate(c);
+      root.removeAttribute("aria-busy");
     });
+
+    // ghost mirroring the checkout: steps, amount grid, fields, CTA + summary card
+    function skeletonDonate() {
+      const ln = (w, h) => `<div class="skel sk-text" style="width:${w};${h ? "height:" + h + ";" : ""}"></div>`;
+      return `<div class="ghost">
+        <div class="skel sk-text" style="width:160px;height:14px;margin-bottom:18px"></div>
+        <div class="gn-wrap">
+          <div>
+            <div class="gd-row" style="gap:18px;margin-bottom:22px">
+              <div class="skel sk-pill" style="width:90px"></div>
+              <div class="skel sk-pill" style="width:110px"></div>
+              <div class="skel sk-pill" style="width:90px"></div>
+            </div>
+            <div class="skel sk-title" style="width:60%;height:28px;margin-bottom:10px"></div>
+            ${ln("85%", "14px")}
+            <div class="gn-amounts" style="margin:20px 0">
+              <div class="skel gn-amt"></div><div class="skel gn-amt"></div><div class="skel gn-amt"></div>
+              <div class="skel gn-amt"></div><div class="skel gn-amt"></div><div class="skel gn-amt"></div>
+            </div>
+            <div class="skel sk-btn" style="width:100%;margin-bottom:14px"></div>
+            <div class="skel sk-btn" style="width:100%;height:52px"></div>
+          </div>
+          <div class="gn-summary">
+            <div class="skel sk-text" style="width:50%;height:14px"></div>
+            <div class="gd-row" style="align-items:center">
+              <div class="skel sk-img" style="width:64px;height:64px"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:8px">${ln("80%")}${ln("55%")}</div>
+            </div>
+            <div class="skel sk-bar" style="width:100%"></div>
+            ${ln("70%")}
+          </div>
+        </div>
+      </div>`;
+    }
 
     function renderDonate(c) {
       const pct = D.pct(c);
@@ -1499,6 +1576,15 @@
     const page = document.body.dataset.page;
     const fn = PAGES[page];
     if (fn) fn();
+
+    /* perf: stop decoding background videos while the tab/page is hidden; on return, resume only the ones on screen */
+    const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const inView = (v) => { const r = v.getBoundingClientRect(); return r.bottom > 0 && r.top < innerHeight && r.height > 0; };
+    document.addEventListener("visibilitychange", () => {
+      const vids = document.querySelectorAll("video");
+      if (document.hidden) { vids.forEach((v) => v.pause()); }
+      else if (!reduceMotion) { vids.forEach((v) => { if (inView(v)) { const p = v.play(); if (p && p.catch) p.catch(() => {}); } }); }
+    });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run);
   else run();
