@@ -111,7 +111,9 @@
         else tryPlay();
       };
       playInView(qs(".nh-final-video"));   // final CTA (both viewports)
-      playInView(qs(".nh-how-video"));     // how-it-works (mobile only; display:none on desktop won't intersect)
+      const howV = qs(".nh-how-video");    // how-it-works grass bg — runs a touch slower than normal
+      if (howV) howV.defaultPlaybackRate = howV.playbackRate = 0.6;
+      playInView(howV);
     }
 
     observeNew();
@@ -741,13 +743,14 @@
       const allSup = allSupporters(c);
       const topSupporters = allSup.slice(0, 5);
       const atRank = (s) => { const m = /(\d+)\s*(h|d|w|mo)/.exec(s || ""); if (!m) return 1e9; return +m[1] * (m[2] === "h" ? 1 : m[2] === "d" ? 24 : m[2] === "w" ? 168 : 720); };
-      const recentSupporters = allSup.slice().sort((a, b) => atRank(a.at) - atRank(b.at)).slice(0, 5);
+      // recent = real supporters first (varied amounts), padded from the smaller deterministic list — keeps amounts alternating instead of all-equal
+      const recentSupporters = buildSupporters(c).slice().sort((a, b) => atRank(a.at) - atRank(b.at)).slice(0, 5);
       const messages = (c.supporters || []).filter((s) => s.message);
       const related = D.all().filter((x) => x.id !== c.id).sort((a, b) => D.pct(b) - D.pct(a)).slice(0, 6);
 
       const supRow = (d) => `<div class="cd-sup-row">
         <span class="cd-sup-av">${initials(d.name)}</span>
-        <span class="cd-sup-name">${esc(d.name)}</span>
+        <span class="cd-sup-main"><span class="cd-sup-name">${esc(d.name)}</span>${d.at ? `<span class="cd-sup-time">${esc(d.at)}</span>` : ""}</span>
         <span class="cd-sup-amt">${money(d.amount)}</span>
       </div>`;
 
@@ -1099,7 +1102,7 @@
   function buildSupporters(c) {
     const real = (c.supporters || []).slice();
     const names = ["Alex M.", "Jordan P.", "Sam K.", "Taylor R.", "Casey W.", "Morgan L.", "Anonymous", "Jamie B.", "Robin S.", "Quinn A."];
-    const amts = [25, 50, 100, 35, 75, 150, 40, 200, 60, 30];
+    const amts = [25, 50, 100, 75, 75, 150, 50, 200, 125, 25];
     const ats = ["3d ago", "4d ago", "5d ago", "6d ago", "1w ago", "1w ago", "2w ago"];
     // deterministic seed from id
     let seed = 0; for (const ch of c.id) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
@@ -1129,15 +1132,16 @@
     const out = buildSupporters(c).slice();
     const firsts = ["Alex", "Jordan", "Sam", "Taylor", "Casey", "Morgan", "Jamie", "Robin", "Quinn", "Avery", "Riley", "Drew", "Skyler", "Parker", "Reese", "Sage", "Devon", "Harper", "Rowan", "Emerson", "Marisol", "Noah", "Hannah", "Sofia", "Grace"];
     const inits = ["A.", "B.", "C.", "D.", "K.", "L.", "M.", "N.", "P.", "R.", "S.", "T.", "W."];
-    const amts = [25, 50, 100, 35, 75, 150, 40, 200, 60, 30, 500, 250, 20, 1000, 45, 80];
-    const ats = ["2h ago", "5h ago", "8h ago", "1d ago", "1d ago", "2d ago", "3d ago", "4d ago", "5d ago", "6d ago", "1w ago", "1w ago", "2w ago", "2w ago", "3w ago", "1mo ago"];
+    const amts = [25, 50, 100, 75, 25, 150, 50, 200, 125, 50, 500, 250, 25, 1000, 75, 175];
+    // 11 entries (coprime with amts' 16) + a different multiplier so the time varies WITHIN each amount group instead of repeating
+    const ats = ["2h ago", "6h ago", "11h ago", "1d ago", "2d ago", "4d ago", "6d ago", "1w ago", "2w ago", "3w ago", "1mo ago"];
     let seed = 0; for (const ch of c.id) seed = (seed * 31 + ch.charCodeAt(0)) >>> 0;
     const total = Math.max(c.donors, out.length);
     let k = 0;
     while (out.length < total) {
       const anon = (seed + k * 5) % 7 === 0;
       const name = anon ? "Anonymous" : `${firsts[(seed + k * 7) % firsts.length]} ${inits[(seed + k * 3) % inits.length]}`;
-      out.push({ name, amount: amts[(seed + k * 11) % amts.length], message: "", at: ats[(seed + k) % ats.length] });
+      out.push({ name, amount: amts[(seed + k * 11) % amts.length], message: "", at: ats[(seed + k * 3) % ats.length] });
       k++;
     }
     return out.sort((a, b) => b.amount - a.amount);
@@ -1325,6 +1329,28 @@
     updatePreview();
   };
 
+  /* "Spread hope" — a small point of light rises from the donate button, with a few soft sparkles */
+  function spreadHopeRise(originEl) {
+    const r = originEl.getBoundingClientRect();
+    const x = r.left + r.width / 2, y = r.top + r.height / 2;
+    const layer = document.createElement("div");
+    layer.className = "hope-rise-layer";
+    const dot = document.createElement("span");
+    dot.className = "hope-dot";
+    dot.style.left = x + "px"; dot.style.top = y + "px";
+    layer.appendChild(dot);
+    for (let i = 0; i < 4; i++) {
+      const s = document.createElement("span");
+      s.className = "hope-spark";
+      s.style.left = x + "px"; s.style.top = y + "px";
+      s.style.setProperty("--dx", (i % 2 ? 1 : -1) * (12 + (i % 2 ? 6 : 0)) + "px");
+      s.style.setProperty("--dl", (0.06 + i * 0.07).toFixed(2) + "s");
+      layer.appendChild(s);
+    }
+    document.body.appendChild(layer);
+    setTimeout(() => layer.remove(), 1500);
+  }
+
   /* =================================================================
      DONATE (mock checkout — no real payment)
      ================================================================= */
@@ -1467,9 +1493,13 @@
       qs("#dSubmit").addEventListener("click", () => {
         if (!amount || amount < 1) { toast("Please choose an amount to donate", "err"); go(0); return; }
         const btn = qs("#dSubmit");
-        btn.disabled = true; btn.textContent = "Processing…";
-        // mock — no real payment provider; simulate then go to thank-you
-        setTimeout(() => { location.href = "thank-you.html?id=" + c.id + "&amt=" + amount; }, 700);
+        btn.disabled = true;
+        const dest = "thank-you.html?id=" + c.id + "&amt=" + amount + "&hope=1";
+        // mock — no real payment provider; a small "spread hope" light rises, then we navigate
+        if (reduce) { btn.textContent = "Processing…"; setTimeout(() => { location.href = dest; }, 220); return; }
+        btn.classList.add("dn-glow");
+        spreadHopeRise(btn);
+        setTimeout(() => { location.href = dest; }, 1000);
       });
     }
   };
@@ -1501,6 +1531,13 @@
     qs("#tyFill").style.width = p + "%";
     qs("#tyMeta").textContent = `${money(c.raised)} raised · ${p}% of ${money(c.goal)}`;
     qs("#tyMoreLink").href = "browse-campaigns.html";
+
+    // "spread hope" arrival: the light point lands, pulses into the check, then the content reveals
+    if (param("hope") && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const card = qs(".confirm-card");
+      if (card) card.classList.add("hope-arrive");
+    }
+
     qsa("[data-sh]").forEach((a) => a.addEventListener("click", (e) => {
       e.preventDefault();
       const url = "campaign.html?id=" + c.id, full = location.origin + location.pathname.replace(/thank-you\.html$/, "") + url;

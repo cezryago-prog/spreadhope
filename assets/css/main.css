@@ -1856,6 +1856,66 @@ i.serif, .serif-accent {
 }
 .confirm-check svg { width: 40px; height: 40px; }
 .confirm-check.celebrate { background: var(--coral-wash); color: var(--amber-deep); }
+
+/* ===== "Spread hope" donation → thank-you light animation ===== */
+/* button micro feedback */
+.dn-glow { animation: dn-glow .55s var(--ease) both; }
+@keyframes dn-glow {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,198,138,0); }
+  35% { transform: scale(.986); box-shadow: 0 0 0 7px rgba(255,198,138,.18); }
+  100% { transform: scale(1); box-shadow: 0 0 0 16px rgba(255,198,138,0); }
+}
+/* rising point of light + soft sparkles (created in JS) */
+.hope-rise-layer { position: fixed; inset: 0; z-index: 300; pointer-events: none; }
+.hope-dot {
+  position: fixed; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, var(--warm-sun) 40%, rgba(255,198,138,0) 72%);
+  box-shadow: 0 0 16px 4px rgba(255,198,138,.55), 0 0 34px 10px rgba(169,214,161,.32);
+  opacity: 0; will-change: transform, opacity;
+  animation: hope-rise 1.15s cubic-bezier(.22,.7,.3,1) forwards;
+}
+@keyframes hope-rise {
+  0% { opacity: 0; transform: translateY(0) scale(.4); }
+  16% { opacity: 1; transform: translateY(-10px) scale(1.06); }
+  60% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-200px) scale(.88); }
+}
+.hope-spark {
+  position: fixed; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%;
+  background: radial-gradient(circle, #fff, rgba(169,214,161,0) 70%);
+  opacity: 0; will-change: transform, opacity;
+  animation: hope-spark 1.05s ease-out var(--dl, 0s) forwards;
+}
+@keyframes hope-spark {
+  0% { opacity: 0; transform: translate(0,0) scale(.5); }
+  28% { opacity: .85; }
+  100% { opacity: 0; transform: translate(var(--dx, 0), -130px) scale(.65); }
+}
+/* arrival on the thank-you page: land → pulse → ripple, then content reveals */
+.confirm-card.hope-arrive .confirm-check { position: relative; animation: hope-land .7s cubic-bezier(.22,.7,.3,1) both; }
+.confirm-card.hope-arrive .confirm-check::after {
+  content: ""; position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  box-shadow: 0 0 0 0 rgba(255,198,138,.5), 0 0 0 0 rgba(169,214,161,.4);
+  animation: hope-ripple 1.2s ease-out .35s 1 both;
+}
+@keyframes hope-land {
+  0% { opacity: 0; transform: translateY(-14px) scale(.4); }
+  60% { opacity: 1; transform: translateY(0) scale(1.13); }
+  100% { transform: translateY(0) scale(1); }
+}
+@keyframes hope-ripple {
+  0% { box-shadow: 0 0 0 0 rgba(255,198,138,.5), 0 0 0 0 rgba(169,214,161,.42); }
+  100% { box-shadow: 0 0 0 26px rgba(255,198,138,0), 0 0 0 42px rgba(169,214,161,0); }
+}
+.confirm-card.hope-arrive h1 { animation: hope-fade .6s var(--ease) .38s both; }
+.confirm-card.hope-arrive > p { animation: hope-fade .6s var(--ease) .52s both; }
+.confirm-card.hope-arrive .mini-card { animation: hope-fade .6s var(--ease) .66s both; }
+@keyframes hope-fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .dn-glow, .hope-dot, .hope-spark,
+  .confirm-card.hope-arrive .confirm-check, .confirm-card.hope-arrive .confirm-check::after,
+  .confirm-card.hope-arrive h1, .confirm-card.hope-arrive > p, .confirm-card.hope-arrive .mini-card { animation: none !important; }
+}
 .confirm-card h1 { font-size: clamp(26px, 4vw, 38px); margin-bottom: 14px; }
 .confirm-card > p { color: var(--text-2); font-size: 16.5px; max-width: 44ch; margin: 0 auto 24px; }
 .status-pill {
@@ -1874,6 +1934,11 @@ i.serif, .serif-accent {
 .mini-card .mc .mt { font-family: var(--font-head); font-weight: 700; font-size: 16px; margin-bottom: 6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
 .mini-card .careflow-track { height: 6px; }
 .mini-card .mm { font-size: 12.5px; color: var(--text-2); margin-top: 7px; }
+/* thank-you share buttons — circular icon buttons (were unstyled → giant SVGs) */
+.share-btns { display: flex; justify-content: center; gap: 12px; }
+.share-btns a { width: 46px; height: 46px; flex: none; display: grid; place-items: center; border-radius: 50%; background: var(--soft-sand); color: var(--care-blue); transition: background .2s, color .2s, transform .2s; }
+.share-btns a:hover { background: var(--sage-soft); transform: translateY(-2px); }
+.share-btns a svg { width: 20px; height: 20px; }
 .confirm-acts { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
 /* =====================================================================
@@ -2603,7 +2668,9 @@ i.serif, .serif-accent {
 .cd-sup-row { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line-soft); }
 .cd-sup-row:last-child { border-bottom: none; }
 .cd-sup-av { width: 38px; height: 38px; border-radius: 50%; background: var(--sage-light); color: var(--deep-meadow); display: grid; place-items: center; font-family: var(--font-head); font-weight: 700; font-size: 13px; flex: none; }
-.cd-sup-name { flex: 1; min-width: 0; font-family: var(--font-head); font-weight: 600; font-size: 14.5px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cd-sup-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.cd-sup-name { font-family: var(--font-head); font-weight: 600; font-size: 14.5px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cd-sup-time { font-family: var(--font-head); font-weight: 500; font-size: 12px; color: var(--text-2); }
 .cd-sup-amt { flex: none; display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-head); font-weight: 700; font-size: 14.5px; color: var(--ink); }
 .cd-sup-amt i { display: inline-flex; color: var(--fresh-green); }
 .cd-sup-amt i svg { width: 15px; height: 15px; }
@@ -2676,6 +2743,9 @@ i.serif, .serif-accent {
 
 /* desktop: interactive expanding showcase — one card highlighted at a time */
 @media (min-width: 861px) {
+  /* desktop only: drop the background video, keep the plain site (cream) background */
+  .cd-more { background: var(--cream-base); }
+  .cd-more-video, .cd-more::before { display: none; }
   .cd-more .wrap { max-width: 1240px; }
   .cd-show { overflow: visible; gap: 16px; height: clamp(360px, 33vw, 440px); padding: 2px; }
   .cd-show-card { flex: 1 1 0; max-width: none; min-width: 0; aspect-ratio: auto; cursor: pointer; box-shadow: var(--sh-sm); transition: flex-grow .55s var(--ease), box-shadow .45s var(--ease); }
@@ -3065,12 +3135,17 @@ i.serif, .serif-accent {
    HOW IT WORKS — interactive donation-journey walkthrough
    ===================================================================== */
 /* soft-sand base graded toward the brand greens, with slow drifting glows */
+/* default / mobile: soft gradient background (no video) */
 .nh-how { position: relative; overflow: hidden; background: linear-gradient(162deg, var(--soft-sand) 0%, #E4EEDB 46%, #DBE8D1 100%); }
-.nh-how::before, .nh-how::after { content: ""; position: absolute; top: 50%; left: 50%; width: min(72vw, 580px); aspect-ratio: 1; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(66px); will-change: transform; }
-.nh-how::before { background: radial-gradient(circle, rgba(79,175,143,.46), rgba(79,175,143,0) 70%); animation: hiw-glowA 12s ease-in-out infinite; }
-.nh-how::after { background: radial-gradient(circle, rgba(169,214,161,.52), rgba(169,214,161,0) 70%); animation: hiw-glowB 15s ease-in-out infinite; }
-.nh-how > .wrap { position: relative; z-index: 1; }
-.nh-how-video { display: none; }
+.nh-how-video { display: none; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; filter: blur(3px) brightness(1.05) saturate(.97); }
+.nh-how::before { display: none; }
+.nh-how::after { display: none; content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(250,248,241,.82) 0%, rgba(250,248,241,.58) 26%, rgba(250,248,241,.40) 52%, rgba(250,248,241,.6) 80%, rgba(250,248,241,1) 100%); }
+.nh-how > .wrap { position: relative; z-index: 2; }
+/* DESKTOP ONLY: graminha grass video background + cream veil */
+@media (min-width: 861px) {
+  .nh-how-video, .nh-how::after { display: block; }
+}
 @keyframes hiw-glowA {
   0%   { transform: translate(-98%, -86%) scale(1); }
   25%  { transform: translate(6%, -64%) scale(1.16); }
@@ -3086,22 +3161,9 @@ i.serif, .serif-accent {
   100% { transform: translate(8%, -2%) scale(1.06); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .nh-how::before { animation: none; transform: translate(-90%, -70%); }
-  .nh-how::after { animation: none; transform: translate(0%, -10%); }
+  .nh-how::after { transform: none; animation: none; }
 }
 
-/* ---- MOBILE: grass video as the section background (desktop keeps the gradient+glows) ---- */
-@media (max-width: 860px) {
-  .nh-how-video { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; filter: blur(2px) brightness(1.04) saturate(.97); }
-  .nh-how::before { display: none; }
-  /* soft frosted cream veil so the video stays pretty but never competes with the copy */
-  .nh-how::after {
-    inset: 0; top: 0; left: 0; width: auto; height: auto; aspect-ratio: auto;
-    border-radius: 0; filter: none; animation: none !important; transform: none !important; z-index: 1;
-    background: linear-gradient(180deg, rgba(250,248,241,.82) 0%, rgba(250,248,241,.56) 24%, rgba(250,248,241,.34) 50%, rgba(250,248,241,.6) 80%, rgba(250,248,241,1) 100%);
-  }
-  .nh-how > .wrap { z-index: 2; }
-}
 
 /* ---- stage: intro in flow, demo overlaid; height animates between them ---- */
 .hiw-stage { position: relative; transition: min-height .6s var(--ease); }
