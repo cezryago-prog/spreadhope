@@ -526,7 +526,7 @@
       status: param("status") || "any",
       sort: param("sort") || "recent",
       page: 1,
-      perPage: 4,
+      perPage: 6,
     };
     if (searchInput) searchInput.value = state.q;
 
@@ -735,9 +735,8 @@
       // full-bleed carousel that intersperses an info "card" slide after every pair
       const isDesk = matchMedia("(min-width: 861px)").matches;
       const heroSlides = [];
-      gallery.forEach((src, i) => {
+      gallery.forEach((src) => {
         heroSlides.push({ type: "photo", src });
-        if (!isDesk && (i + 1) % 2 === 0) heroSlides.push({ type: "card" });
       });
       const story = [].concat(c.story.the_story || [], c.story.why || [], c.story.how || [], c.story.note || []);
       const allSup = allSupporters(c);
@@ -776,7 +775,7 @@
             <img class="cd-hero-img" src="${s.src}" alt="${esc(c.title)}" loading="eager" decoding="async" onerror="this.onerror=null;this.src='assets/img/hero.png'">
           </div>`).join("")}
         </div>
-        <span class="cd-verified">${c.verified ? I.checkBadge : I.shield}${esc(c.organizer.name)}</span>
+        <span class="cd-verified"><img class="cd-verified-av" src="${c.organizer.avatar}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'">${esc(c.organizer.name)}</span>
         <div class="cd-hero-titlebar"><span class="cd-hero-cat2">${esc(c.category)}</span><div class="cd-hero-h1">${esc(c.title)}</div></div>
         ${heroSlides.length > 1 ? `<div class="cd-hero-dots">${heroSlides.map((g, i) => `<button class="${i === 0 ? "on" : ""}" data-i="${i}" aria-label="View slide ${i + 1}"></button>`).join("")}</div>` : ""}
         </div><!-- /cd-hero-media -->
@@ -813,44 +812,42 @@
         <div class="cd-inner">
 
           <div class="cd-cols">
-            <div class="cd-main">
 
-              <!-- 6. story -->
-              <section class="cd-block cd-story">
-                <h2>Campaign story</h2>
-                <div class="cd-story-body collapsed" id="storyCollapse">${paras(story)}</div>
-                <button class="cd-readmore" id="storyToggle">Read more</button>
-              </section>
+            <!-- 6. story (desktop: left column) -->
+            <section class="cd-block cd-story">
+              <h2>Campaign story</h2>
+              <div class="cd-story-body collapsed" id="storyCollapse">${paras(story)}</div>
+              <button class="cd-readmore" id="storyToggle">Read more</button>
+            </section>
 
-              <!-- 7. organizer -->
-              <section class="cd-organizer">
-                <div class="cd-org-head">
-                  <img class="cd-org-av" src="${c.organizer.avatar}" alt="${esc(c.organizer.name)}" onerror="this.style.visibility='hidden'">
-                  <div class="cd-org-info">
-                    <div class="cd-org-lbl">Organized by</div>
-                    <div class="cd-org-name">${esc(c.organizer.name)} ${c.verified ? `<i class="cd-org-vf" title="Verified">${I.checkBadge}</i>` : ""}</div>
-                    <div class="cd-org-rel">${esc(c.organizer.relation || c.location)}</div>
-                  </div>
+            <!-- 7. organizer (desktop: right column, aligned with story) -->
+            <section class="cd-organizer">
+              <div class="cd-org-head">
+                <img class="cd-org-av" src="${c.organizer.avatar}" alt="${esc(c.organizer.name)}" onerror="this.style.visibility='hidden'">
+                <div class="cd-org-info">
+                  <div class="cd-org-lbl">Organized by</div>
+                  <div class="cd-org-name">${esc(c.organizer.name)} ${c.verified ? `<i class="cd-org-vf" title="Verified">${I.checkBadge}</i>` : ""}</div>
+                  <div class="cd-org-rel">${esc(c.organizer.relation || c.location)}</div>
                 </div>
-                <p class="cd-org-trust">${I.shield}<span>All donations go directly toward this campaign's stated purpose.</span></p>
-              </section>
+              </div>
+              <p class="cd-org-trust">${I.shield}<span>All donations go directly toward this campaign's stated purpose.</span></p>
+            </section>
 
-              <!-- 9. supporters -->
-              <section class="cd-block">
-                <div class="cd-block-head"><h2 id="supTitle">Recent supporters</h2><button class="cd-seeall" id="supToggle">Top supporters</button></div>
-                <div class="cd-supporters">
-                  <div id="cdSupRows">${recentSupporters.map(supRow).join("")}</div>
-                  <button class="cd-sup-seeall" id="supSeeAll">See all supporters</button>
-                </div>
-              </section>
+            <!-- 9. supporters (full width below) -->
+            <section class="cd-block cd-supporters-sec">
+              <div class="cd-block-head"><h2 id="supTitle">Recent supporters</h2><button class="cd-seeall" id="supToggle">Top supporters</button></div>
+              <div class="cd-supporters">
+                <div id="cdSupRows">${recentSupporters.map(supRow).join("")}</div>
+                <button class="cd-sup-seeall" id="supSeeAll">See all supporters</button>
+              </div>
+            </section>
 
-              <!-- 10. words of support -->
-              ${messages.length ? `<section class="cd-block">
-                <h2>Words of support</h2>
-                <div class="cd-words hscroll">${messages.map((d) => `<div class="cd-word"><div class="cd-word-msg">“${esc(d.message)}”</div><div class="cd-word-by">${I.heart}<span>${esc(d.name)}</span></div></div>`).join("")}</div>
-              </section>` : ""}
+            <!-- 10. words of support — floating speech bubbles (full width below) -->
+            ${messages.length ? `<section class="cd-block cd-words-sec">
+              <div class="cd-block-head"><h2>Words of support</h2>${messages.length > 2 ? `<button class="cd-seeall" id="wordsSeeAll">View all</button>` : ""}</div>
+              <div class="cd-words">${messages.map((d, i) => `<div class="cd-word" style="--i:${i}"><div class="cd-word-msg">${esc(d.message)}</div><div class="cd-word-by">${I.heart}<span>${esc(d.name)}</span></div></div>`).join("")}</div>
+            </section>` : ""}
 
-            </div>
           </div>
         </div>
       </div>
@@ -1011,21 +1008,22 @@
         });
       })();
 
-      // words of support: auto-advance every 3s, loop back to start
-      (() => {
-        const row = qs(".cd-words");
-        if (!row || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-        let paused = false;
-        ["pointerdown", "touchstart", "wheel"].forEach((ev) => row.addEventListener(ev, () => { paused = true; }, { passive: true }));
-        setInterval(() => {
-          if (paused) return;
-          const card = row.querySelector(".cd-word");
-          const gap = parseFloat(getComputedStyle(row).columnGap || getComputedStyle(row).gap) || 12;
-          const step = card ? card.getBoundingClientRect().width + gap : row.clientWidth;
-          if (row.scrollLeft + row.clientWidth >= row.scrollWidth - 4) row.scrollTo({ left: 0, behavior: "smooth" });
-          else row.scrollBy({ left: step, behavior: "smooth" });
-        }, 3000);
-      })();
+      // words of support: "View all" → modal listing every message
+      qs("#wordsSeeAll")?.addEventListener("click", () => {
+        const m = document.createElement("div");
+        m.className = "sup-modal-backdrop";
+        m.innerHTML = `<div class="sup-modal" role="dialog" aria-modal="true" aria-label="Words of support">
+          <div class="sup-modal-head"><h3>Words of support</h3><span class="sup-modal-meta">${messages.length} messages</span><button class="icon-btn" id="wordsModalClose" aria-label="Close">${I.close}</button></div>
+          <div class="sup-modal-list cd-words-modal">${messages.map((d) => `<div class="cd-word"><div class="cd-word-msg">“${esc(d.message)}”</div><div class="cd-word-by">${I.heart}<span>${esc(d.name)}</span></div></div>`).join("")}</div></div>`;
+        document.body.appendChild(m);
+        window.CW.lockScroll(true);
+        requestAnimationFrame(() => m.classList.add("open"));
+        const close = () => { m.classList.remove("open"); window.CW.lockScroll(false); setTimeout(() => m.remove(), 320); };
+        m.addEventListener("click", (e) => { if (e.target === m) close(); });
+        qs("#wordsModalClose", m).addEventListener("click", close);
+        const onEsc = (e) => { if (e.key === "Escape") { close(); document.removeEventListener("keydown", onEsc); } };
+        document.addEventListener("keydown", onEsc);
+      });
 
       // recommended — interactive showcase (one card highlighted at a time)
       const moreSlot = qs("#cdMoreSlot");
@@ -1438,8 +1436,8 @@
             <p class="donate-sub">One last look, then you're done.</p>
             <div class="dn-review" id="dnReview"></div>
             <button class="btn btn-primary btn-lg btn-block" id="dSubmit">Donate <span id="dAmtLabel"></span></button>
-            <div class="dn-secure">${I.shield}<span>Secure &amp; protected — funds go directly to ${esc(c.organizer.name)}.</span></div>
             <button class="btn btn-ghost btn-block" id="dBack2" style="margin-top:12px">Back</button>
+            <div class="dn-secure">${I.shield}<span>Secure &amp; protected — funds go directly to ${esc(c.organizer.name)}.</span></div>
           </section>
         </div>
 
