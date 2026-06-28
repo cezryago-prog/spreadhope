@@ -86,6 +86,9 @@
         dotsWrap.innerHTML = slides.map((_, i) => `<button class="${i === 0 ? "on" : ""}" aria-label="Story ${i + 1}"></button>`).join("");
         qsa("button", dotsWrap).forEach((d, i) => d.addEventListener("click", () => go(i)));
       }
+      // prev/next arrows (desktop)
+      qs("#sohPrev")?.addEventListener("click", () => go(active - 1));
+      qs("#sohNext")?.addEventListener("click", () => go(active + 1));
       // swipe
       let sx = null;
       track.addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; stop(); }, { passive: true });
@@ -1366,115 +1369,119 @@
 
     // ghost mirroring the checkout: steps, amount grid, fields, CTA + summary card
     function skeletonDonate() {
-      const ln = (w, h) => `<div class="skel sk-text" style="width:${w};${h ? "height:" + h + ";" : ""}"></div>`;
-      return `<div class="ghost">
-        <div class="skel sk-text" style="width:160px;height:14px;margin-bottom:18px"></div>
-        <div class="gn-wrap">
-          <div>
-            <div class="gd-row" style="gap:18px;margin-bottom:22px">
-              <div class="skel sk-pill" style="width:90px"></div>
-              <div class="skel sk-pill" style="width:110px"></div>
-              <div class="skel sk-pill" style="width:90px"></div>
-            </div>
-            <div class="skel sk-title" style="width:60%;height:28px;margin-bottom:10px"></div>
-            ${ln("85%", "14px")}
-            <div class="gn-amounts" style="margin:20px 0">
-              <div class="skel gn-amt"></div><div class="skel gn-amt"></div><div class="skel gn-amt"></div>
-              <div class="skel gn-amt"></div><div class="skel gn-amt"></div><div class="skel gn-amt"></div>
-            </div>
-            <div class="skel sk-btn" style="width:100%;margin-bottom:14px"></div>
-            <div class="skel sk-btn" style="width:100%;height:52px"></div>
-          </div>
-          <div class="gn-summary">
-            <div class="skel sk-text" style="width:50%;height:14px"></div>
-            <div class="gd-row" style="align-items:center">
-              <div class="skel sk-img" style="width:64px;height:64px"></div>
-              <div style="flex:1;display:flex;flex-direction:column;gap:8px">${ln("80%")}${ln("55%")}</div>
-            </div>
-            <div class="skel sk-bar" style="width:100%"></div>
-            ${ln("70%")}
-          </div>
-        </div>
+      const amt = `<div class="skel" style="height:58px;border-radius:var(--r-lg)"></div>`;
+      return `<div class="ghost dn2">
+        <div class="skel sk-text" style="width:150px;height:14px;margin-bottom:18px"></div>
+        <div class="skel" style="width:100%;aspect-ratio:16/10;border-radius:var(--r-xl)"></div>
+        <div class="skel" style="width:100%;height:108px;border-radius:var(--r-xl);margin-top:18px"></div>
+        <div class="skel sk-title" style="width:62%;height:24px;margin:28px 0 14px"></div>
+        <div class="dn2-amounts">${amt}${amt}${amt}${amt}${amt}${amt}</div>
+        <div class="skel" style="width:100%;height:58px;border-radius:var(--r-pill);margin-top:22px"></div>
       </div>`;
     }
 
     function renderDonate(c) {
       const pct = D.pct(c);
-      const amounts = [25, 50, 100, 250, 500, 1000];
+      const amounts = [25, 50, 100, 300, 500, 1000];
+      const suggested = 100;
+      const lockIc = '<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>';
+      const mailIc = '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="m4 8 8 5 8-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       root.innerHTML = `
-      <div class="breadcrumb"><a href="campaign.html?id=${c.id}">Back to campaign</a>${I.chevron}<span>Donate</span></div>
-      <div class="donate-grid">
-        <div class="donate-form">
-          <div class="dn-steps" id="dnSteps">
-            <span class="dn-step current" data-s="0"><i>1</i>Amount</span>
-            <span class="dn-line"></span>
-            <span class="dn-step" data-s="1"><i>2</i>Your support</span>
-            <span class="dn-line"></span>
-            <span class="dn-step" data-s="2"><i>3</i>Complete</span>
-          </div>
-
-          <section class="dn-pane active" data-pane="0">
-            <h1>Choose your support</h1>
-            <p class="donate-sub">Pick an amount that goes directly toward ${esc(c.organizer.name)}'s goal.</p>
-            <div class="amount-grid">
-              ${amounts.map((a) => `<button type="button" class="amount-opt" data-amt="${a}">${money(a)}</button>`).join("")}
-            </div>
-            <button class="btn btn-primary btn-lg btn-block" id="dNext0">Continue ${I.arrow}</button>
-          </section>
-
-          <section class="dn-pane" data-pane="1">
-            <h1>Add your support</h1>
-            <p class="donate-sub">Tell ${esc(c.organizer.name)} who's behind this gift. Your name is required even for anonymous donations.</p>
-            <div class="dn-field"><label for="dName">Your name <span class="hint req">— required</span></label><input type="text" id="dName" placeholder="Jane Doe" required></div>
-            <div class="dn-field"><label for="dMsg">Words of support <span class="hint">— optional</span></label><textarea id="dMsg" placeholder="Sending strength and hope…"></textarea></div>
-            <label class="anon-row"><input type="checkbox" id="dAnon"> Donate anonymously</label>
-            <div class="dn-nav"><button class="btn btn-ghost" id="dBack1">Back</button><button class="btn btn-primary" id="dNext1">Review ${I.arrow}</button></div>
-          </section>
-
-          <section class="dn-pane" data-pane="2">
-            <h1>Complete your donation</h1>
-            <p class="donate-sub">One last look, then you're done.</p>
-            <div class="dn-review" id="dnReview"></div>
-            <button class="btn btn-primary btn-lg btn-block" id="dSubmit">Donate <span id="dAmtLabel"></span></button>
-            <button class="btn btn-ghost btn-block" id="dBack2" style="margin-top:12px">Back</button>
-            <div class="dn-secure">${I.shield}<span>Secure &amp; protected — funds go directly to ${esc(c.organizer.name)}.</span></div>
-          </section>
+      <div class="dn2">
+        <a class="dn2-back" id="dnBack" href="campaign.html?id=${c.id}"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="dnBackTxt">Back to campaign</span></a>
+        <div class="dn-steps" id="dnSteps">
+          <span class="dn-step current" data-s="0"><i>1</i>Your support</span>
+          <span class="dn-line"></span>
+          <span class="dn-step" data-s="1"><i>2</i>Amount</span>
+          <span class="dn-line"></span>
+          <span class="dn-step" data-s="2"><i>3</i>Complete</span>
         </div>
 
-        <aside class="donate-summary">
-          <div class="ds-card">
-            <div class="ds-img"><img src="${c.cover}" alt="${esc(c.title)}" onerror="this.src='${D.fallbackImg(c.category)}'"></div>
-            <div class="ds-body">
-              <div class="ds-eyebrow">You're supporting</div>
-              <div class="ds-title">${esc(c.title)}</div>
-              <div class="careflow"><div class="careflow-track"><div class="careflow-fill" style="width:${pct}%"></div></div></div>
-              <div class="ds-meta"><strong>${money(c.raised)}</strong> raised of ${money(c.goal)} · <span>${pct}%</span></div>
-            </div>
+        <section class="dn-pane" data-pane="1">
+        <div class="dn2-hero">
+          <img src="${c.cover}" alt="${esc(c.title)}" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'">
+          <div class="dn2-hero-cap">
+            <h1>${esc(c.title)}</h1>
+            <p>by ${esc(c.organizer.name)}${c.location ? ` • ${esc(c.location)}` : ""}</p>
           </div>
-        </aside>
+        </div>
+
+        <div class="dn2-raised">
+          <div class="dn2-raised-info">
+            <span class="dn2-lbl">Raised so far</span>
+            <b class="dn2-amt">${money(c.raised)}</b>
+            <span class="dn2-goal">of ${money(c.goal)} goal</span>
+          </div>
+          <div class="dn2-pct"><b>${pct}<i>%</i></b><span>Funded</span></div>
+          <div class="careflow dn2-bar"><div class="careflow-track"><div class="careflow-fill" style="width:${pct}%"></div></div></div>
+        </div>
+
+        <h2 class="dn2-h">Choose your donation amount</h2>
+        <div class="dn2-amounts">
+          ${amounts.map((a) => `<button type="button" class="dn2-opt${a === suggested ? " dn2-suggested" : ""}" data-amt="${a}">${a === suggested ? `<span class="dn2-sug-badge">Suggested</span>` : ""}${money(a)}</button>`).join("")}
+        </div>
+
+        <button class="dn2-donate is-empty" id="dNext0" type="button"><span id="dBtnLabel">Choose an amount</span><span class="dn2-donate-arrow">${I.arrow}</span></button>
+
+        <p class="dn2-secure">${I.shield}<span>Secure donation • Privacy protected</span></p>
+
+        <div class="dn2-clarity">
+          <div class="dn2-clarity-head">
+            <span class="dn2-clarity-ic">${I.shield}</span>
+            <div class="dn2-clarity-tx"><b>Giving with clarity</b><p>Your donation is processed securely and connected to this campaign's goal.</p></div>
+          </div>
+          <ul class="dn2-trust">
+            <li>${lockIc}<span>Secure donation flow</span></li>
+            <li>${I.heart}<span>Your support goes toward this campaign</span></li>
+            <li>${mailIc}<span>You'll receive a confirmation after donating</span></li>
+          </ul>
+        </div>
+        </section>
+
+        <section class="dn-pane active" data-pane="0">
+          <h2 class="dn2-h" style="margin-top:4px">Add your support</h2>
+          <p class="donate-sub">Tell ${esc(c.organizer.name)} who's behind this gift. Your name is required even for anonymous donations.</p>
+          <div class="dn-field"><label for="dName">Your name <span class="hint req">— required</span></label><input type="text" id="dName" placeholder="Jane Doe" required></div>
+          <div class="dn-field"><label for="dMsg">Words of support <span class="hint">— optional</span></label><textarea id="dMsg" placeholder="Sending strength and hope…"></textarea></div>
+          <label class="anon-row"><input type="checkbox" id="dAnon"> Donate anonymously</label>
+          <button class="btn btn-primary btn-lg btn-block" id="dNext1">Continue ${I.arrow}</button>
+        </section>
+
+        <section class="dn-pane" data-pane="2">
+          <h2 class="dn2-h" style="margin-top:4px">Complete your donation</h2>
+          <p class="donate-sub">One last look, then you're done.</p>
+          <div class="dn-review" id="dnReview"></div>
+          <button class="btn btn-primary btn-lg btn-block" id="dSubmit">Donate <span id="dAmtLabel"></span></button>
+          <div class="dn-secure">${I.shield}<span>Secure &amp; protected — funds go directly to ${esc(c.organizer.name)}.</span></div>
+        </section>
       </div>`;
 
-      let amount = 0, step = 0;
+      let amount = 0;
       const panes = qsa(".dn-pane");
       const steps = qsa("#dnSteps .dn-step");
+      const backLink = qs("#dnBack");
       const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
       const go = (s) => {
-        step = s;
         panes.forEach((p) => p.classList.toggle("active", +p.dataset.pane === s));
         steps.forEach((st) => { const i = +st.dataset.s; st.classList.toggle("current", i === s); st.classList.toggle("done", i < s); });
+        qs("#dnBackTxt").textContent = s === 0 ? "Back to campaign" : "Back";
+        backLink.dataset.prev = s === 0 ? "" : String(s - 1);
         window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
       };
+      backLink.addEventListener("click", (e) => { if (backLink.dataset.prev) { e.preventDefault(); go(+backLink.dataset.prev); } });
 
-      const setAmount = (v) => { amount = v; qsa(".amount-opt").forEach((x) => x.classList.toggle("sel", +x.dataset.amt === v)); };
-      qsa(".amount-opt").forEach((b) => b.addEventListener("click", () => { setAmount(+b.dataset.amt); }));
+      const setAmount = (v) => { amount = v; qsa(".dn2-opt").forEach((x) => x.classList.toggle("sel", +x.dataset.amt === v)); const btn = qs("#dNext0"); btn.classList.remove("is-empty"); qs("#dBtnLabel").textContent = "Continue · " + money(v); };
+      qsa(".dn2-opt").forEach((b) => b.addEventListener("click", () => setAmount(+b.dataset.amt)));
 
-      qs("#dNext0").addEventListener("click", () => { if (!amount || amount < 1) { toast("Please choose an amount", "err"); return; } go(1); });
+      // step 0 = Your support (name) → step 1 = Amount → step 2 = Complete
       qs("#dNext1").addEventListener("click", () => {
         if (!qs("#dName").value.trim()) { toast("Please enter your name", "err"); qs("#dName").focus(); return; }
+        go(1);
+      });
+      qs("#dNext0").addEventListener("click", () => {
+        if (!amount || amount < 1) { toast("Please choose an amount", "err"); return; }
         buildReview(); go(2);
       });
-      qs("#dBack1").addEventListener("click", () => go(0));
-      qs("#dBack2").addEventListener("click", () => go(1));
 
       function buildReview() {
         const name = qs("#dName").value.trim();
@@ -1489,7 +1496,7 @@
       }
 
       qs("#dSubmit").addEventListener("click", () => {
-        if (!amount || amount < 1) { toast("Please choose an amount to donate", "err"); go(0); return; }
+        if (!amount || amount < 1) { toast("Please choose an amount to donate", "err"); go(1); return; }
         const btn = qs("#dSubmit");
         btn.disabled = true;
         const dest = "thank-you.html?id=" + c.id + "&amt=" + amount + "&hope=1";

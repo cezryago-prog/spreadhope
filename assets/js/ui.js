@@ -72,17 +72,21 @@
         <h3 class="ccard-title">${esc(c.title)}</h3>
       </div>
       <div class="ccard-body">
+        <h3 class="ccard-title-m">${esc(c.title)}</h3>
         <div class="careflow">
+          <div class="ccard-amt"><b>${money(c.raised)}</b> <span>of ${money(c.goal)}</span></div>
           <div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div>
           <div class="careflow-stats">
             <div class="raised">${money(c.raised)} <span>of ${money(c.goal)}</span></div>
             <div class="pct">${p}%</div>
           </div>
+          <div class="ccard-funded">${p}% funded</div>
         </div>
         <div class="ccard-foot">
           <span class="ccard-donors">${I.users}${c.donors} supporters</span>
           <span class="ccard-go">Donate ${I.arrow}</span>
         </div>
+        <a class="ccard-support" href="${href}">Support this story ${I.arrow}</a>
       </div>
     </article>`;
   }
