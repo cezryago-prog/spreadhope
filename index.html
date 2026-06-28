@@ -10,15 +10,26 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="image" href="assets/img/hero.png">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/main.css?v=226">
+<link rel="stylesheet" href="assets/css/main.css?v=240">
 </head>
 <body data-page="home">
 
 <!-- ============ HERO ============ -->
 <section class="nh-hero">
-  <div class="nh-hero-mosaic" aria-hidden="true"><div class="nh-hero-mosaic-grid" id="heroMosaic"></div></div>
+  <div class="nh-hero-mosaic" aria-hidden="true"><video class="nh-hero-video" autoplay loop muted playsinline preload="none"><source src="assets/video/hero-nova.mp4" type="video/mp4"></video><div class="nh-hero-mosaic-grid" id="heroMosaic"></div></div>
   <div class="nh-hero-deco" aria-hidden="true">
     <svg class="nh-deco-path" viewBox="0 0 460 300" preserveAspectRatio="none"><path d="M20 250 C 150 215 165 95 300 125 C 388 145 415 70 440 28" fill="none" stroke="#A9D6A1" stroke-width="2.5" stroke-dasharray="1 13" stroke-linecap="round"/></svg>
+  </div>
+  <div class="nh-leaves" aria-hidden="true">
+    <span class="nh-leaf" style="left:7%;width:22px;color:var(--sage-light);animation-duration:13s;animation-delay:-1s;--leaf-op:.5"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M27 5C12 6 5 15 4.3 24.6 4.1 27 5 28 5 28s8.8-.8 14.4-6.4C24.6 16.4 24.4 9 27 5Z"/><path d="M7 26C12 20 18 13 25 8" fill="none" stroke="rgba(250,248,241,.5)" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+    <span class="nh-leaf" style="left:20%;width:28px;color:var(--fresh-green);animation-duration:17s;animation-delay:-8s;--leaf-op:.45"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M27 5C12 6 5 15 4.3 24.6 4.1 27 5 28 5 28s8.8-.8 14.4-6.4C24.6 16.4 24.4 9 27 5Z"/><path d="M7 26C12 20 18 13 25 8" fill="none" stroke="rgba(250,248,241,.5)" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+    <span class="nh-leaf" style="left:34%;width:18px;color:var(--warm-sun);animation-duration:11s;animation-delay:-4s;--leaf-op:.55"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M27 5C12 6 5 15 4.3 24.6 4.1 27 5 28 5 28s8.8-.8 14.4-6.4C24.6 16.4 24.4 9 27 5Z"/><path d="M7 26C12 20 18 13 25 8" fill="none" stroke="rgba(250,248,241,.5)" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+    <span class="nh-leaf" style="left:48%;width:24px;color:var(--sage-light);animation-duration:15s;animation-delay:-12s;--leaf-op:.4"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M27 5C12 6 5 15 4.3 24.6 4.1 27 5 28 5 28s8.8-.8 14.4-6.4C24.6 16.4 24.4 9 27 5Z"/><path d="M7 26C12 20 18 13 25 8" fill="none" stroke="rgba(250,248,241,.5)" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+    <span class="nh-leaf" style="left:61%;width:20px;color:var(--fresh-green);animation-duration:13s;animation-delay:-6s;--leaf-op:.5"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M27 5C12 6 5 15 4.3 24.6 4.1 27 5 28 5 28s8.8-.8 14.4-6.4C24.6 16.4 24.4 9 27 5Z"/><path d="M7 26C12 20 18 13 25 8" fill="none" stroke="rgba(250,248,241,.5)" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+    <span class="nh-leaf" style="left:73%;width:30px;color:var(--warm-sun);animation-duration:18s;animation-delay:-2s;--leaf-op:.4"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M27 5C12 6 5 15 4.3 24.6 4.1 27 5 28 5 28s8.8-.8 14.4-6.4C24.6 16.4 24.4 9 27 5Z"/><path d="M7 26C12 20 18 13 25 8" fill="none" stroke="rgba(250,248,241,.5)" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+    <span class="nh-leaf" style="left:85%;width:22px;color:var(--sage-light);animation-duration:14s;animation-delay:-10s;--leaf-op:.5"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M27 5C12 6 5 15 4.3 24.6 4.1 27 5 28 5 28s8.8-.8 14.4-6.4C24.6 16.4 24.4 9 27 5Z"/><path d="M7 26C12 20 18 13 25 8" fill="none" stroke="rgba(250,248,241,.5)" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+    <span class="nh-leaf" style="left:92%;width:16px;color:var(--amber-deep);animation-duration:12s;animation-delay:-5s;--leaf-op:.4"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M27 5C12 6 5 15 4.3 24.6 4.1 27 5 28 5 28s8.8-.8 14.4-6.4C24.6 16.4 24.4 9 27 5Z"/><path d="M7 26C12 20 18 13 25 8" fill="none" stroke="rgba(250,248,241,.5)" stroke-width="1.3" stroke-linecap="round"/></svg></span>
+    <span class="nh-leaf" style="left:13%;width:16px;color:var(--deep-meadow);animation-duration:16s;animation-delay:-14s;--leaf-op:.28"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M27 5C12 6 5 15 4.3 24.6 4.1 27 5 28 5 28s8.8-.8 14.4-6.4C24.6 16.4 24.4 9 27 5Z"/><path d="M7 26C12 20 18 13 25 8" fill="none" stroke="rgba(250,248,241,.5)" stroke-width="1.3" stroke-linecap="round"/></svg></span>
   </div>
   <div class="wrap nh-hero-grid">
     <div class="nh-hero-copy reveal">
@@ -194,6 +205,19 @@
   </div>
 </section>
 
+<!-- ============ LIVE SUPPORT — happening now timeline ============ -->
+<section class="nh-section ln-section" id="liveNow">
+  <div class="wrap ln-wrap">
+    <div class="ln-intro reveal">
+      <span class="nh-eyebrow">Live support</span>
+      <h2>Happening now</h2>
+      <p>Contributions, messages and progress landing across Spread Hope campaigns — see the community show up, moment by moment.</p>
+      <div class="ln-pulse"><span class="ln-dot" aria-hidden="true"></span> Updating live</div>
+    </div>
+    <div class="ln-feed" id="lnFeed" aria-live="polite" aria-label="Recent support activity"></div>
+  </div>
+</section>
+
 <!-- ============ FINAL CTA ============ -->
 <section class="nh-section nh-final">
   <video class="nh-final-video" autoplay loop muted playsinline preload="metadata" poster="assets/img/be-reason-bg-desktop.png" aria-hidden="true">
@@ -206,8 +230,8 @@
   </div>
 </section>
 
-<script src="assets/js/data.js?v=226"></script>
-<script src="assets/js/ui.js?v=226"></script>
-<script src="assets/js/app.js?v=226"></script>
+<script src="assets/js/data.js?v=240"></script>
+<script src="assets/js/ui.js?v=240"></script>
+<script src="assets/js/app.js?v=240"></script>
 </body>
 </html>

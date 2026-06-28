@@ -140,8 +140,31 @@
 
   function renderHeader() {
     const active = document.body.dataset.page || "";
-    const navLinks = NAV.map((n) => `<a href="${n.href}" class="${active === n.key ? "active" : ""}">${n.label}</a>`).join("");
-    const drawerLinks = NAV.map((n) => `<a href="${n.href}" class="${active === n.key ? "active" : ""}">${n.label} ${I.chevron}</a>`).join("");
+    const howActive = active === "how" || active === "howdonate" || active === "howcreate";
+    const navLinks = NAV.map((n) => {
+      if (n.key === "how") {
+        return `<div class="nav-dd" data-navdd>
+          <button type="button" class="nav-dd-btn${howActive ? " active" : ""}" aria-expanded="false" aria-haspopup="true">How it works ${I.chevron}</button>
+          <div class="nav-dd-menu">
+            <a href="how-to-donate.html"><b>For donors</b><span>How to give, step by step</span></a>
+            <a href="how-to-create.html"><b>For organizers</b><span>Create &amp; manage a campaign</span></a>
+          </div>
+        </div>`;
+      }
+      return `<a href="${n.href}" class="${active === n.key ? "active" : ""}">${n.label}</a>`;
+    }).join("");
+    const drawerLinks = NAV.map((n) => {
+      if (n.key === "how") {
+        return `<div class="drawer-acc" data-acc>
+          <button type="button" class="drawer-acc-btn${howActive ? " active" : ""}" aria-expanded="false">How it works ${I.chevron}</button>
+          <div class="drawer-acc-panel">
+            <a href="how-to-donate.html"${active === "howdonate" ? ' class="active"' : ""}><b>For donors</b><span>How to give, step by step</span></a>
+            <a href="how-to-create.html"${active === "howcreate" ? ' class="active"' : ""}><b>For organizers</b><span>Create &amp; manage a campaign</span></a>
+          </div>
+        </div>`;
+      }
+      return `<a href="${n.href}" class="${active === n.key ? "active" : ""}">${n.label} ${I.chevron}</a>`;
+    }).join("");
     const brand = `<a class="brand" href="index.html" aria-label="Spread Hope home"><img class="brand-headerlogo" src="assets/img/logo-name.png" alt="Spread Hope" width="200" height="63"></a>`;
 
     const header = document.createElement("header");
@@ -214,6 +237,23 @@
     qs("#menuOpen").addEventListener("click", openDrawer);
     qs("#menuClose").addEventListener("click", closeDrawer);
     backdrop.addEventListener("click", closeDrawer);
+
+    // "How it works" — top-nav dropdown + drawer accordion (open the two paths instead of redirecting)
+    qsa(".nav-dd-btn").forEach((b) => b.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const dd = b.closest(".nav-dd");
+      const open = dd.classList.toggle("open");
+      b.setAttribute("aria-expanded", open ? "true" : "false");
+    }));
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".nav-dd")) return;
+      qsa(".nav-dd.open").forEach((d) => { d.classList.remove("open"); d.querySelector(".nav-dd-btn")?.setAttribute("aria-expanded", "false"); });
+    });
+    qsa(".drawer-acc-btn").forEach((b) => b.addEventListener("click", () => {
+      const acc = b.closest(".drawer-acc");
+      const open = acc.classList.toggle("open");
+      b.setAttribute("aria-expanded", open ? "true" : "false");
+    }));
 
     // search
     const overlay = qs("#searchOverlay");

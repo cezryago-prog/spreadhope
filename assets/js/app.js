@@ -113,14 +113,96 @@
         if ("IntersectionObserver" in window) new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) tryPlay(); else v.pause(); }), { threshold: 0.12 }).observe(v);
         else tryPlay();
       };
+      playInView(qs(".nh-hero-video"));    // mobile hero backdrop video
       playInView(qs(".nh-final-video"));   // final CTA (both viewports)
       const howV = qs(".nh-how-video");    // how-it-works grass bg — runs a touch slower than normal
       if (howV) howV.defaultPlaybackRate = howV.playbackRate = 0.6;
       playInView(howV);
     }
 
+    initLiveNow();
     observeNew();
   };
+
+  /* =================================================================
+     LIVE SUPPORT — "happening now" activity timeline (mock, brand data)
+     ================================================================= */
+  function initLiveNow() {
+    const feed = qs("#lnFeed");
+    if (!feed) return;
+    const reduceM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const camps = D.all().slice(0, 3);
+    const names = ["Sofia M.", "Daniel R.", "Amara K.", "Liam T.", "Priya N."];
+    const heartNames = ["Eli", "Ana", "Tom", "Mia", "Sol", "Bea", "Ravi"];
+    const msgs = [
+      "Sending strength — you've got this.",
+      "Every step counts. Rooting for you all the way!",
+      "So glad to help make this happen.",
+      "Hope this brings you a little closer to the goal.",
+      "Thinking of you and your family today.",
+    ];
+    const times = ["Just now", "1 min ago", "4 min ago", "9 min ago", "16 min ago"];
+    const amts = [50, 25, 100, 150, 75];
+    const heartsArr = [128, 207, 311, 94, 256];
+    const acts = [
+      (a) => `contributed <b>${money(a)}</b> to`,
+      () => `sent support to`,
+      () => `just backed`,
+      (a) => `contributed <b>${money(a)}</b> to`,
+      () => `is cheering for`,
+    ];
+    const mini = (n) => `<span class="ln-mini-av">${initials(n)}</span>`;
+    feed.innerHTML = camps.map((c, i) => {
+      const p = D.pct(c);
+      const name = names[i % names.length];
+      const action = acts[i % acts.length](amts[i % amts.length]);
+      const miniAvs = [heartNames[i % heartNames.length], heartNames[(i + 2) % heartNames.length], heartNames[(i + 4) % heartNames.length]].map(mini).join("");
+      return `
+      <article class="ln-card reveal" data-delay="${i % 3}">
+        <div class="ln-card-top">
+          <span class="ln-av">${initials(name)}</span>
+          <div class="ln-card-meta">
+            <p class="ln-act"><b>${esc(name)}</b> ${action} <a href="campaign.html?id=${c.id}">${esc(c.title)}</a></p>
+            <span class="ln-time">${I.clock}<span>${times[i % times.length]}</span></span>
+          </div>
+          <button class="ln-like" type="button" aria-label="Like this activity" aria-pressed="false">${I.heart}</button>
+        </div>
+        <p class="ln-msg">${esc(msgs[i % msgs.length])}</p>
+        <a class="ln-camp" href="campaign.html?id=${c.id}">
+          <span class="ln-camp-img"><img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'"></span>
+          <span class="ln-camp-body">
+            <span class="ln-camp-cat">${esc(c.category)}</span>
+            <span class="ln-camp-title">${esc(c.title)}</span>
+            <span class="careflow"><span class="careflow-track"><span class="careflow-fill" style="width:${p}%"></span></span></span>
+            <span class="ln-camp-foot"><span class="ln-pct">${p}% funded</span><span class="ln-cta">View campaign ${I.arrow}</span></span>
+          </span>
+        </a>
+        <div class="ln-hearts">
+          <span class="ln-hearts-avs">${miniAvs}</span>
+          <span class="ln-hearts-tx"><b class="ln-hcount">${heartsArr[i % heartsArr.length]}</b> hearts received</span>
+          <span class="ln-hearts-ic">${I.heart}</span>
+        </div>
+      </article>`;
+    }).join("");
+    observeNew(feed);
+
+    qsa(".ln-like", feed).forEach((b) => b.addEventListener("click", (e) => {
+      e.preventDefault();
+      b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") === "true" ? "false" : "true");
+    }));
+
+    // gentle "live" feel — nudge one heart count at a time with a soft pop
+    if (!reduceM) {
+      const counts = qsa(".ln-hcount", feed);
+      let k = 0;
+      setInterval(() => {
+        if (document.hidden || !counts.length) return;
+        const el = counts[k++ % counts.length];
+        el.textContent = +el.textContent + 1;
+        el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump");
+      }, 4200);
+    }
+  }
 
   /* =================================================================
      HOW IT WORKS — interactive donation-journey walkthrough
@@ -1611,6 +1693,80 @@
       });
     });
   }
+
+  /* =================================================================
+     HOW-IT-WORKS demos — animated donor / organizer flows (mock UI)
+     ================================================================= */
+  function buildHowDemo(kind) {
+    const mount = qs("#hdMount");
+    if (!mount) return;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ck = '<svg viewBox="0 0 24 24" fill="none"><path d="m5 13 4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const hr = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 20s-7-4.6-9.3-9C1.3 8.4 2.6 5 6 5c2 0 3.2 1.2 4 2.4C10.8 6.2 12 5 14 5c3.4 0 4.7 3.4 3.3 6-2.3 4.4-9.3 9-9.3 9Z"/></svg>';
+    const mag = '<svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    const vf = '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="currentColor" opacity=".18"/><path d="m8.4 12 2.5 2.5 4.7-5.4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const lock = '<svg viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>';
+    const mail = '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="m4 8 8 5 8-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const chev = '<svg viewBox="0 0 24 24" fill="none"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    const cs = D.all();
+    const c1 = cs[0];
+    const cimg = (c) => `<img src="${c.cover}" alt="" loading="lazy" onerror="this.onerror=null;this.src='assets/img/hero.png'">`;
+    const flow = (pct, gw) => `<span class="careflow"><span class="careflow-track"><span class="careflow-fill${gw ? " gw" : ""}" style="${gw ? "--w:" + pct + "%" : "width:" + pct + "%"}"></span></span></span>`;
+    const card = (c, cls, cur) => `<a class="d-card${cls || ""}"><span class="d-cimg">${cimg(c)}<b class="m-tag">${esc(c.category)}</b><i class="m-mh">${hr}</i></span><span class="d-cb"><span class="d-ct">${esc(c.title)}</span>${flow(D.pct(c))}<span class="d-cn"><b>${money(c.raised)}</b> of ${money(c.goal)}</span></span>${cur || ""}</a>`;
+    let caps, scenes, url;
+    if (kind === "org") {
+      url = "spreadhope.org/start";
+      caps = ["Start a campaign", "Add a clear title", "Add image & story", "Set your goal & publish", "Track support roll in"];
+      scenes = [
+        `<div class="m-screen m-center"><div class="m-canvas"><span class="m-canvas-ic">+</span><span class="m-canvas-tx">New fundraiser</span></div><button class="btn btn-primary d-btn pulse" type="button">Create a campaign<span class="m-cursor"></span></button></div>`,
+        `<div class="m-screen m-split"><div class="m-form"><div class="m-flabel">Campaign title</div><div class="m-input active"><span class="m-typed">Send Jonas to study</span><span class="m-caret"></span></div><div class="m-flabel">Category</div><div class="m-input selin"><span>Education</span>${chev}</div></div><div class="m-prev"><span class="d-phero ph"></span><b class="m-ptag in">Education</b><i class="m-h1 in"></i><i class="m-p dim"></i></div></div>`,
+        `<div class="m-screen m-split"><div class="m-form"><div class="m-flabel">Cover image</div><div class="m-upload done">${ck}<span>cover.jpg added</span></div><div class="m-flabel">Your story</div><div class="m-input tall"><i class="ml"></i><i class="ml"></i><i class="ml w60"></i></div></div><div class="m-prev"><span class="d-phero appear">${cimg(c1)}</span><b class="m-ptag">Education</b><i class="m-h1"></i><i class="m-p in"></i><i class="m-p in d2 w60"></i></div></div>`,
+        `<div class="m-screen m-split"><div class="m-form"><div class="m-flabel">Funding goal</div><div class="m-input goal">$28,000</div><div class="m-reviewed">${ck}<span>Passed review</span></div><button class="m-cta pub" type="button">Publish campaign<span class="m-cursor"></span></button></div><div class="m-prev"><span class="d-phero">${cimg(c1)}</span><b class="m-ptag">Education</b><i class="m-h1"></i>${flow(8, true)}<div class="m-statusrow"><span class="m-status">● Live</span><span class="m-goaltx">$0 of $28,000</span></div></div></div>`,
+        `<div class="m-screen m-dash"><div class="m-dash-h"><span class="m-live">● Live</span><span>Your dashboard</span></div><div class="m-stats"><div class="m-stat"><b class="m-count" data-to="1250" data-pre="$">$0</b><span>raised</span></div><div class="m-stat"><b class="m-count" data-to="18">0</b><span>supporters</span></div><div class="m-stat"><b class="m-count" data-to="32">0</b><span>hearts</span></div></div>${flow(45, true)}<div class="m-feedlist"><div class="m-frow"><span class="m-fav">A</span><i class="m-frtx"></i><b class="m-fram">+$50</b></div><div class="m-frow"><span class="m-fav">M</span><i class="m-frtx w70"></i><b class="m-fram">+$25</b></div><div class="m-frow"><span class="m-fav">P</span><i class="m-frtx w50"></i><b class="m-fram">+$100</b></div></div><div class="m-floaters"><i>${hr}</i><i>${hr}</i><i>${hr}</i></div></div>`,
+      ];
+    } else {
+      url = "spreadhope.org";
+      caps = ["Browse campaigns", "Open the campaign", "Choose your amount", "Confirm securely", "See the impact grow"];
+      scenes = [
+        `<div class="m-screen d-browse"><div class="d-srch">${mag}<span>${esc(c1.category.toLowerCase())} near me</span></div><div class="d-cards">${card(cs[0])}${card(cs[1], " pick", '<span class="m-cursor"></span>')}${card(cs[2])}</div></div>`,
+        `<div class="m-screen d-camp"><span class="d-hero">${cimg(c1)}<b class="m-tag light">${esc(c1.category)}</b></span><div class="m-org"><span class="m-oav">${initials(c1.organizer.name)}</span><span class="m-oinfo"><b>${esc(c1.organizer.name)} <i class="m-vf">${vf}</i></b><span>Organizer · ${esc(c1.location || "Verified")}</span></span></div><div class="d-ct big">${esc(c1.title)}</div><div class="m-statrow"><span><b>${money(c1.raised)}</b> raised</span><span class="m-srpct">${D.pct(c1)}%</span></div>${flow(D.pct(c1))}<button class="btn btn-primary btn-block d-btn" type="button">Donate now<span class="m-cursor"></span></button></div>`,
+        `<div class="m-screen d-don"><div class="d-donhd"><span class="d-mini">${cimg(c1)}</span><span class="d-minitx"><b>${esc(c1.title)}</b><span>${money(c1.raised)} raised · ${D.pct(c1)}%</span></span></div><div class="m-label">Choose your amount</div><div class="m-amts"><span class="m-amt">$25</span><span class="m-amt sel">$50 <i class="m-amtck">${ck}</i></span><span class="m-amt">$100</span><span class="m-amt">$300</span><span class="m-amt">$500</span><span class="m-amt">$1k</span></div><button class="btn btn-primary btn-block d-btn" type="button">Donate $50<span class="m-cursor"></span></button><div class="m-secure2">${lock}<span>Secure &amp; protected</span></div></div>`,
+        `<div class="m-screen m-conf"><span class="m-bigcheck">${ck}<i class="m-spark s1"></i><i class="m-spark s2"></i><i class="m-spark s3"></i><i class="m-spark s4"></i></span><div class="m-conf-t">Donation sent</div><div class="m-conf-amt">$50 · ${esc(c1.title)}</div><div class="m-conf-d">${mail}<span>Receipt on its way</span></div></div>`,
+        `<div class="m-screen d-imp"><a class="d-card big"><span class="d-cimg">${cimg(c1)}<b class="m-tag">${esc(c1.category)}</b></span><span class="d-cb"><span class="d-ct">${esc(c1.title)}</span>${flow(Math.min(99, D.pct(c1) + 4), true)}<span class="d-cn"><b class="m-count" data-pre="$" data-from="${c1.raised}" data-to="${c1.raised + 250}">${money(c1.raised)}</b> of ${money(c1.goal)}</span></span></a><div class="d-impline">${hr}<span><b>+3</b> supporters just now</span></div><div class="m-floaters"><i>${hr}<u>+$50</u></i><i>${hr}<u>+$25</u></i><i>${hr}</i><i>${hr}<u>+$100</u></i></div></div>`,
+      ];
+    }
+    mount.className = "hd reveal " + (mount.classList.contains("in") ? "in " : "") + (kind === "org" ? "hd-org" : "hd-donor");
+    mount.innerHTML = `
+      <div class="hd-device">
+        <div class="hd-chrome"><span class="hd-cdot"></span><span class="hd-cdot"></span><span class="hd-cdot"></span><span class="hd-url">${url}</span></div>
+        <div class="hd-screens">${scenes.map((s, i) => `<div class="hd-scene${i === 0 ? " on" : ""}" data-s="${i}">${s}</div>`).join("")}</div>
+      </div>
+      <div class="hd-foot"><div class="hd-cap" id="hdCap">${caps[0]}</div><div class="hd-dots" id="hdDots">${caps.map((_, i) => `<button type="button" data-i="${i}" class="${i === 0 ? "on" : ""}" aria-label="Step ${i + 1}"></button>`).join("")}</div></div>`;
+    const sceneEls = qsa(".hd-scene", mount);
+    const cap = qs("#hdCap", mount);
+    const dots = qsa("#hdDots button", mount);
+    let i = 0, timer = null;
+    const countUp = (el) => {
+      const to = +el.dataset.to, from = +(el.dataset.from || 0), pre = el.dataset.pre || "", suf = el.dataset.suf || "";
+      if (reduce) { el.textContent = pre + to.toLocaleString("en-US") + suf; return; }
+      const t0 = performance.now(), dur = 1100;
+      const tick = (t) => { const p = Math.min(1, (t - t0) / dur); const v = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3))); el.textContent = pre + v.toLocaleString("en-US") + suf; if (p < 1) requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
+    };
+    const show = (n) => {
+      i = n;
+      sceneEls.forEach((s, k) => s.classList.toggle("on", k === n));
+      dots.forEach((d, k) => d.classList.toggle("on", k === n));
+      cap.textContent = caps[n];
+      qsa(".m-count", sceneEls[n]).forEach(countUp);
+    };
+    show(0);
+    dots.forEach((d) => d.addEventListener("click", () => { show(+d.dataset.i); if (timer) { clearInterval(timer); start(); } }));
+    function start() { timer = setInterval(() => { if (!document.hidden) show((i + 1) % sceneEls.length); }, 3200); }
+    if (!reduce) start();
+  }
+  PAGES.howdonate = () => buildHowDemo("donor");
+  PAGES.howcreate = () => buildHowDemo("org");
 
   /* ---------- Dispatch ---------- */
   function run() {
