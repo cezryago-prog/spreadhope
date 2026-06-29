@@ -1470,16 +1470,8 @@
       const mailIc = '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="m4 8 8 5 8-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       root.innerHTML = `
       <div class="dn2">
-        <a class="dn2-back" id="dnBack" href="campaign.html?id=${c.id}"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="dnBackTxt">Back to campaign</span></a>
-        <div class="dn-steps" id="dnSteps">
-          <span class="dn-step current" data-s="0"><i>1</i>Your support</span>
-          <span class="dn-line"></span>
-          <span class="dn-step" data-s="1"><i>2</i>Amount</span>
-          <span class="dn-line"></span>
-          <span class="dn-step" data-s="2"><i>3</i>Complete</span>
-        </div>
+        <a class="dn2-back" href="campaign.html?id=${c.id}"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Back to campaign</span></a>
 
-        <section class="dn-pane" data-pane="1">
         <div class="dn2-hero">
           <img src="${c.cover}" alt="${esc(c.title)}" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'">
           <div class="dn2-hero-cap">
@@ -1503,7 +1495,7 @@
           ${amounts.map((a) => `<button type="button" class="dn2-opt${a === suggested ? " dn2-suggested" : ""}" data-amt="${a}">${a === suggested ? `<span class="dn2-sug-badge">Suggested</span>` : ""}${money(a)}</button>`).join("")}
         </div>
 
-        <button class="dn2-donate is-empty" id="dNext0" type="button"><span id="dBtnLabel">Choose an amount</span><span class="dn2-donate-arrow">${I.arrow}</span></button>
+        <button class="dn2-donate is-empty" id="dDonate" type="button"><span id="dBtnLabel">Choose an amount</span><span class="dn2-donate-arrow">${I.arrow}</span></button>
 
         <p class="dn2-secure">${I.shield}<span>Secure donation • Privacy protected</span></p>
 
@@ -1515,75 +1507,25 @@
           <ul class="dn2-trust">
             <li>${lockIc}<span>Secure donation flow</span></li>
             <li>${I.heart}<span>Your support goes toward this campaign</span></li>
-            <li>${mailIc}<span>You'll receive a confirmation after donating</span></li>
+            <li>${mailIc}<span>You can leave words of support right after donating</span></li>
           </ul>
         </div>
-        </section>
-
-        <section class="dn-pane active" data-pane="0">
-          <h2 class="dn2-h" style="margin-top:4px">Add your support</h2>
-          <p class="donate-sub">Tell ${esc(c.organizer.name)} who's behind this gift. Your name is required even for anonymous donations.</p>
-          <div class="dn-field"><label for="dName">Your name <span class="hint req">— required</span></label><input type="text" id="dName" placeholder="Jane Doe" required></div>
-          <div class="dn-field"><label for="dMsg">Words of support <span class="hint">— optional</span></label><textarea id="dMsg" placeholder="Sending strength and hope…"></textarea></div>
-          <label class="anon-row"><input type="checkbox" id="dAnon"> Donate anonymously</label>
-          <button class="btn btn-primary btn-lg btn-block" id="dNext1">Continue ${I.arrow}</button>
-        </section>
-
-        <section class="dn-pane" data-pane="2">
-          <h2 class="dn2-h" style="margin-top:4px">Complete your donation</h2>
-          <p class="donate-sub">One last look, then you're done.</p>
-          <div class="dn-review" id="dnReview"></div>
-          <button class="btn btn-primary btn-lg btn-block" id="dSubmit">Donate <span id="dAmtLabel"></span></button>
-          <div class="dn-secure">${I.shield}<span>Secure &amp; protected — funds go directly to ${esc(c.organizer.name)}.</span></div>
-        </section>
       </div>`;
 
       let amount = 0;
-      const panes = qsa(".dn-pane");
-      const steps = qsa("#dnSteps .dn-step");
-      const backLink = qs("#dnBack");
       const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const go = (s) => {
-        panes.forEach((p) => p.classList.toggle("active", +p.dataset.pane === s));
-        steps.forEach((st) => { const i = +st.dataset.s; st.classList.toggle("current", i === s); st.classList.toggle("done", i < s); });
-        qs("#dnBackTxt").textContent = s === 0 ? "Back to campaign" : "Back";
-        backLink.dataset.prev = s === 0 ? "" : String(s - 1);
-        window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
-      };
-      backLink.addEventListener("click", (e) => { if (backLink.dataset.prev) { e.preventDefault(); go(+backLink.dataset.prev); } });
 
-      const setAmount = (v) => { amount = v; qsa(".dn2-opt").forEach((x) => x.classList.toggle("sel", +x.dataset.amt === v)); const btn = qs("#dNext0"); btn.classList.remove("is-empty"); qs("#dBtnLabel").textContent = "Continue · " + money(v); };
+      const setAmount = (v) => { amount = v; qsa(".dn2-opt").forEach((x) => x.classList.toggle("sel", +x.dataset.amt === v)); const btn = qs("#dDonate"); btn.classList.remove("is-empty"); qs("#dBtnLabel").textContent = "Donate · " + money(v); };
       qsa(".dn2-opt").forEach((b) => b.addEventListener("click", () => setAmount(+b.dataset.amt)));
 
-      // step 0 = Your support (name) → step 1 = Amount → step 2 = Complete
-      qs("#dNext1").addEventListener("click", () => {
-        if (!qs("#dName").value.trim()) { toast("Please enter your name", "err"); qs("#dName").focus(); return; }
-        go(1);
-      });
-      qs("#dNext0").addEventListener("click", () => {
+      // single step — choose an amount, then donate straight through to thank-you (words of support live there)
+      qs("#dDonate").addEventListener("click", () => {
         if (!amount || amount < 1) { toast("Please choose an amount", "err"); return; }
-        buildReview(); go(2);
-      });
-
-      function buildReview() {
-        const name = qs("#dName").value.trim();
-        const anon = qs("#dAnon").checked;
-        const msg = qs("#dMsg").value.trim();
-        qs("#dAmtLabel").textContent = "· " + money(amount);
-        qs("#dnReview").innerHTML = `
-          <div class="dr-amount"><span>Your donation</span><b>${money(amount)}</b></div>
-          <div class="dr-row"><span>Supporting</span><b>${esc(c.title)}</b></div>
-          <div class="dr-row"><span>From</span><b>${anon ? "Anonymous" : (name ? esc(name) : "A kind supporter")}</b></div>
-          ${msg ? `<div class="dr-msg">“${esc(msg)}”</div>` : ""}`;
-      }
-
-      qs("#dSubmit").addEventListener("click", () => {
-        if (!amount || amount < 1) { toast("Please choose an amount to donate", "err"); go(1); return; }
-        const btn = qs("#dSubmit");
+        const btn = qs("#dDonate");
         btn.disabled = true;
         const dest = "thank-you.html?id=" + c.id + "&amt=" + amount + "&hope=1";
         // mock — no real payment provider; a small "spread hope" light rises, then we navigate
-        if (reduce) { btn.textContent = "Processing…"; setTimeout(() => { location.href = dest; }, 220); return; }
+        if (reduce) { qs("#dBtnLabel").textContent = "Processing…"; setTimeout(() => { location.href = dest; }, 220); return; }
         btn.classList.add("dn-glow");
         spreadHopeRise(btn);
         setTimeout(() => { location.href = dest; }, 1000);
@@ -1611,12 +1553,15 @@
     const id = param("id");
     const c = id ? D.all().find((x) => x.id === id) : D.featured();
     if (!c) return;
-    const p = D.pct(c);
-    qs("#tyTitle").textContent = c.title;
-    qs("#tyImg").src = c.cover;
-    qs("#tyImg").onerror = function () { this.src = D.fallbackImg(c.category); };
-    qs("#tyFill").style.width = p + "%";
-    qs("#tyMeta").textContent = `${money(c.raised)} raised · ${p}% of ${money(c.goal)}`;
+    const amt = parseInt(param("amt"), 10);
+
+    // amount pill + organizer-aware subtext
+    if (amt > 0) qs("#tyAmount").textContent = money(amt) + " donated";
+    else { const pill = qs("#tyAmount"); if (pill) pill.style.display = "none"; }
+    qs("#tySub").innerHTML = `Your gift goes directly to <b>${esc(c.organizer.name)}</b>'s fundraiser — every contribution brings the goal a little closer.`;
+
+    // primary action → back to the campaign just supported
+    qs("#tyBackLink").href = "campaign.html?id=" + c.id;
     qs("#tyMoreLink").href = "browse-campaigns.html";
 
     // "spread hope" arrival: the light point lands, pulses into the check, then the content reveals
@@ -1625,15 +1570,13 @@
       if (card) card.classList.add("hope-arrive");
     }
 
-    qsa("[data-sh]").forEach((a) => a.addEventListener("click", (e) => {
+    // share this fundraiser — native share if available, else copy the campaign link
+    qs("#tyShare").addEventListener("click", (e) => {
       e.preventDefault();
       const url = "campaign.html?id=" + c.id, full = location.origin + location.pathname.replace(/thank-you\.html$/, "") + url;
-      const k = a.dataset.sh, t = encodeURIComponent("I just supported: " + c.title);
-      if (k === "copy") navigator.clipboard.writeText(full).then(() => toast("Link copied"));
-      else if (k === "wa") window.open(`https://wa.me/?text=${t}%20${encodeURIComponent(full)}`, "_blank");
-      else if (k === "fb") window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(full)}`, "_blank");
-      else if (k === "x") window.open(`https://twitter.com/intent/tweet?text=${t}&url=${encodeURIComponent(full)}`, "_blank");
-    }));
+      if (navigator.share) { navigator.share({ title: c.title, text: "I just supported: " + c.title, url: full }).catch(() => {}); }
+      else navigator.clipboard.writeText(full).then(() => toast("Link copied")).catch(() => toast("Couldn't copy the link", "err"));
+    });
   };
 
   /* =================================================================

@@ -2306,14 +2306,16 @@ body[data-page="browse"] .site-header.is-scrolled { background: rgba(250,248,241
   0% { box-shadow: 0 0 0 0 rgba(255,198,138,.5), 0 0 0 0 rgba(169,214,161,.42); }
   100% { box-shadow: 0 0 0 26px rgba(255,198,138,0), 0 0 0 42px rgba(169,214,161,0); }
 }
-.confirm-card.hope-arrive h1 { animation: hope-fade .6s var(--ease) .38s both; }
-.confirm-card.hope-arrive > p { animation: hope-fade .6s var(--ease) .52s both; }
-.confirm-card.hope-arrive .mini-card { animation: hope-fade .6s var(--ease) .66s both; }
+.confirm-card.hope-arrive .ty-badge { animation: hope-fade .6s var(--ease) .38s both; }
+.confirm-card.hope-arrive h1 { animation: hope-fade .6s var(--ease) .48s both; }
+.confirm-card.hope-arrive .ty-amount-pill { animation: hope-fade .6s var(--ease) .58s both; }
+.confirm-card.hope-arrive > p { animation: hope-fade .6s var(--ease) .66s both; }
 @keyframes hope-fade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
   .dn-glow, .hope-dot, .hope-spark,
   .confirm-card.hope-arrive .confirm-check, .confirm-card.hope-arrive .confirm-check::after,
-  .confirm-card.hope-arrive h1, .confirm-card.hope-arrive > p, .confirm-card.hope-arrive .mini-card { animation: none !important; }
+  .confirm-card.hope-arrive .ty-badge, .confirm-card.hope-arrive h1,
+  .confirm-card.hope-arrive .ty-amount-pill, .confirm-card.hope-arrive > p { animation: none !important; }
 }
 .confirm-card h1 { font-size: clamp(26px, 4vw, 38px); margin-bottom: 14px; }
 .confirm-card > p { color: var(--text-2); font-size: 16.5px; max-width: 44ch; margin: 0 auto 24px; }
@@ -2339,6 +2341,19 @@ body[data-page="browse"] .site-header.is-scrolled { background: rgba(250,248,241
 .share-btns a:hover { background: var(--sage-soft); transform: translateY(-2px); }
 .share-btns a svg { width: 20px; height: 20px; }
 .confirm-acts { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+/* thank-you — minimal confirmation layout */
+body[data-page="thankyou"] .confirm-check.celebrate { background: var(--fresh-green); color: #fff; box-shadow: 0 14px 30px -12px rgba(35,78,82,.45); }
+.ty-badge { display: inline-block; font-family: var(--font-head); font-weight: 700; font-size: 11.5px; letter-spacing: .15em; text-transform: uppercase; color: var(--muted-green-gray); background: var(--sage-wash); padding: 7px 16px; border-radius: var(--r-pill); margin-bottom: 22px; }
+.ty-amount-pill { display: inline-block; font-family: var(--font-head); font-weight: 700; font-size: 16.5px; color: var(--deep-meadow); background: #fff; padding: 11px 26px; border-radius: var(--r-pill); box-shadow: var(--sh-sm); margin: 2px 0 22px; }
+body[data-page="thankyou"] .confirm-acts .btn { min-width: 264px; }
+.ty-links { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 20px; font-family: var(--font-head); font-weight: 600; font-size: 13.5px; }
+.ty-links a { color: var(--muted-green-gray); transition: color .2s; white-space: nowrap; }
+.ty-links a:hover { color: var(--deep-meadow); }
+.ty-links .ty-dot { color: var(--line); }
+/* phones: trim the card's side padding so the layout uses the full width like the reference (keeps the links on one line) */
+@media (max-width: 600px) {
+  body[data-page="thankyou"] .confirm-card { padding-left: 22px; padding-right: 22px; }
+}
 
 /* =====================================================================
    HOW IT WORKS PAGE / ABOUT / GENERIC CONTENT
@@ -3623,9 +3638,9 @@ body[data-page="campaign"] .site-footer { padding-top: clamp(26px, 4vw, 44px); }
   .nh-hero::before { display: none; }                  /* the hero video + veil is the backdrop now */
   .nh-hero-grid { position: relative; z-index: 2; }     /* foreground above the backdrop */
 
-  .nh-hero-mosaic { display: block; position: absolute; inset: 0; z-index: 0; overflow: hidden; }
-  /* mobile hero backdrop = "hero nova" video; the campaign mosaic stays behind as a graceful fallback */
-  .nh-hero-video { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; filter: brightness(1.13) saturate(1.03); }
+  /* mobile hero backdrop = plain cream + falling leaves only (mosaic & video removed) */
+  .nh-hero-mosaic { display: none; }
+  .nh-hero-video { display: none; }
   .nh-hero-mosaic-grid {
     position: absolute; top: 50%; left: 50%;
     width: 174%; height: 156%;
