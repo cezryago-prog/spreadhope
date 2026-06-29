@@ -2170,6 +2170,9 @@ body[data-page="browse"] .site-header.is-scrolled { background: rgba(250,248,241
    START WIZARD
    ===================================================================== */
 .wizard-grid { display: grid; grid-template-columns: 1fr 400px; gap: clamp(32px, 5vw, 60px); align-items: start; }
+/* let both columns shrink below their content's intrinsic width — otherwise a large
+   preview image's natural width blows the 1fr track out and breaks the layout */
+.wizard-grid > * { min-width: 0; }
 .stepper { display: flex; gap: 6px; margin-bottom: 32px; }
 .stepper-item { flex: 1; min-width: 0; }
 .stepper-item .bar { height: 5px; border-radius: var(--r-pill); background: var(--sand-line); margin-bottom: 9px; transition: background .4s; }
@@ -2505,6 +2508,8 @@ body[data-page="thankyou"] .confirm-acts .btn { min-width: 264px; }
   .preview-rail.collapsed .preview-toggle svg { transform: rotate(180deg); }
   .preview-rail .ccard { transition: max-height .4s var(--ease), opacity .3s; overflow: hidden; }
   .preview-rail.collapsed .ccard, .preview-rail.collapsed .plabel { display: none; }
+  /* stacked layout already shows the live preview on top — drop the redundant text review summary */
+  #reviewSlot { display: none; }
 
   .ccard.featured { flex-direction: column; }
   .ccard.featured .ccard-img { width: 100%; aspect-ratio: 16/10; }
