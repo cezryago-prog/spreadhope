@@ -45,61 +45,102 @@
     const track = qs("#sohTrack");
     if (track) {
       const camps = [D.featured(), ...D.active(4)].filter(Boolean);
-      const slide = (c) => {
-        const p = D.pct(c);
-        return `
-        <a class="soh-slide" href="campaign.html?id=${c.id}">
-          <div class="soh-media"><span class="heart">${I.heart}</span><img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'"></div>
-          <div class="soh-body">
-            <h3>${esc(c.title)}</h3>
-            <p>${esc(c.blurb)}</p>
-            <div class="soh-nums"><span class="r">${money(c.raised)}</span><span class="g">of ${money(c.goal)}</span></div>
-            <div class="careflow"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div></div>
-            <div class="soh-pct">${p}% funded</div>
-            <span class="btn btn-primary btn-block">Support this story ${I.arrow}</span>
-          </div>
-        </a>`;
-      };
-      const more = `<a class="soh-slide soh-more" href="browse-campaigns.html">
-        <div class="soh-more-in"><span class="soh-more-ic">${I.arrow}</span><span class="soh-more-t">Explore more stories</span><span class="soh-more-sub">See all fundraisers</span></div></a>`;
-      track.innerHTML = camps.map(slide).join("") + more;
+      if (matchMedia("(min-width: 861px)").matches) {
+        /* DESKTOP: 3-card expanding accordion — the big one (left, by default) is the "principal".
+           Click a small card → it grows into the principal. Click the principal (already big) → open it. */
+        const three = camps.slice(0, 3);
+        const sohEl = track.closest(".soh");
+        const card = (c, i) => {
+          const p = D.pct(c);
+          return `
+          <a class="soh-ac-card${i === 0 ? " is-active" : ""}" href="campaign.html?id=${c.id}" data-i="${i}">
+            <img class="soh-ac-img" src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'">
+            <span class="soh-ac-heart">${I.heart}</span>
+            <span class="soh-ac-cat">${esc(c.category)}</span>
+            <div class="soh-ac-body">
+              <h3>${esc(c.title)}</h3>
+              <p class="soh-ac-blurb">${esc(c.blurb)}</p>
+              <div class="soh-ac-nums"><span class="r">${money(c.raised)}</span><span class="g">of ${money(c.goal)}</span></div>
+              <div class="careflow"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}" style="width:0%"></div></div></div>
+              <div class="soh-ac-pct">${p}% funded</div>
+              <span class="soh-ac-cta">Support this story ${I.arrow}</span>
+            </div>
+          </a>`;
+        };
+        const accWrap = document.createElement("div");
+        accWrap.className = "wrap soh-acc-wrap reveal in";
+        accWrap.innerHTML = `<div class="soh-acc">${three.map(card).join("")}</div>`;
+        sohEl.style.display = "none";
+        sohEl.insertAdjacentElement("afterend", accWrap);
 
-      const slides = qsa(".soh-slide", track);
-      const dotsWrap = qs("#sohDots");
-      const vp = track.parentElement;
-      let active = 0, timer = null;
+        const cards = qsa(".soh-ac-card", accWrap);
+        const setActive = (idx) => {
+          cards.forEach((cd, i) => {
+            const on = i === idx;
+            cd.classList.toggle("is-active", on);
+            if (on) { const f = cd.querySelector(".careflow-fill"); if (f) { f.style.width = "0%"; requestAnimationFrame(() => { f.style.width = f.dataset.fill + "%"; }); } }
+          });
+        };
+        cards.forEach((cd, i) => {
+          cd.addEventListener("click", (e) => {
+            // promote a small card on first click; if it's already the principal, let the link open the campaign
+            if (!cd.classList.contains("is-active")) { e.preventDefault(); setActive(i); }
+          });
+        });
+        setActive(0);
+      } else {
+        /* MOBILE: center-focus peek carousel, swipe, auto-advance 3s */
+        const slide = (c) => {
+          const p = D.pct(c);
+          return `
+          <a class="soh-slide" href="campaign.html?id=${c.id}">
+            <div class="soh-media"><span class="heart">${I.heart}</span><img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'"></div>
+            <div class="soh-body">
+              <h3>${esc(c.title)}</h3>
+              <p>${esc(c.blurb)}</p>
+              <div class="soh-nums"><span class="r">${money(c.raised)}</span><span class="g">of ${money(c.goal)}</span></div>
+              <div class="careflow"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div></div>
+              <div class="soh-pct">${p}% funded</div>
+              <span class="btn btn-primary btn-block">Support this story ${I.arrow}</span>
+            </div>
+          </a>`;
+        };
+        const more = `<a class="soh-slide soh-more" href="browse-campaigns.html">
+          <div class="soh-more-in"><span class="soh-more-ic">${I.arrow}</span><span class="soh-more-t">Explore more stories</span><span class="soh-more-sub">See all fundraisers</span></div></a>`;
+        track.innerHTML = camps.map(slide).join("") + more;
 
-      const center = () => {
-        const el = slides[active];
-        const offset = el.offsetLeft - (vp.clientWidth - el.clientWidth) / 2;
-        track.style.transform = `translateX(${-offset}px)`;
-        slides.forEach((s, i) => s.classList.toggle("is-active", i === active));
-        if (dotsWrap) qsa("button", dotsWrap).forEach((d, i) => d.classList.toggle("on", i === active));
-        const fill = el.querySelector(".careflow-fill");
-        if (fill && fill.dataset.fill) fill.style.width = fill.dataset.fill + "%";
-      };
-      const start = () => { if (reduce) return; clearInterval(timer); timer = setInterval(() => { active = (active + 1) % slides.length; center(); }, 3000); };
-      const stop = () => clearInterval(timer);
-      const go = (i) => { active = (i + slides.length) % slides.length; center(); start(); };
+        const slides = qsa(".soh-slide", track);
+        const dotsWrap = qs("#sohDots");
+        const vp = track.parentElement;
+        let active = 0, timer = null;
 
-      if (dotsWrap) {
-        dotsWrap.innerHTML = slides.map((_, i) => `<button class="${i === 0 ? "on" : ""}" aria-label="Story ${i + 1}"></button>`).join("");
-        qsa("button", dotsWrap).forEach((d, i) => d.addEventListener("click", () => go(i)));
+        const center = () => {
+          const el = slides[active];
+          const offset = el.offsetLeft - (vp.clientWidth - el.clientWidth) / 2;
+          track.style.transform = `translateX(${-offset}px)`;
+          slides.forEach((s, i) => s.classList.toggle("is-active", i === active));
+          if (dotsWrap) qsa("button", dotsWrap).forEach((d, i) => d.classList.toggle("on", i === active));
+          const fill = el.querySelector(".careflow-fill");
+          if (fill && fill.dataset.fill) fill.style.width = fill.dataset.fill + "%";
+        };
+        const start = () => { if (reduce) return; clearInterval(timer); timer = setInterval(() => { active = (active + 1) % slides.length; center(); }, 3000); };
+        const stop = () => clearInterval(timer);
+        const go = (i) => { active = (i + slides.length) % slides.length; center(); start(); };
+
+        if (dotsWrap) {
+          dotsWrap.innerHTML = slides.map((_, i) => `<button class="${i === active ? "on" : ""}" aria-label="Story ${i + 1}"></button>`).join("");
+          qsa("button", dotsWrap).forEach((d, i) => d.addEventListener("click", () => go(i)));
+        }
+        qs("#sohPrev")?.addEventListener("click", () => go(active - 1));
+        qs("#sohNext")?.addEventListener("click", () => go(active + 1));
+        let sx = null;
+        track.addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; stop(); }, { passive: true });
+        track.addEventListener("touchend", (e) => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 40) active = (active + (dx < 0 ? 1 : -1) + slides.length) % slides.length; center(); start(); }, { passive: true });
+        window.addEventListener("resize", center, { passive: true });
+
+        requestAnimationFrame(() => { center(); requestAnimationFrame(center); });
+        start();
       }
-      // prev/next arrows (desktop)
-      qs("#sohPrev")?.addEventListener("click", () => go(active - 1));
-      qs("#sohNext")?.addEventListener("click", () => go(active + 1));
-      // swipe
-      let sx = null;
-      track.addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; stop(); }, { passive: true });
-      track.addEventListener("touchend", (e) => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 40) active = (active + (dx < 0 ? 1 : -1) + slides.length) % slides.length; center(); start(); }, { passive: true });
-      // pause on hover (desktop)
-      vp.addEventListener("mouseenter", stop);
-      vp.addEventListener("mouseleave", start);
-      window.addEventListener("resize", center, { passive: true });
-
-      requestAnimationFrame(() => { center(); requestAnimationFrame(center); });
-      start();
     }
 
     initHowItWorks();
@@ -334,6 +375,8 @@
     let i = 0, playing = false, timer = null, tapTimer = null, finished = false;
 
     function syncHeight() {
+      // desktop lays the copy + demo side by side in a grid — let it size naturally
+      if (matchMedia("(min-width: 861px)").matches) { stage.style.minHeight = ""; return; }
       const h = stage.classList.contains("show-demo") ? demo.offsetHeight : intro.offsetHeight;
       stage.style.minHeight = h + "px";
     }
@@ -367,16 +410,15 @@
     }
 
     /* ---- segmented progress ---- */
-    function paintSegs() {
+    // single deterministic repaint of EVERY segment — race-free against pause / skip / off-screen
+    function paintSegs(animate) {
       segs.forEach((s, n) => {
-        if (n === i) return; // current handled separately
-        s.fill.style.transition = "width .35s var(--ease)";
+        s.btn.classList.toggle("on", n === i);
+        if (n === i) return; // current handled below
+        // snap past→full / future→empty instantly: no transition that could stall from a frozen state
+        s.fill.style.transition = "none";
         s.fill.style.width = (n < i ? 100 : 0) + "%";
-        s.btn.classList.toggle("on", false);
       });
-      segs[i].btn.classList.add("on");
-    }
-    function fillCurrentSeg(animate) {
       const f = segs[i].fill;
       if (playing && animate && !reduce) {
         f.style.transition = "none"; f.style.width = "0%";
@@ -401,8 +443,7 @@
       numEl.textContent = i + 1;
       titleEl.textContent = STEPS[i].t;
       descEl.textContent = STEPS[i].d;
-      paintSegs();
-      fillCurrentSeg(animate);
+      paintSegs(animate);
       // animate the campaign progress bar when its screen shows
       const sb = scrEls[i].querySelector("[data-fill]");
       if (sb) { sb.style.width = "0%"; requestAnimationFrame(() => { sb.style.width = sb.dataset.fill + "%"; }); }
@@ -453,7 +494,7 @@
     }
 
     /* ---- open / close ---- */
-    function open() {
+    function open(doScroll = true) {
       if (!stage.classList.contains("show-demo")) {
         stage.classList.add("show-demo");
         intro.setAttribute("aria-hidden", "true");
@@ -464,8 +505,10 @@
       exitFinished(); i = 0;
       if (reduce) { playing = false; setPlayUI(false); show(0, false); }
       else play();
-      const top = stage.getBoundingClientRect().top + window.scrollY - 90;
-      window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
+      if (doScroll) {
+        const top = stage.getBoundingClientRect().top + window.scrollY - 90;
+        window.scrollTo({ top, behavior: reduce ? "auto" : "smooth" });
+      }
     }
     function close() {
       stage.classList.remove("show-demo");
@@ -495,12 +538,26 @@
     if ("IntersectionObserver" in window) {
       const io = new IntersectionObserver((es) => {
         es.forEach((e) => {
-          if (!stage.classList.contains("show-demo") || finished) return;
-          if (e.isIntersecting) { if (playing) schedule(); }
+          const live = stage.classList.contains("show-demo") || matchMedia("(min-width: 861px)").matches;
+          if (!live || finished) return;
+          if (e.isIntersecting) { if (playing) { show(i, true); schedule(); } }  // restart the current bar instead of leaving it frozen
           else { clearTimeout(timer); freezeSeg(); }
         });
       }, { threshold: 0.25 });
       io.observe(demo);
+    }
+
+    // desktop: reveal + play the walkthrough automatically once the section scrolls into view — no click needed
+    if (!reduce && matchMedia("(min-width: 861px)").matches && "IntersectionObserver" in window) {
+      let autoStarted = false;
+      const autoIO = new IntersectionObserver((es) => {
+        es.forEach((e) => {
+          if (autoStarted || !e.isIntersecting) return;
+          autoStarted = true; autoIO.disconnect();
+          play(); // demo sits inline in the right column on desktop — just start it (no swap)
+        });
+      }, { threshold: 0.3 });
+      autoIO.observe(stage);
     }
 
     // prime first screen (correct if opened with reduced motion)
@@ -813,6 +870,7 @@
 
     function renderDetail(c) {
       const p = D.pct(c);
+      const fmtCreated = (s) => { const d = new Date((s || "") + "T00:00:00"); return isNaN(d) ? "" : d.toLocaleDateString("en-US", { month: "long", year: "numeric" }); };
       const gallery = (c.gallery && c.gallery.length ? c.gallery : [c.cover]);
       // hero carousel slides: a "card" slide (plain dark bg) after every complete PAIR of photos
       // (e.g. photo, photo, card, photo, photo, card … — a trailing lone photo gets no card)
@@ -837,6 +895,23 @@
         <span class="cd-sup-main"><span class="cd-sup-name">${esc(d.name)}</span>${d.at ? `<span class="cd-sup-time">${esc(d.at)}</span>` : ""}</span>
         <span class="cd-sup-amt">${money(d.amount)}</span>
       </div>`;
+
+      // "Sharing helps" promo — a fanned stack of mini cards of this campaign
+      const smMini = (front) => `<div class="cd-sm-mini${front ? " cd-sm-mini-front" : ""}">
+        <div class="cd-sm-mini-img"><img src="${c.cover}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'"></div>
+        <div class="cd-sm-mini-body">
+          <div class="cd-sm-mini-t">${esc(c.title)}</div>
+          ${front ? `<div class="cd-sm-mini-by">by ${esc(c.organizer.name)}</div>` : ""}
+          <div class="cd-sm-mini-nums"><b>${money(c.raised)}</b><span>raised</span><em>${p}%</em></div>
+          <div class="careflow"><div class="careflow-track"><div class="careflow-fill" style="width:${p}%"></div></div></div>
+        </div>
+      </div>`;
+      const smIc = {
+        fb: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 9h3l.5-3H14V4.5c0-.9.3-1.5 1.6-1.5H17V.3C16.6.2 15.6 0 14.5 0 12 0 10.3 1.5 10.3 4.3V6H8v3h2.3v9H14V9Z"/></svg>',
+        ig: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5.2" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><circle cx="17.4" cy="6.6" r="1.25" fill="currentColor"/></svg>',
+        tt: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.35 2.1 1.7 3.75 3.8 4.02v2.45c-1.4 0-2.7-.45-3.8-1.2v5.9a5.55 5.55 0 1 1-5.55-5.55c.28 0 .55.02.82.06v2.55a3.05 3.05 0 1 0 2.18 2.93V3h2.55Z"/></svg>',
+        wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2a1 1 0 0 1 .7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.1 2.3 1.4 2.6 1.6.3.1.5.1.7-.1l.7-.9c.2-.3.4-.2.6-.1l1.8.9c.3.1.5.2.5.3.1.1.1.6-.1 1.1Z"/></svg>'
+      };
 
       root.innerHTML = `
       <!-- 2 + 3. hero carousel (photos + story slides) + verification badge -->
@@ -905,19 +980,6 @@
               <button class="cd-readmore" id="storyToggle">Read more</button>
             </section>
 
-            <!-- 7. organizer (desktop: right column, aligned with story) -->
-            <section class="cd-organizer">
-              <div class="cd-org-head">
-                <img class="cd-org-av" src="${c.organizer.avatar}" alt="${esc(c.organizer.name)}" onerror="this.style.visibility='hidden'">
-                <div class="cd-org-info">
-                  <div class="cd-org-lbl">Organized by</div>
-                  <div class="cd-org-name">${esc(c.organizer.name)} ${c.verified ? `<i class="cd-org-vf" title="Verified">${I.checkBadge}</i>` : ""}</div>
-                  <div class="cd-org-rel">${esc(c.organizer.relation || c.location)}</div>
-                </div>
-              </div>
-              <p class="cd-org-trust">${I.shield}<span>All donations go directly toward this campaign's stated purpose.</span></p>
-            </section>
-
             <!-- 9. supporters (full width below) -->
             <section class="cd-block cd-supporters-sec">
               <div class="cd-block-head"><h2 id="supTitle">Recent supporters</h2><button class="cd-seeall" id="supToggle">Top supporters</button></div>
@@ -932,6 +994,48 @@
               <div class="cd-block-head"><h2>Words of support</h2>${messages.length > 2 ? `<button class="cd-seeall" id="wordsSeeAll">View all</button>` : ""}</div>
               <div class="cd-words">${messages.map((d, i) => `<div class="cd-word" style="--i:${i}"><div class="cd-word-msg">${esc(d.message)}</div><div class="cd-word-by">${I.heart}<span>${esc(d.name)}</span></div></div>`).join("")}</div>
             </section>` : ""}
+
+            <!-- 11. organizer + trust meta (full width, between words and "you may also like") -->
+            <section class="cd-block cd-trust">
+              <span class="cd-trust-lbl">Organizer and beneficiary</span>
+              <div class="cd-trust-head">
+                <img class="cd-trust-av" src="${c.organizer.avatar}" alt="${esc(c.organizer.name)}" onerror="this.style.visibility='hidden'">
+                <div class="cd-trust-id">
+                  <div class="cd-trust-name">${esc(c.organizer.name)}${c.verified ? `<span class="cd-trust-vf" title="Verified organizer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 13 4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>` : ""}</div>
+                  <div class="cd-trust-rel">Organizer${c.organizer.relation ? ` · ${esc(c.organizer.relation)}` : ""}${c.location ? ` · ${esc(c.location)}` : ""}</div>
+                </div>
+              </div>
+              <div class="cd-trust-protect">
+                <span class="cd-trust-protect-ic">${I.shield}</span>
+                <div class="cd-trust-protect-tx"><b>Donation protected</b><span>Backed by our trust &amp; safety standards.</span></div>
+              </div>
+              <div class="cd-trust-foot">
+                <a class="cd-trust-report" href="contact.html?subject=report&campaign=${encodeURIComponent(c.title)}"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 21V4m0 1.5h11l-2 4 2 4H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Report fundraiser</span></a>
+                <p class="cd-trust-note">The content on this page is the sole responsibility of the campaign creator and does not represent the opinion or endorsement of Spread Hope.</p>
+              </div>
+            </section>
+
+            <!-- 12. sharing helps — promo with a fanned card stack + social share -->
+            <section class="cd-block cd-sharemore">
+              <div class="cd-sm-grid">
+                <div class="cd-sm-copy">
+                  <h2>Sharing helps more than you think</h2>
+                  <p>On average, each share can inspire <b>$50</b> in donations by helping this fundraiser reach more people.</p>
+                </div>
+                <div class="cd-sm-fan">
+                  ${smMini(false)}
+                  ${smMini(false)}
+                  ${smMini(true)}
+                </div>
+                <div class="cd-sm-social">
+                  <button class="cd-sm-sbtn" data-net="fb" type="button" aria-label="Share on Facebook"><span class="cd-sm-ic">${smIc.fb}</span><i>Facebook</i></button>
+                  <button class="cd-sm-sbtn" data-net="ig" type="button" aria-label="Share on Instagram"><span class="cd-sm-ic">${smIc.ig}</span><i>Instagram</i></button>
+                  <button class="cd-sm-sbtn" data-net="tt" type="button" aria-label="Share on TikTok"><span class="cd-sm-ic">${smIc.tt}</span><i>TikTok</i></button>
+                  <button class="cd-sm-sbtn" data-net="wa" type="button" aria-label="Share on WhatsApp"><span class="cd-sm-ic">${smIc.wa}</span><i>WhatsApp</i></button>
+                  <button class="cd-sm-sbtn" data-net="copy" type="button" aria-label="Copy link"><span class="cd-sm-ic">${I.copy}</span><i>Copy link</i></button>
+                </div>
+              </div>
+            </section>
 
           </div>
         </div>
@@ -1044,6 +1148,19 @@
       // donate + share
       qs("#donateBtn").addEventListener("click", () => { location.href = "donate.html?id=" + c.id; });
       qs("#shareBtn").addEventListener("click", () => share(c.title));
+
+      // "Sharing helps" promo — social buttons + the front card's donate CTA
+      (() => {
+        const campUrl = location.origin + location.pathname + "?id=" + c.id;
+        const enc = encodeURIComponent(campUrl), t = encodeURIComponent(c.title);
+        qsa(".cd-sm-sbtn").forEach((b) => b.addEventListener("click", () => {
+          const net = b.dataset.net;
+          if (net === "fb") window.open(`https://www.facebook.com/sharer/sharer.php?u=${enc}`, "_blank", "noopener");
+          else if (net === "wa") window.open(`https://wa.me/?text=${t}%20${enc}`, "_blank", "noopener");
+          else navigator.clipboard.writeText(campUrl).then(() => toast(net === "copy" ? "Link copied" : "Link copied — paste it in your story")).catch(() => toast("Couldn't copy the link", "err"));
+        }));
+        qs(".cd-sm-donate")?.addEventListener("click", () => { location.href = "donate.html?id=" + c.id; });
+      })();
 
       // rotating "just donated" — cycles through real donor names only
       (() => {
@@ -1472,43 +1589,46 @@
       <div class="dn2">
         <a class="dn2-back" href="campaign.html?id=${c.id}"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Back to campaign</span></a>
 
-        <div class="dn2-hero">
-          <img src="${c.cover}" alt="${esc(c.title)}" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'">
-          <div class="dn2-hero-cap">
-            <h1>${esc(c.title)}</h1>
-            <p>by ${esc(c.organizer.name)}${c.location ? ` • ${esc(c.location)}` : ""}</p>
-          </div>
-        </div>
+        <div class="dn2-grid">
+          <!-- LEFT: campaign summary — one cohesive card (image → title → organizer → progress) -->
+          <aside class="dn2-summary">
+            <div class="dn2-sumcard">
+              <div class="dn2-hero">
+                <img src="${c.cover}" alt="${esc(c.title)}" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'">
+                <div class="dn2-hero-cap"><h1>${esc(c.title)}</h1></div>
+              </div>
+              <div class="dn2-sumbody">
+                <div class="dn2-progress">
+                  <div class="dn2-raised-top">
+                    <b class="dn2-amt">${money(c.raised)}</b>
+                    <span class="dn2-pct">${pct}%</span>
+                  </div>
+                  <div class="dn2-goal">raised of <b>${money(c.goal)}</b> goal</div>
+                  <div class="careflow dn2-bar"><div class="careflow-track"><div class="careflow-fill" style="width:${pct}%"></div></div></div>
+                </div>
+              </div>
+            </div>
+          </aside>
 
-        <div class="dn2-raised">
-          <div class="dn2-raised-info">
-            <span class="dn2-lbl">Raised so far</span>
-            <b class="dn2-amt">${money(c.raised)}</b>
-            <span class="dn2-goal">of ${money(c.goal)} goal</span>
-          </div>
-          <div class="dn2-pct"><b>${pct}<i>%</i></b><span>Funded</span></div>
-          <div class="careflow dn2-bar"><div class="careflow-track"><div class="careflow-fill" style="width:${pct}%"></div></div></div>
-        </div>
+          <!-- RIGHT: donation action card -->
+          <section class="dn2-main">
+            <div class="dn2-action">
+              <h2 class="dn2-h">Choose your donation amount</h2>
+              <div class="dn2-amounts">
+                ${amounts.map((a) => `<button type="button" class="dn2-opt${a === suggested ? " dn2-suggested" : ""}" data-amt="${a}">${a === suggested ? `<span class="dn2-sug-badge">Suggested</span>` : ""}${money(a)}</button>`).join("")}
+              </div>
 
-        <h2 class="dn2-h">Choose your donation amount</h2>
-        <div class="dn2-amounts">
-          ${amounts.map((a) => `<button type="button" class="dn2-opt${a === suggested ? " dn2-suggested" : ""}" data-amt="${a}">${a === suggested ? `<span class="dn2-sug-badge">Suggested</span>` : ""}${money(a)}</button>`).join("")}
-        </div>
+              <button class="dn2-donate is-empty" id="dDonate" type="button"><span id="dBtnLabel">Choose an amount</span></button>
+            </div>
 
-        <button class="dn2-donate is-empty" id="dDonate" type="button"><span id="dBtnLabel">Choose an amount</span><span class="dn2-donate-arrow">${I.arrow}</span></button>
-
-        <p class="dn2-secure">${I.shield}<span>Secure donation • Privacy protected</span></p>
-
-        <div class="dn2-clarity">
-          <div class="dn2-clarity-head">
-            <span class="dn2-clarity-ic">${I.shield}</span>
-            <div class="dn2-clarity-tx"><b>Giving with clarity</b><p>Your donation is processed securely and connected to this campaign's goal.</p></div>
-          </div>
-          <ul class="dn2-trust">
-            <li>${lockIc}<span>Secure donation flow</span></li>
-            <li>${I.heart}<span>Your support goes toward this campaign</span></li>
-            <li>${mailIc}<span>You can leave words of support right after donating</span></li>
-          </ul>
+            <div class="dn2-clarity">
+              <span class="dn2-clarity-ic">${I.shield}</span>
+              <div class="dn2-clarity-tx">
+                <b>Your donation is protected</b>
+                <p>Backed by our terms, refund policy and privacy commitments — give with confidence.</p>
+              </div>
+            </div>
+          </section>
         </div>
       </div>`;
 
