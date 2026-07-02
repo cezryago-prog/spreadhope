@@ -324,14 +324,43 @@
   }
 
   /* ---------- Scroll reveal ---------- */
+  // Reusable variants live in CSS via [data-rv]: (default) fade-up · pop · scale · slide-left · slide-right · fade.
+  // autoTagReveal gives static/section content the same treatment without hand-tagging every template —
+  // it staggers group children and picks a variant by element type. Legal pages are skipped on purpose.
+  const RV_SKIP = "header, footer, .site-header, .site-footer, .cd-hero, .cd-hero-media, .nh-hero-visual, .share-lab-stage, .share-lab-rail, .soh, #hiwStage, .cd-more, .drawer, .search-overlay, .toast, .help-fab, [data-no-reveal]";
+  const RV_GROUPS = ".page-intro > .wrap, .section > .wrap, .section-tight > .wrap, .nh-section > .wrap, .cd-cols, .bc-list, .dn2-grid, [data-stagger]";
+  function autoTagReveal(root = document) {
+    if (document.body.getAttribute("data-page") === "legal") return; // keep legal pages static for reading
+    const vh = window.innerHeight || 800;
+    const cardish = (el) => /(^|[\s-])(card|ccard|chip|badge|opt|mini|tile|step|sup-)/.test(el.className || "") || el.tagName === "ARTICLE";
+    const mediaish = (el) => el.matches("img, picture, figure") || /(hero|visual|cover|image|photo|media)/.test(el.className || "");
+    qsa(RV_GROUPS, root).forEach((g) => {
+      if (g.closest(RV_SKIP)) return;
+      Array.from(g.children).forEach((k, i) => {
+        if (k.nodeType !== 1 || k.closest(RV_SKIP) === k || k.matches("script, style, br, hr")) return;
+        const cs = getComputedStyle(k);
+        if (cs.position === "fixed" || cs.position === "absolute") return; // never disturb positioned/overlay elements
+        const hasReveal = k.classList.contains("reveal");
+        if (!hasReveal) {
+          // only hide what's still below the reveal line → no flash on already-painted static content
+          if (k.getBoundingClientRect().top <= vh * 0.82) return;
+          k.classList.add("reveal");
+        }
+        if (!k.hasAttribute("data-rv")) k.setAttribute("data-rv", cardish(k) ? "pop" : mediaish(k) ? "scale" : "up");
+        k.style.transitionDelay = Math.min(i, 6) * 0.075 + "s"; // gentle stagger, capped
+      });
+    });
+  }
   function initReveal() {
+    autoTagReveal(document);
     const els = qsa(".reveal");
     if (!("IntersectionObserver" in window) || matchMedia("(prefers-reduced-motion: reduce)").matches) {
       els.forEach((e) => e.classList.add("in")); return;
     }
+    // threshold 0 (reveal as soon as the top edge crosses the line) so tall section blocks never sit blank
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
-    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    }, { threshold: 0, rootMargin: "0px 0px -12% 0px" });
     els.forEach((e) => io.observe(e));
   }
 

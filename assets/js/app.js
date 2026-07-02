@@ -896,21 +896,13 @@
         <span class="cd-sup-amt">${money(d.amount)}</span>
       </div>`;
 
-      // "Sharing helps" promo — a fanned stack of mini cards of this campaign
-      const smMini = (front) => `<div class="cd-sm-mini${front ? " cd-sm-mini-front" : ""}">
-        <div class="cd-sm-mini-img"><img src="${c.cover}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'"></div>
-        <div class="cd-sm-mini-body">
-          <div class="cd-sm-mini-t">${esc(c.title)}</div>
-          ${front ? `<div class="cd-sm-mini-by">by ${esc(c.organizer.name)}</div>` : ""}
-          <div class="cd-sm-mini-nums"><b>${money(c.raised)}</b><span>raised</span><em>${p}%</em></div>
-          <div class="careflow"><div class="careflow-track"><div class="careflow-fill" style="width:${p}%"></div></div></div>
-        </div>
-      </div>`;
+      // share lab — mini campaign-image helper + channel glyphs
+      const cImg = (cls) => `<img class="${cls}" src="${c.cover}" alt="" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'">`;
       const smIc = {
         fb: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 9h3l.5-3H14V4.5c0-.9.3-1.5 1.6-1.5H17V.3C16.6.2 15.6 0 14.5 0 12 0 10.3 1.5 10.3 4.3V6H8v3h2.3v9H14V9Z"/></svg>',
         ig: '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5.2" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="2"/><circle cx="17.4" cy="6.6" r="1.25" fill="currentColor"/></svg>',
-        tt: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 3c.35 2.1 1.7 3.75 3.8 4.02v2.45c-1.4 0-2.7-.45-3.8-1.2v5.9a5.55 5.55 0 1 1-5.55-5.55c.28 0 .55.02.82.06v2.55a3.05 3.05 0 1 0 2.18 2.93V3h2.55Z"/></svg>',
-        wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2a1 1 0 0 1 .7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.1 2.3 1.4 2.6 1.6.3.1.5.1.7-.1l.7-.9c.2-.3.4-.2.6-.1l1.8.9c.3.1.5.2.5.3.1.1.1.6-.1 1.1Z"/></svg>'
+        wa: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.3A10 10 0 1 0 12 2Zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .1-1.7-.1-.4-.1-.9-.3-1.6-.6-2.8-1.2-4.6-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.8 0-1.3.7-2 .9-2.2a1 1 0 0 1 .7-.3h.5c.2 0 .4 0 .6.5l.8 1.9c.1.2.1.4 0 .5l-.4.6c-.2.2-.3.4-.1.7.2.3.9 1.4 1.9 2.3 1.3 1.1 2.3 1.4 2.6 1.6.3.1.5.1.7-.1l.7-.9c.2-.3.4-.2.6-.1l1.8.9c.3.1.5.2.5.3.1.1.1.6-.1 1.1Z"/></svg>',
+        x: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 3h3l-6.55 7.48L21.8 21h-6.02l-4.71-6.16L5.6 21H2.6l7.02-8.02L2.3 3h6.17l4.26 5.63L17.5 3Zm-1.05 16.2h1.66L7.64 4.7H5.86l10.59 14.5Z"/></svg>'
       };
 
       root.innerHTML = `
@@ -995,19 +987,29 @@
               <div class="cd-words">${messages.map((d, i) => `<div class="cd-word" style="--i:${i}"><div class="cd-word-msg">${esc(d.message)}</div><div class="cd-word-by">${I.heart}<span>${esc(d.name)}</span></div></div>`).join("")}</div>
             </section>` : ""}
 
-            <!-- 11. organizer + trust meta (full width, between words and "you may also like") -->
+            <!-- 11. organizer + trust meta (2-col grid on desktop: org | info / foot) -->
             <section class="cd-block cd-trust">
-              <span class="cd-trust-lbl">Organizer and beneficiary</span>
-              <div class="cd-trust-head">
-                <img class="cd-trust-av" src="${c.organizer.avatar}" alt="${esc(c.organizer.name)}" onerror="this.style.visibility='hidden'">
-                <div class="cd-trust-id">
-                  <div class="cd-trust-name">${esc(c.organizer.name)}${c.verified ? `<span class="cd-trust-vf" title="Verified organizer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 13 4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>` : ""}</div>
-                  <div class="cd-trust-rel">Organizer${c.organizer.relation ? ` · ${esc(c.organizer.relation)}` : ""}${c.location ? ` · ${esc(c.location)}` : ""}</div>
+              <div class="cd-trust-org">
+                <span class="cd-trust-lbl">Organizer and beneficiary</span>
+                <div class="cd-trust-head">
+                  <img class="cd-trust-av" src="${c.organizer.avatar}" alt="${esc(c.organizer.name)}" onerror="this.style.visibility='hidden'">
+                  <div class="cd-trust-id">
+                    <div class="cd-trust-name">${esc(c.organizer.name)}${c.verified ? `<span class="cd-trust-vf" title="Verified organizer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 13 4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span>` : ""}</div>
+                    <div class="cd-trust-rel">Organizer${c.organizer.relation ? ` · ${esc(c.organizer.relation)}` : ""}${c.location ? ` · ${esc(c.location)}` : ""}</div>
+                  </div>
                 </div>
               </div>
-              <div class="cd-trust-protect">
-                <span class="cd-trust-protect-ic">${I.shield}</span>
-                <div class="cd-trust-protect-tx"><b>Donation protected</b><span>Backed by our trust &amp; safety standards.</span></div>
+              <div class="cd-trust-info">
+                <div class="cd-trust-protect">
+                  <span class="cd-trust-protect-ic">${I.shield}</span>
+                  <div class="cd-trust-protect-tx"><b>Donation protected</b></div>
+                </div>
+                <span class="cd-trust-info-h">Why you can give with confidence</span>
+                <ul class="cd-trust-rows">
+                  <li><span class="cd-trust-row-ic">${c.verified ? I.checkBadge : I.users}</span><div><b>${c.verified ? "Identity verified" : "Organizer on record"}</b><span>${c.verified ? `We confirmed ${esc(c.organizer.name.split(" ")[0])}'s identity before this fundraiser went live.` : "Details provided by the campaign creator."}</span></div></li>
+                  <li><span class="cd-trust-row-ic">${I.heart}</span><div><b>Straight to the cause</b><span>Every donation goes directly toward the beneficiary of this fundraiser.</span></div></li>
+                  <li><span class="cd-trust-row-ic">${I.clock}</span><div><b>${fmtCreated(c.createdAt) ? `Active since ${fmtCreated(c.createdAt)}` : "Community backed"}</b><span>${c.donors.toLocaleString("en-US")} supporters have given so far.</span></div></li>
+                </ul>
               </div>
               <div class="cd-trust-foot">
                 <a class="cd-trust-report" href="contact.html?subject=report&campaign=${encodeURIComponent(c.title)}"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 21V4m0 1.5h11l-2 4 2 4H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Report fundraiser</span></a>
@@ -1016,23 +1018,100 @@
             </section>
 
             <!-- 12. sharing helps — promo with a fanned card stack + social share -->
-            <section class="cd-block cd-sharemore">
-              <div class="cd-sm-grid">
-                <div class="cd-sm-copy">
-                  <h2>Sharing helps more than you think</h2>
-                  <p>On average, each share can inspire <b>$50</b> in donations by helping this fundraiser reach more people.</p>
+            <section class="cd-block share-lab" data-share-lab>
+              <div class="share-lab-head">
+                <h2>Help this story reach more people</h2>
+                <p>Every share brings the goal a little closer — pick a way to spread it.</p>
+              </div>
+              <div class="share-lab-body">
+                <div class="share-lab-rail" role="tablist" aria-label="Ways to share">
+                  <button class="share-chip is-active" data-net="copy" type="button" role="tab" aria-selected="true"><span class="share-chip-ic">${I.copy}</span><i>Copy link</i></button>
+                  <button class="share-chip" data-net="fb" type="button" role="tab" aria-selected="false"><span class="share-chip-ic">${smIc.fb}</span><i>Facebook</i></button>
+                  <button class="share-chip" data-net="ig" type="button" role="tab" aria-selected="false"><span class="share-chip-ic">${smIc.ig}</span><i>Instagram</i></button>
+                  <button class="share-chip" data-net="wa" type="button" role="tab" aria-selected="false"><span class="share-chip-ic">${smIc.wa}</span><i>WhatsApp</i></button>
+                  <button class="share-chip" data-net="x" type="button" role="tab" aria-selected="false"><span class="share-chip-ic">${smIc.x}</span><i>X</i></button>
                 </div>
-                <div class="cd-sm-fan">
-                  ${smMini(false)}
-                  ${smMini(false)}
-                  ${smMini(true)}
-                </div>
-                <div class="cd-sm-social">
-                  <button class="cd-sm-sbtn" data-net="fb" type="button" aria-label="Share on Facebook"><span class="cd-sm-ic">${smIc.fb}</span><i>Facebook</i></button>
-                  <button class="cd-sm-sbtn" data-net="ig" type="button" aria-label="Share on Instagram"><span class="cd-sm-ic">${smIc.ig}</span><i>Instagram</i></button>
-                  <button class="cd-sm-sbtn" data-net="tt" type="button" aria-label="Share on TikTok"><span class="cd-sm-ic">${smIc.tt}</span><i>TikTok</i></button>
-                  <button class="cd-sm-sbtn" data-net="wa" type="button" aria-label="Share on WhatsApp"><span class="cd-sm-ic">${smIc.wa}</span><i>WhatsApp</i></button>
-                  <button class="cd-sm-sbtn" data-net="copy" type="button" aria-label="Copy link"><span class="cd-sm-ic">${I.copy}</span><i>Copy link</i></button>
+                <div class="share-lab-view">
+                  <div class="share-lab-stage">
+
+                    <div class="share-scene sc-copy on" data-net="copy">
+                      <div class="sc-copywrap">
+                        <div class="sc-link-card">
+                          <div class="sc-link-thumb">${cImg("")}</div>
+                          <div class="sc-link-meta"><small>SPREADHOPE.ORG</small><b>${esc(c.title)}</b></div>
+                        </div>
+                        <div class="sc-copybar">
+                          <span class="sc-copy-glob"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="1.6"/><path d="M3.6 12h16.8M12 3.6c2.3 2.3 2.3 14.5 0 16.8M12 3.6c-2.3 2.3-2.3 14.5 0 16.8" stroke="currentColor" stroke-width="1.6"/></svg></span>
+                          <span class="sc-copy-url">spreadhope.org/c/${c.id}</span>
+                          <button class="sc-copybtn" data-act="copy" type="button">Copy</button>
+                        </div>
+                        <p class="sc-copy-hint">Share this link anywhere</p>
+                      </div>
+                      <div class="sc-copy-done"><span class="sc-copy-check">${I.check}</span> Link copied</div>
+                    </div>
+
+                    <div class="share-scene sc-fb" data-net="fb">
+                      <div class="sc-fbcard">
+                        <div class="sc-fb-head"><span class="sc-fb-ava"></span><div class="sc-fb-who"><b>You</b><small>Public · Timeline</small></div><span class="sc-fb-brand">${smIc.fb}</span></div>
+                        <div class="sc-fb-say">Please help — every bit counts 💙</div>
+                        <div class="sc-fb-link">
+                          <div class="sc-fb-thumb">${cImg("")}</div>
+                          <div class="sc-fb-info"><small>SPREADHOPE.ORG</small><b>${esc(c.title)}</b><span class="sc-fb-blurb">${esc(c.blurb || "")}</span></div>
+                        </div>
+                        <div class="sc-fb-actions">
+                          <span><svg viewBox="0 0 24 24" fill="none"><path d="M7 10v9M7 10l3.2-6.5c1.1 0 1.9 .9 1.9 2V8h4.6a1.8 1.8 0 0 1 1.8 2.1l-.9 5A1.8 1.8 0 0 1 16 19H7" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Like</span>
+                          <span><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H8l-4 3V5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>Comment</span>
+                          <span><svg viewBox="0 0 24 24" fill="none"><path d="M4 12v7h16v-7M12 3v12M8 7l4-4 4 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>Share</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="share-scene sc-ig" data-net="ig">
+                      <div class="sc-igstory">
+                        ${cImg("sc-ig-img")}
+                        <div class="sc-ig-grad"></div>
+                        <div class="sc-ig-top"><span class="sc-ig-ring"><span class="sc-ig-ava"></span></span><span class="sc-ig-user">your story</span></div>
+                        <div class="sc-ig-cap">${esc(c.title)}</div>
+                        <div class="sc-ig-sticker"><span class="sc-ig-dot"></span>spreadhope.org</div>
+                        <span class="sc-ig-tap"></span>
+                      </div>
+                    </div>
+
+                    <div class="share-scene sc-wa" data-net="wa">
+                      <div class="sc-wachat">
+                        <div class="sc-wa-bar"><span class="sc-wa-ava"></span><div class="sc-wa-id"><b>Share with a friend</b><small>online</small></div><span class="sc-wa-wa">${smIc.wa}</span></div>
+                        <div class="sc-wa-body">
+                          <div class="sc-wa-bubble">
+                            <div class="sc-wa-card">
+                              <div class="sc-wa-thumb">${cImg("")}</div>
+                              <div class="sc-wa-ctx"><b>${esc(c.title)}</b><small>spreadhope.org/c/${c.id}</small></div>
+                            </div>
+                            <span class="sc-wa-msg">Can you help? 🙏</span>
+                            <span class="sc-wa-meta">now<svg class="sc-wa-tick" viewBox="0 0 20 12" fill="none"><path d="M2 7l3 3 6-7M8 10l1 .9 6-7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="share-scene sc-x" data-net="x">
+                      <div class="sc-xcard">
+                        <span class="sc-x-ava"></span>
+                        <div class="sc-x-body">
+                          <div class="sc-x-head"><b>You</b><small>@you · now</small></div>
+                          <p class="sc-x-text">Help ${esc(c.organizer.name.split(" ")[0])} reach the goal — every share counts. <span class="sc-x-link">spreadhope.org/c/${c.id}</span></p>
+                          <div class="sc-x-media">${cImg("")}</div>
+                          <div class="sc-x-actions">
+                            <span><svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v11H8l-4 3V5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>12</span>
+                            <span><svg viewBox="0 0 24 24" fill="none"><path d="M4 8l3-3 3 3M7 5v9a2 2 0 0 0 2 2h6M20 16l-3 3-3-3M17 19v-9a2 2 0 0 0-2-2H9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>34</span>
+                            <span><svg viewBox="0 0 24 24" fill="none"><path d="M12 20s-7-4.6-9.3-9C1.3 8.4 2.6 5 6 5c2 0 3.2 1.2 4 2.4C10.8 6.2 12 5 14 5c3.4 0 4.7 3.4 3.3 6-2.3 4.4-9.3 9-9.3 9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>128</span>
+                            <span><svg viewBox="0 0 24 24" fill="none"><path d="M4 20v-6M10 20V6M16 20v-9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>2.4K</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                  <button class="share-lab-cta net-copy" data-cta type="button"><span class="share-lab-cta-ic">${I.copy}</span><span class="share-lab-cta-tx">Copy link</span></button>
                 </div>
               </div>
             </section>
@@ -1054,6 +1133,7 @@
       </section>`;
 
       window.CW.initProgress(root);
+      window.CW.initReveal(); // scroll-in animation for the campaign's sections/cards (renders async via D.get)
 
       /* background videos — play while in view, pause off-screen (autoplay fallback) */
       if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
@@ -1149,17 +1229,55 @@
       qs("#donateBtn").addEventListener("click", () => { location.href = "donate.html?id=" + c.id; });
       qs("#shareBtn").addEventListener("click", () => share(c.title));
 
-      // "Sharing helps" promo — social buttons + the front card's donate CTA
+      // share lab — interactive channel previews: per-channel CTA + auto-sizing stage + gentle auto-loop
       (() => {
+        const lab = qs("[data-share-lab]");
+        if (!lab) return;
         const campUrl = location.origin + location.pathname + "?id=" + c.id;
         const enc = encodeURIComponent(campUrl), t = encodeURIComponent(c.title);
-        qsa(".cd-sm-sbtn").forEach((b) => b.addEventListener("click", () => {
-          const net = b.dataset.net;
+        const chips = qsa(".share-chip", lab), scenes = qsa(".share-scene", lab);
+        const cta = qs("[data-cta]", lab);
+        const ctaIc = qs(".share-lab-cta-ic", cta), ctaTx = qs(".share-lab-cta-tx", cta);
+        const order = ["copy", "fb", "ig", "wa", "x"];
+        const CTA = {
+          copy: { t: "Copy link", ic: I.copy },
+          fb:   { t: "Share on Facebook", ic: smIc.fb },
+          ig:   { t: "Create story", ic: smIc.ig },
+          wa:   { t: "Share on WhatsApp", ic: smIc.wa },
+          x:    { t: "Post on X", ic: smIc.x },
+        };
+        const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        let cur = null, timer = null;
+
+        const doShare = (net) => {
           if (net === "fb") window.open(`https://www.facebook.com/sharer/sharer.php?u=${enc}`, "_blank", "noopener");
           else if (net === "wa") window.open(`https://wa.me/?text=${t}%20${enc}`, "_blank", "noopener");
-          else navigator.clipboard.writeText(campUrl).then(() => toast(net === "copy" ? "Link copied" : "Link copied — paste it in your story")).catch(() => toast("Couldn't copy the link", "err"));
-        }));
-        qs(".cd-sm-donate")?.addEventListener("click", () => { location.href = "donate.html?id=" + c.id; });
+          else if (net === "x") window.open(`https://twitter.com/intent/tweet?text=${t}&url=${enc}`, "_blank", "noopener");
+          else navigator.clipboard.writeText(campUrl).then(() => toast(net === "ig" ? "Link copied — paste it in your story" : "Link copied")).catch(() => toast("Couldn't copy the link", "err"));
+        };
+        const setActive = (net) => {
+          if (net === cur) return;
+          cur = net;
+          chips.forEach((el) => { const on = el.dataset.net === net; el.classList.toggle("is-active", on); el.setAttribute("aria-selected", on ? "true" : "false"); });
+          scenes.forEach((s) => s.classList.toggle("on", s.dataset.net === net));
+          const cfg = CTA[net]; ctaTx.textContent = cfg.t; ctaIc.innerHTML = cfg.ic; cta.className = "share-lab-cta net-" + net;
+        };
+        const advance = () => setActive(order[(order.indexOf(cur) + 1) % order.length]);
+        const stopAuto = () => { if (timer) { clearInterval(timer); timer = null; } };
+        const startAuto = () => { if (reduce || timer) return; timer = setInterval(advance, 3800); };
+
+        chips.forEach((b) => {
+          b.addEventListener("click", () => { setActive(b.dataset.net); stopAuto(); startAuto(); });
+          b.addEventListener("mouseenter", () => { if (matchMedia("(min-width: 861px)").matches) setActive(b.dataset.net); });
+        });
+        cta.addEventListener("click", () => doShare(cur));
+        qsa("[data-act]", lab).forEach((b) => b.addEventListener("click", (e) => { e.stopPropagation(); doShare(b.dataset.act); }));
+
+        lab.addEventListener("mouseenter", stopAuto);
+        lab.addEventListener("mouseleave", startAuto);
+
+        setActive("copy");
+        startAuto();
       })();
 
       // rotating "just donated" — cycles through real donor names only
@@ -1501,7 +1619,7 @@
         <div class="review-block"><h4>Campaign <button data-edit="2">Edit</button></h4>
           ${row("Title", draft.title)}${row("Category", draft.category)}${row("Goal", draft.goal ? money(+draft.goal) : "")}</div>
         <div class="review-block"><h4>Story <button data-edit="1">Edit</button></h4>
-          <p style="color:var(--slate-gray);font-size:14.5px;line-height:1.6;margin:0">${esc((draft.story || "").slice(0, 220))}${(draft.story || "").length > 220 ? "…" : ""}</p></div>
+          <p style="color:var(--slate-gray);font-size:14.5px;line-height:1.6;margin:0;overflow-wrap:anywhere;word-break:break-word">${esc((draft.story || "").slice(0, 220))}${(draft.story || "").length > 220 ? "…" : ""}</p></div>
         <div class="review-block"><h4>Photos <button data-edit="3">Edit</button></h4>
           ${draft.photos.length ? `<div class="upload-grid">${draft.photos.map((p) => `<div class="upload-thumb"><img src="${p.url}" alt=""></div>`).join("")}</div>` : `<p style="color:var(--slate-gray);margin:0">No photos added yet.</p>`}</div>`;
       qsa("[data-edit]", r).forEach((b) => b.addEventListener("click", () => go(+b.dataset.edit)));
@@ -1564,6 +1682,7 @@
       document.title = `Donate · ${c.title} · Spread Hope`;
       renderDonate(c);
       root.removeAttribute("aria-busy");
+      window.CW.initReveal(); // scroll-in animation after async render
     });
 
     // ghost mirroring the checkout: steps, amount grid, fields, CTA + summary card
@@ -1600,10 +1719,12 @@
               <div class="dn2-sumbody">
                 <div class="dn2-progress">
                   <div class="dn2-raised-top">
-                    <b class="dn2-amt">${money(c.raised)}</b>
+                    <div class="dn2-raised-left">
+                      <b class="dn2-amt">${money(c.raised)}</b>
+                      <div class="dn2-goal">raised of <b>${money(c.goal)}</b> goal</div>
+                    </div>
                     <span class="dn2-pct">${pct}%</span>
                   </div>
-                  <div class="dn2-goal">raised of <b>${money(c.goal)}</b> goal</div>
                   <div class="careflow dn2-bar"><div class="careflow-track"><div class="careflow-fill" style="width:${pct}%"></div></div></div>
                 </div>
               </div>
@@ -1675,10 +1796,14 @@
     if (!c) return;
     const amt = parseInt(param("amt"), 10);
 
+    // campaign cover image at the top of the card
+    const cover = qs("#tyCover");
+    if (cover) { cover.src = c.cover; cover.alt = c.title; cover.onerror = () => { cover.src = "assets/img/hero.png"; }; }
+
     // amount pill + organizer-aware subtext
     if (amt > 0) qs("#tyAmount").textContent = money(amt) + " donated";
     else { const pill = qs("#tyAmount"); if (pill) pill.style.display = "none"; }
-    qs("#tySub").innerHTML = `Your gift goes directly to <b>${esc(c.organizer.name)}</b>'s fundraiser — every contribution brings the goal a little closer.`;
+    qs("#tySub").innerHTML = `Your gift goes straight to <b>${esc(c.organizer.name)}</b>'s fundraiser.`;
 
     // primary action → back to the campaign just supported
     qs("#tyBackLink").href = "campaign.html?id=" + c.id;
@@ -1837,6 +1962,8 @@
     const page = document.body.dataset.page;
     const fn = PAGES[page];
     if (fn) fn();
+    // one reveal pass after the page renders — auto-tags sections/cards for scroll-in animation (legal pages skip themselves)
+    window.CW.initReveal();
 
     /* perf: stop decoding background videos while the tab/page is hidden; on return, resume only the ones on screen */
     const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
