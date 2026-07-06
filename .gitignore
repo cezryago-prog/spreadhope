@@ -1,5 +1,19 @@
+# Secrets / environment (never commit these)
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
 # Vercel
 .vercel
+
+# Build output (unused by this static site, kept as a safeguard)
+dist/
+build/
+.vite/
+.next/
+.cache/
 
 # OS
 .DS_Store
