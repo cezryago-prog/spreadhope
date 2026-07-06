@@ -1004,12 +1004,7 @@
                   <span class="cd-trust-protect-ic">${I.shield}</span>
                   <div class="cd-trust-protect-tx"><b>Donation protected</b></div>
                 </div>
-                <span class="cd-trust-info-h">Why you can give with confidence</span>
-                <ul class="cd-trust-rows">
-                  <li><span class="cd-trust-row-ic">${c.verified ? I.checkBadge : I.users}</span><div><b>${c.verified ? "Identity verified" : "Organizer on record"}</b><span>${c.verified ? `We confirmed ${esc(c.organizer.name.split(" ")[0])}'s identity before this fundraiser went live.` : "Details provided by the campaign creator."}</span></div></li>
-                  <li><span class="cd-trust-row-ic">${I.heart}</span><div><b>Straight to the cause</b><span>Every donation goes directly toward the beneficiary of this fundraiser.</span></div></li>
-                  <li><span class="cd-trust-row-ic">${I.clock}</span><div><b>${fmtCreated(c.createdAt) ? `Active since ${fmtCreated(c.createdAt)}` : "Community backed"}</b><span>${c.donors.toLocaleString("en-US")} supporters have given so far.</span></div></li>
-                </ul>
+                <p class="cd-trust-line">Protected by our trust and safety standards.</p>
               </div>
               <div class="cd-trust-foot">
                 <a class="cd-trust-report" href="contact.html?subject=report&campaign=${encodeURIComponent(c.title)}"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 21V4m0 1.5h11l-2 4 2 4H5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Report fundraiser</span></a>
