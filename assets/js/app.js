@@ -1721,6 +1721,7 @@
                     <span class="dn2-pct">${pct}%</span>
                   </div>
                   <div class="careflow dn2-bar"><div class="careflow-track"><div class="careflow-fill" style="width:${pct}%"></div></div></div>
+                  <div class="dn2-meta"><span class="dn2-meta-ic">${I.heart}</span><span>${c.donors.toLocaleString("en-US")} people have donated</span></div>
                 </div>
               </div>
             </div>
@@ -1730,11 +1731,13 @@
           <section class="dn2-main">
             <div class="dn2-action">
               <h2 class="dn2-h">Choose your donation amount</h2>
+              <p class="dn2-sub">Every dollar goes straight to this fundraiser.</p>
               <div class="dn2-amounts">
                 ${amounts.map((a) => `<button type="button" class="dn2-opt${a === suggested ? " dn2-suggested" : ""}" data-amt="${a}">${a === suggested ? `<span class="dn2-sug-badge">Suggested</span>` : ""}${money(a)}</button>`).join("")}
               </div>
 
               <button class="dn2-donate is-empty" id="dDonate" type="button"><span id="dBtnLabel">Choose an amount</span></button>
+              <p class="dn2-secure">${lockIc}<span>Secure checkout on the next step — no payment yet.</span></p>
             </div>
 
             <div class="dn2-clarity">
@@ -1751,7 +1754,7 @@
       let amount = 0;
       const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      const setAmount = (v) => { amount = v; qsa(".dn2-opt").forEach((x) => x.classList.toggle("sel", +x.dataset.amt === v)); const btn = qs("#dDonate"); btn.classList.remove("is-empty"); qs("#dBtnLabel").textContent = "Donate · " + money(v); };
+      const setAmount = (v) => { amount = v; qsa(".dn2-opt").forEach((x) => x.classList.toggle("sel", +x.dataset.amt === v)); const btn = qs("#dDonate"); btn.classList.remove("is-empty"); qs("#dBtnLabel").textContent = "Donate " + money(v); };
       qsa(".dn2-opt").forEach((b) => b.addEventListener("click", () => setAmount(+b.dataset.amt)));
 
       // single step — choose an amount, then donate straight through to thank-you (words of support live there)
