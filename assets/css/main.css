@@ -1932,7 +1932,7 @@ body[data-page="browse"] .site-header.is-scrolled { background: rgba(250,248,241
 .dn2-progress { margin: 0; }
 .dn2-raised-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dn2-raised-left { min-width: 0; }
-.dn2-amt { font-family: var(--font-display); font-weight: 600; font-size: clamp(25px, 6vw, 31px); color: var(--deep-meadow); line-height: 1; }
+.dn2-amt { font-family: var(--font-head); font-weight: 800; font-size: clamp(28px, 6.6vw, 34px); color: var(--deep-meadow); line-height: 1; letter-spacing: -.01em; }
 .dn2-pct { font-family: var(--font-head); font-weight: 800; font-size: clamp(18px, 4.4vw, 22px); color: var(--fresh-green); flex: none; }
 .dn2-goal { font-size: 13px; color: var(--text-2); margin-top: 6px; }
 .dn2-goal b { font-weight: 700; color: var(--muted-green-gray); }
@@ -1947,7 +1947,7 @@ body[data-page="browse"] .site-header.is-scrolled { background: rgba(250,248,241
 .dn2-action { background: var(--cream-2); border: 1px solid var(--line-soft); border-radius: var(--r-xl); padding: clamp(20px, 3.4vw, 26px); box-shadow: 0 20px 46px -32px rgba(35,78,82,.34), var(--sh-xs); }
 
 /* amount picker — premium tickets with clear states */
-.dn2-h { font-family: var(--font-display); font-weight: 600; font-size: clamp(20px, 4.6vw, 24px); color: var(--deep-meadow); margin: 0 0 5px; }
+.dn2-h { font-family: var(--font-display); font-weight: 600; font-size: clamp(20px, 4.6vw, 24px); color: var(--deep-meadow); margin: 0 0 16px; }
 .dn2-sub { margin: 0 0 16px; font-family: var(--font-head); font-weight: 500; font-size: 13px; line-height: 1.5; color: var(--muted-green-gray); }
 .dn2-amounts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 9px; }   /* margin-top = room for the "Suggested" ribbon above the top row */
 .dn2-opt { position: relative; padding: 17px 8px; border-radius: 14px; background: var(--cream-base); border: 1.5px solid var(--line-soft); font-family: var(--font-head); font-weight: 700; font-size: 18px; color: var(--ink); cursor: pointer; transition: border-color .2s, background .2s, color .2s, transform .16s var(--ease), box-shadow .22s; }
@@ -3296,7 +3296,7 @@ body[data-page="thankyou"] .confirm-acts .btn { min-width: 240px; }
 .cd-trust-protect-ic { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #fff; color: var(--fresh-green); flex: none; box-shadow: var(--sh-xs); }
 .cd-trust-protect-ic svg { width: 15px; height: 15px; }
 .cd-trust-protect-tx b { display: block; font-family: var(--font-head); font-weight: 700; font-size: 12.5px; color: var(--deep-meadow); line-height: 1.2; }
-.cd-trust-protect-tx span { display: block; font-size: 11px; color: var(--muted-green-gray); margin-top: 1px; }
+.cd-trust-protect-tx span { display: none; font-size: 11.5px; color: var(--muted-green-gray); margin-top: 2px; line-height: 1.4; }   /* subtitle: hidden by default, shown inside the mobile pill */
 /* right — donation protected badge + one short trust line */
 .cd-trust-info { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line-soft); }
 .cd-trust-info .cd-trust-protect { margin-top: 0; margin-bottom: 10px; }
@@ -3307,41 +3307,32 @@ body[data-page="thankyou"] .confirm-acts .btn { min-width: 240px; }
 .cd-trust-report:hover { color: var(--amber-deep); }
 .cd-trust-report svg { width: 15px; height: 15px; flex: none; }
 .cd-trust-note { margin: 7px 0 0; color: var(--muted-green-gray); font-size: 11px; line-height: 1.55; opacity: .8; }
-@media (min-width: 861px) {
-  .cd-trust { display: grid; grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr); grid-template-rows: auto 1fr; column-gap: clamp(26px, 3vw, 40px); row-gap: 16px; padding: clamp(24px, 2.6vw, 32px); align-items: start; }
-  .cd-trust-org { grid-column: 1; grid-row: 1 / 3; align-self: stretch; justify-content: center; padding-right: clamp(24px, 2.6vw, 36px); border-right: 1px solid var(--line-soft); }
-  .cd-trust-av { width: 88px; height: 88px; }
-  .cd-trust-info { grid-column: 2; grid-row: 1; margin-top: 0; padding-top: 0; border-top: none; }
-  .cd-trust-foot { grid-column: 2; grid-row: 2; align-self: end; margin-top: 0; }
+/* organizer card — single-column reference model on ALL viewports:
+   horizontal head (avatar left · name/relation right) → wide trust pill → report inside */
+.cd-trust { padding: clamp(20px, 3.4vw, 30px); }
+.cd-trust-lbl { margin-bottom: 15px; font-size: 10px; }
+.cd-trust-org { align-items: stretch; text-align: left; }
+.cd-trust-head { flex-direction: row; align-items: center; gap: 15px; }
+.cd-trust-av { width: 62px; height: 62px; box-shadow: 0 0 0 3px var(--cream-base), 0 0 0 4px var(--sage-wash); }
+.cd-trust-name { justify-content: flex-start; font-size: clamp(18px, 1.8vw, 20px); gap: 7px; }
+.cd-trust-vf { width: 17px; height: 17px; }
+.cd-trust-rel { text-align: left; font-size: 13px; margin-top: 3px; }
+.cd-trust-line { display: none; }
+.cd-trust-info { margin-top: 16px; padding-top: 16px; }
+.cd-trust-info .cd-trust-protect {
+  display: inline-flex; align-items: center; gap: 12px; width: auto; max-width: 100%; margin: 0; padding: 12px 18px;
+  border-radius: 20px;
+  background: linear-gradient(180deg, var(--sage-wash), #F1F7EC);
+  border: 1px solid rgba(79,175,143,.26);
+  box-shadow: 0 8px 20px -14px rgba(79,175,143,.5);
 }
-/* mobile — refined, premium: harmonious profile, trust-badge, discreet fine print */
-@media (max-width: 860px) {
-  .cd-trust { padding: clamp(20px, 5.5vw, 26px) clamp(18px, 5vw, 22px); }
-  .cd-trust-lbl { margin-bottom: 14px; font-size: 10px; }
-  /* organizer */
-  .cd-trust-head { gap: 12px; }
-  .cd-trust-av { width: 72px; height: 72px; box-shadow: 0 0 0 4px var(--cream-base), 0 0 0 5px var(--sage-wash); }
-  .cd-trust-name { font-size: 19px; gap: 8px; }
-  .cd-trust-vf { width: 17px; height: 17px; }
-  .cd-trust-rel { font-size: 13px; margin-top: 5px; letter-spacing: .005em; }
-  /* trust — premium donation-protected badge + soft line */
-  .cd-trust-info { margin-top: 14px; padding-top: 15px; }
-  .cd-trust-info .cd-trust-protect {
-    margin-bottom: 11px; justify-content: center; gap: 9px; padding: 11px 16px;
-    border-radius: var(--r-lg);
-    background: linear-gradient(180deg, var(--sage-wash), #F1F7EC);
-    border: 1px solid rgba(79,175,143,.26);
-    box-shadow: 0 8px 20px -14px rgba(79,175,143,.55);
-  }
-  .cd-trust-protect-ic { width: 30px; height: 30px; box-shadow: 0 2px 7px -2px rgba(79,175,143,.5); }
-  .cd-trust-protect-ic svg { width: 16px; height: 16px; }
-  .cd-trust-protect-tx b { font-size: 14.5px; letter-spacing: -.01em; }
-  .cd-trust-line { text-align: center; font-size: 12px; font-weight: 400; line-height: 1.55; color: var(--muted-green-gray); max-width: 30ch; margin: 0 auto; }
-  /* fine print — centered, light, easy to find but discreet */
-  .cd-trust-foot { margin-top: 13px; padding-top: 13px; text-align: center; }
-  .cd-trust-report { font-size: 12.5px; }
-  .cd-trust-note { font-size: 10.5px; line-height: 1.55; opacity: .7; margin: 8px auto 0; }
-}
+.cd-trust-protect-ic { width: 30px; height: 30px; box-shadow: 0 2px 6px -2px rgba(79,175,143,.5); }
+.cd-trust-protect-ic svg { width: 15px; height: 15px; }
+.cd-trust-protect-tx b { font-size: 13.5px; letter-spacing: -.01em; }
+.cd-trust-protect-tx span { display: block; }
+.cd-trust-foot { margin-top: 16px; padding-top: 14px; text-align: center; }
+.cd-trust-report { font-size: 12.5px; }
+.cd-trust-note { display: none; }
 
 /* ===== Share lab — interactive channel picker with animated previews ===== */
 .share-lab { background: var(--cream-2); border: 1px solid var(--line-soft); border-radius: var(--r-xl); padding: clamp(24px, 5.5vw, 40px) clamp(18px, 5vw, 34px); box-shadow: var(--sh-sm); }

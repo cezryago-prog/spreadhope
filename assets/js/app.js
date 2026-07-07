@@ -1002,7 +1002,7 @@
               <div class="cd-trust-info">
                 <div class="cd-trust-protect">
                   <span class="cd-trust-protect-ic">${I.shield}</span>
-                  <div class="cd-trust-protect-tx"><b>Donation protected</b></div>
+                  <div class="cd-trust-protect-tx"><b>Donation protected</b><span class="cd-trust-protect-sub">Protected by our trust and safety standards.</span></div>
                 </div>
                 <p class="cd-trust-line">Protected by our trust and safety standards.</p>
               </div>
@@ -1731,13 +1731,12 @@
           <section class="dn2-main">
             <div class="dn2-action">
               <h2 class="dn2-h">Choose your donation amount</h2>
-              <p class="dn2-sub">Every dollar goes straight to this fundraiser.</p>
               <div class="dn2-amounts">
                 ${amounts.map((a) => `<button type="button" class="dn2-opt${a === suggested ? " dn2-suggested" : ""}" data-amt="${a}">${a === suggested ? `<span class="dn2-sug-badge">Suggested</span>` : ""}${money(a)}</button>`).join("")}
               </div>
 
               <button class="dn2-donate is-empty" id="dDonate" type="button"><span id="dBtnLabel">Choose an amount</span></button>
-              <p class="dn2-secure">${lockIc}<span>Secure checkout on the next step — no payment yet.</span></p>
+              <p class="dn2-secure">${lockIc}<span>Secure checkout on the next step</span></p>
             </div>
 
             <div class="dn2-clarity">
