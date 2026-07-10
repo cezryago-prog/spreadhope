@@ -41,104 +41,132 @@
       initCarousels();
     }
 
-    /* ---- "A story of hope" — center-focus peek carousel, auto-advance 3s ---- */
-    const track = qs("#sohTrack");
-    if (track) {
+    /* ---- "A story of hope" — accordion (desktop) / peek carousel (mobile),
+           rebuilt when the viewport crosses the 861px breakpoint so it never
+           shows the wrong (unstyled) layout after a desktop↔mobile resize ---- */
+    const sohTrack = qs("#sohTrack");
+    if (sohTrack) {
+      const sohEl = sohTrack.closest(".soh");
+      const sohHost = sohEl.parentNode;
       const camps = [D.featured(), ...D.active(4)].filter(Boolean);
-      if (matchMedia("(min-width: 861px)").matches) {
-        /* DESKTOP: 3-card expanding accordion — the big one (left, by default) is the "principal".
-           Click a small card → it grows into the principal. Click the principal (already big) → open it. */
-        const three = camps.slice(0, 3);
-        const sohEl = track.closest(".soh");
-        const card = (c, i) => {
-          const p = D.pct(c);
-          return `
-          <a class="soh-ac-card${i === 0 ? " is-active" : ""}" href="campaign.html?id=${c.id}" data-i="${i}">
-            <img class="soh-ac-img" src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'">
-            <span class="soh-ac-heart">${I.heart}</span>
-            <span class="soh-ac-cat">${esc(c.category)}</span>
-            <div class="soh-ac-body">
-              <h3>${esc(c.title)}</h3>
-              <p class="soh-ac-blurb">${esc(c.blurb)}</p>
-              <div class="soh-ac-nums"><span class="r">${money(c.raised)}</span><span class="g">of ${money(c.goal)}</span></div>
-              <div class="careflow"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}" style="width:0%"></div></div></div>
-              <div class="soh-ac-pct">${p}% funded</div>
-              <span class="soh-ac-cta">Support this story ${I.arrow}</span>
-            </div>
-          </a>`;
-        };
-        const accWrap = document.createElement("div");
-        accWrap.className = "wrap soh-acc-wrap reveal in";
-        accWrap.innerHTML = `<div class="soh-acc">${three.map(card).join("")}</div>`;
-        sohEl.style.display = "none";
-        sohEl.insertAdjacentElement("afterend", accWrap);
+      let sohTimer = null;
+      let mob = null; // mobile carousel state while mobile is active, else null
 
-        const cards = qsa(".soh-ac-card", accWrap);
-        const setActive = (idx) => {
+      const buildSoh = () => {
+        if (sohTimer) { clearInterval(sohTimer); sohTimer = null; }
+        mob = null;
+        const prevAcc = sohHost.querySelector(".soh-acc-wrap");
+        if (prevAcc) prevAcc.remove();
+        sohTrack.innerHTML = "";
+        sohTrack.style.transform = "";
+
+        if (matchMedia("(min-width: 861px)").matches) {
+          /* DESKTOP: 3-card expanding accordion */
+          sohEl.style.display = "none";
+          const three = camps.slice(0, 3);
+          const card = (c, i) => {
+            const p = D.pct(c);
+            return `
+            <a class="soh-ac-card${i === 0 ? " is-active" : ""}" href="campaign.html?id=${c.id}" data-i="${i}">
+              <img class="soh-ac-img" src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'">
+              <span class="soh-ac-heart">${I.heart}</span>
+              <span class="soh-ac-cat">${esc(c.category)}</span>
+              <div class="soh-ac-body">
+                <h3>${esc(c.title)}</h3>
+                <p class="soh-ac-blurb">${esc(c.blurb)}</p>
+                <div class="soh-ac-nums"><span class="r">${money(c.raised)}</span><span class="g">of ${money(c.goal)}</span></div>
+                <div class="careflow"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}" style="width:0%"></div></div></div>
+                <div class="soh-ac-pct">${p}% funded</div>
+                <span class="soh-ac-cta">Support this story ${I.arrow}</span>
+              </div>
+            </a>`;
+          };
+          const accWrap = document.createElement("div");
+          accWrap.className = "wrap soh-acc-wrap reveal in";
+          accWrap.innerHTML = `<div class="soh-acc">${three.map(card).join("")}</div>`;
+          sohEl.insertAdjacentElement("afterend", accWrap);
+          const cards = qsa(".soh-ac-card", accWrap);
+          const setActive = (idx) => {
+            cards.forEach((cd, i) => {
+              const on = i === idx;
+              cd.classList.toggle("is-active", on);
+              if (on) { const f = cd.querySelector(".careflow-fill"); if (f) { f.style.width = "0%"; requestAnimationFrame(() => { f.style.width = f.dataset.fill + "%"; }); } }
+            });
+          };
           cards.forEach((cd, i) => {
-            const on = i === idx;
-            cd.classList.toggle("is-active", on);
-            if (on) { const f = cd.querySelector(".careflow-fill"); if (f) { f.style.width = "0%"; requestAnimationFrame(() => { f.style.width = f.dataset.fill + "%"; }); } }
+            cd.addEventListener("click", (e) => {
+              if (!cd.classList.contains("is-active")) { e.preventDefault(); setActive(i); }
+            });
           });
-        };
-        cards.forEach((cd, i) => {
-          cd.addEventListener("click", (e) => {
-            // promote a small card on first click; if it's already the principal, let the link open the campaign
-            if (!cd.classList.contains("is-active")) { e.preventDefault(); setActive(i); }
-          });
-        });
-        setActive(0);
-      } else {
-        /* MOBILE: center-focus peek carousel, swipe, auto-advance 3s */
-        const slide = (c) => {
-          const p = D.pct(c);
-          return `
-          <a class="soh-slide" href="campaign.html?id=${c.id}">
-            <div class="soh-media"><span class="heart">${I.heart}</span><img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'"></div>
-            <div class="soh-body">
-              <h3>${esc(c.title)}</h3>
-              <p>${esc(c.blurb)}</p>
-              <div class="soh-nums"><span class="r">${money(c.raised)}</span><span class="g">of ${money(c.goal)}</span></div>
-              <div class="careflow"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div></div>
-              <div class="soh-pct">${p}% funded</div>
-              <span class="btn btn-primary btn-block">Support this story ${I.arrow}</span>
-            </div>
-          </a>`;
-        };
-        track.innerHTML = camps.map(slide).join("");
-
-        const slides = qsa(".soh-slide", track);
-        const dotsWrap = qs("#sohDots");
-        const vp = track.parentElement;
-        let active = 0, timer = null;
-
-        const center = () => {
-          const el = slides[active];
-          const offset = el.offsetLeft - (vp.clientWidth - el.clientWidth) / 2;
-          track.style.transform = `translateX(${-offset}px)`;
-          slides.forEach((s, i) => s.classList.toggle("is-active", i === active));
-          if (dotsWrap) qsa("button", dotsWrap).forEach((d, i) => d.classList.toggle("on", i === active));
-          const fill = el.querySelector(".careflow-fill");
-          if (fill && fill.dataset.fill) fill.style.width = fill.dataset.fill + "%";
-        };
-        const start = () => { if (reduce) return; clearInterval(timer); timer = setInterval(() => { active = (active + 1) % slides.length; center(); }, 3000); };
-        const stop = () => clearInterval(timer);
-        const go = (i) => { active = (i + slides.length) % slides.length; center(); start(); };
-
-        if (dotsWrap) {
-          dotsWrap.innerHTML = slides.map((_, i) => `<button class="${i === active ? "on" : ""}" aria-label="Story ${i + 1}"></button>`).join("");
-          qsa("button", dotsWrap).forEach((d, i) => d.addEventListener("click", () => go(i)));
+          setActive(0);
+        } else {
+          /* MOBILE: center-focus peek carousel, swipe, auto-advance 3s */
+          sohEl.style.display = "";
+          const slide = (c) => {
+            const p = D.pct(c);
+            return `
+            <a class="soh-slide" href="campaign.html?id=${c.id}">
+              <div class="soh-media"><span class="heart">${I.heart}</span><img src="${c.cover}" alt="${esc(c.title)}" loading="lazy" onerror="this.onerror=null;this.src='${D.fallbackImg(c.category)}'"></div>
+              <div class="soh-body">
+                <h3>${esc(c.title)}</h3>
+                <p>${esc(c.blurb)}</p>
+                <div class="soh-nums"><span class="r">${money(c.raised)}</span><span class="g">of ${money(c.goal)}</span></div>
+                <div class="careflow"><div class="careflow-track"><div class="careflow-fill" data-fill="${p}"></div></div></div>
+                <div class="soh-pct">${p}% funded</div>
+                <span class="btn btn-primary btn-block">Support this story ${I.arrow}</span>
+              </div>
+            </a>`;
+          };
+          sohTrack.innerHTML = camps.map(slide).join("");
+          const slides = qsa(".soh-slide", sohTrack);
+          const dotsWrap = qs("#sohDots");
+          const vp = sohTrack.parentElement;
+          const st = { active: 0, sx: null, slides };
+          const center = () => {
+            const el = slides[st.active];
+            if (!el) return;
+            const offset = el.offsetLeft - (vp.clientWidth - el.clientWidth) / 2;
+            sohTrack.style.transform = `translateX(${-offset}px)`;
+            slides.forEach((s, i) => s.classList.toggle("is-active", i === st.active));
+            if (dotsWrap) qsa("button", dotsWrap).forEach((d, i) => d.classList.toggle("on", i === st.active));
+            const fill = el.querySelector(".careflow-fill");
+            if (fill && fill.dataset.fill) fill.style.width = fill.dataset.fill + "%";
+          };
+          const start = () => { if (reduce) return; clearInterval(sohTimer); sohTimer = setInterval(() => { st.active = (st.active + 1) % slides.length; center(); }, 3000); };
+          const go = (i) => { st.active = (i + slides.length) % slides.length; center(); start(); };
+          st.center = center; st.start = start; st.stop = () => clearInterval(sohTimer);
+          if (dotsWrap) {
+            dotsWrap.innerHTML = slides.map((_, i) => `<button class="${i === 0 ? "on" : ""}" aria-label="Story ${i + 1}"></button>`).join("");
+            qsa("button", dotsWrap).forEach((d, i) => d.addEventListener("click", () => go(i)));
+          }
+          mob = st;
+          requestAnimationFrame(() => { center(); requestAnimationFrame(center); });
+          start();
         }
-        qs("#sohPrev")?.addEventListener("click", () => go(active - 1));
-        qs("#sohNext")?.addEventListener("click", () => go(active + 1));
-        let sx = null;
-        track.addEventListener("touchstart", (e) => { sx = e.touches[0].clientX; stop(); }, { passive: true });
-        track.addEventListener("touchend", (e) => { if (sx == null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 40) active = (active + (dx < 0 ? 1 : -1) + slides.length) % slides.length; center(); start(); }, { passive: true });
-        window.addEventListener("resize", center, { passive: true });
+      };
 
-        requestAnimationFrame(() => { center(); requestAnimationFrame(center); });
-        start();
-      }
+      // swipe: attached once to the persistent track; only acts while the mobile carousel is live
+      sohTrack.addEventListener("touchstart", (e) => { if (!mob) return; mob.sx = e.touches[0].clientX; mob.stop(); }, { passive: true });
+      sohTrack.addEventListener("touchend", (e) => {
+        if (!mob || mob.sx == null) return;
+        const dx = e.changedTouches[0].clientX - mob.sx; mob.sx = null;
+        if (Math.abs(dx) > 40) mob.active = (mob.active + (dx < 0 ? 1 : -1) + mob.slides.length) % mob.slides.length;
+        mob.center(); mob.start();
+      }, { passive: true });
+
+      buildSoh();
+
+      // rebuild only when crossing the breakpoint; otherwise just re-center the carousel
+      let sohDesktop = matchMedia("(min-width: 861px)").matches;
+      let sohRz;
+      window.addEventListener("resize", () => {
+        clearTimeout(sohRz);
+        sohRz = setTimeout(() => {
+          const nowDesktop = matchMedia("(min-width: 861px)").matches;
+          if (nowDesktop !== sohDesktop) { sohDesktop = nowDesktop; buildSoh(); }
+          else if (mob) mob.center();
+        }, 150);
+      }, { passive: true });
     }
 
     initHowItWorks();
