@@ -105,9 +105,7 @@
             </div>
           </a>`;
         };
-        const more = `<a class="soh-slide soh-more" href="browse-campaigns.html">
-          <div class="soh-more-in"><span class="soh-more-ic">${I.arrow}</span><span class="soh-more-t">Explore more stories</span><span class="soh-more-sub">See all fundraisers</span></div></a>`;
-        track.innerHTML = camps.map(slide).join("") + more;
+        track.innerHTML = camps.map(slide).join("");
 
         const slides = qsa(".soh-slide", track);
         const dotsWrap = qs("#sohDots");

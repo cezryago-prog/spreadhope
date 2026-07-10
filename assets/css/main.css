@@ -3073,6 +3073,16 @@ body[data-page="thankyou"] .confirm-acts .btn { min-width: 240px; }
 /* tighten the gap before the photo CTA so the two sections flow (don't read as divided) */
 .soh-section { padding-bottom: clamp(6px, 1.5vw, 12px); }
 
+/* ===== "A story of hope" — mobile carousel polish (desktop uses the accordion; untouched) ===== */
+@media (max-width: 860px) {
+  /* show pagination dots so the carousel reads as finished */
+  .soh-dots { display: flex; margin-top: 18px; }
+  /* keep titles to 2 lines so every card is the same, proportional height (no stretched empty space) */
+  .soh-body h3 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.28em; }
+  /* a touch less vertical padding for a more compact card */
+  .soh-viewport { padding: 14px 0 30px; }
+}
+
 /* ===== "A story of hope" — desktop 3-card expanding accordion (replaces the arrow carousel) ===== */
 @media (min-width: 861px) {
   .soh-acc-wrap { margin-top: clamp(4px, 1.2vw, 14px); }
