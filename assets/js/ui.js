@@ -202,7 +202,7 @@
         <div class="drawer-foot">
           <div>Every story deserves a way forward.</div>
           <div class="socials">
-            <a href="#" aria-label="Instagram">${I.ig}</a>
+            <a aria-label="Instagram (coming soon)">${I.ig}</a>
           </div>
         </div>
       </aside>`;
@@ -295,7 +295,7 @@
 
   function renderFooter() {
     const groups = [
-      { h: "Explore", links: [["browse-campaigns.html", "All stories"], ["browse-campaigns.html?sort=funded", "Top fundraisers"], ["how-it-works.html", "How it works"]] },
+      { h: "Explore", links: [["browse-campaigns.html", "All stories"], ["browse-campaigns.html?sort=supported", "Top fundraisers"], ["how-it-works.html", "How it works"]] },
       { h: "Company", links: [["about.html", "About us"], ["contact.html", "Contact us"], ["contact.html", "Help center"]] },
       { h: "Legal", links: [["privacy.html", "Privacy policy"], ["terms.html", "Terms of service"]] },
     ];
@@ -308,9 +308,7 @@
             <a class="brand" href="index.html" aria-label="Spread Hope home"><img class="brand-namelogo" src="assets/img/logo-name.png" alt="Spread Hope" width="240" height="72"></a>
             <p>We connect real people with real stories to create real change.</p>
             <div class="footer-socials">
-              <a href="#" aria-label="Instagram">${I.ig}</a>
-              <a href="#" aria-label="Facebook">${I.fb}</a>
-              <a href="#" aria-label="X">${I.x}</a>
+              <a aria-label="Instagram (coming soon)">${I.ig}</a>
             </div>
           </div>
           ${groups.map((g) => `<div class="footer-col"><h4>${g.h}</h4><ul>${g.links.map((l) => `<li><a href="${l[0]}">${l[1]}</a></li>`).join("")}</ul></div>`).join("")}

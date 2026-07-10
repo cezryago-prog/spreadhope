@@ -173,7 +173,8 @@
     if (!feed) return;
     const reduceM = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const camps = D.all().slice(0, 3);
-    const names = ["Sofia M.", "Daniel R.", "Amara K.", "Liam T.", "Priya N."];
+    // supporter name comes straight from each campaign's own data (no hardcoded people)
+    const supName = (cc) => ((cc.supporters || []).map((s) => s.name).find((n) => n && n !== "Anonymous")) || "A supporter";
     const heartNames = ["Eli", "Ana", "Tom", "Mia", "Sol", "Bea", "Ravi"];
     const msgs = [
       "Sending strength — you've got this.",
@@ -195,7 +196,7 @@
     const mini = (n) => `<span class="ln-mini-av">${initials(n)}</span>`;
     feed.innerHTML = camps.map((c, i) => {
       const p = D.pct(c);
-      const name = names[i % names.length];
+      const name = supName(c);
       const action = acts[i % acts.length](amts[i % amts.length]);
       const miniAvs = [heartNames[i % heartNames.length], heartNames[(i + 2) % heartNames.length], heartNames[(i + 4) % heartNames.length]].map(mini).join("");
       return `
@@ -773,20 +774,20 @@
       empty.classList.add("hide");
       grid.innerHTML = res.items.map(listCard).join("");
       observeNew(grid);
-      // pagination — dots + "swipe to see more" hint
+      // pagination — prev / page count / next
       if (res.pages > 1) {
-        let dots = "";
-        for (let i = 1; i <= res.pages; i++) dots += `<button class="${i === state.page ? "on" : ""}" data-pg="${i}" aria-label="Page ${i}"></button>`;
-        pager.innerHTML = `<div class="bc-dots">${dots}</div>
-          <div class="bc-pager-hint">
-            <button class="bc-pg-arrow" data-pg="${state.page - 1}" ${state.page === 1 ? "disabled" : ""} aria-label="Previous">${I.chevron.replace('d="m9 6 6 6-6 6"', 'd="m15 6-6 6 6 6"')}</button>
-            <span>Swipe to see more campaigns</span>
-            <button class="bc-pg-arrow" data-pg="${state.page + 1}" ${state.page === res.pages ? "disabled" : ""} aria-label="Next">${I.arrow}</button>
+        pager.innerHTML = `<div class="bc-pager-hint">
+            <button class="bc-pg-arrow" data-pg="${state.page - 1}" ${state.page === 1 ? "disabled" : ""} aria-label="Previous page">${I.chevron.replace('d="m9 6 6 6-6 6"', 'd="m15 6-6 6 6 6"')}</button>
+            <span class="bc-pager-count">Page ${state.page} of ${res.pages}</span>
+            <button class="bc-pg-arrow" data-pg="${state.page + 1}" ${state.page === res.pages ? "disabled" : ""} aria-label="Next page">${I.arrow}</button>
           </div>`;
         qsa("[data-pg]", pager).forEach((b) => b.addEventListener("click", () => {
           if (b.disabled) return;
-          state.page = +b.dataset.pg; load();
-          window.scrollTo({ top: grid.offsetTop - 110, behavior: "smooth" });
+          const target = +b.dataset.pg;
+          if (!target || target < 1 || target > res.pages || target === state.page) return;
+          state.page = target; load();
+          const anchor = qs(".bc-main") || grid;
+          window.scrollTo({ top: anchor.getBoundingClientRect().top + window.scrollY - 90, behavior: "smooth" });
         }));
       } else pager.innerHTML = "";
     }
@@ -1443,7 +1444,7 @@
   // full donor list (for "All supporters" + modal) — deterministic, sorted by amount desc
   function allSupporters(c) {
     const out = buildSupporters(c).slice();
-    const firsts = ["Alex", "Jordan", "Sam", "Taylor", "Casey", "Morgan", "Jamie", "Robin", "Quinn", "Avery", "Riley", "Drew", "Skyler", "Parker", "Reese", "Sage", "Devon", "Harper", "Rowan", "Emerson", "Marisol", "Noah", "Hannah", "Sofia", "Grace"];
+    const firsts = ["Alex", "Jordan", "Sam", "Taylor", "Casey", "Morgan", "Jamie", "Robin", "Quinn", "Avery", "Riley", "Drew", "Skyler", "Parker", "Reese", "Sage", "Devon", "Harper", "Rowan", "Emerson", "Kai", "Micah", "Elliot", "Dana", "Blake"];
     const inits = ["A.", "B.", "C.", "D.", "K.", "L.", "M.", "N.", "P.", "R.", "S.", "T.", "W."];
     const amts = [25, 50, 100, 75, 25, 150, 50, 200, 125, 50, 500, 250, 25, 1000, 75, 175];
     // 11 entries (coprime with amts' 16) + a different multiplier so the time varies WITHIN each amount group instead of repeating
@@ -1571,7 +1572,7 @@
     function addFiles(files) {
       Array.from(files).filter((f) => f.type.startsWith("image/")).forEach((f) => {
         if (draft.photos.length >= 6) return;
-        draft.photos.push({ name: f.name, url: URL.createObjectURL(f) });
+        draft.photos.push({ name: f.name, url: URL.createObjectURL(f), file: f });
       });
       renderPhotos(); updatePreview();
     }
@@ -1627,16 +1628,44 @@
       else if (v === "back") go(current - 1);
     }));
 
+    // downscale a File to a small JPEG data URL so the user's real cover survives the page change (sessionStorage-safe)
+    function fileToCover(file, maxW = 900) {
+      return new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, maxW / (img.naturalWidth || maxW));
+          const w = Math.max(1, Math.round(img.naturalWidth * scale));
+          const h = Math.max(1, Math.round(img.naturalHeight * scale));
+          const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+          cv.getContext("2d").drawImage(img, 0, 0, w, h);
+          URL.revokeObjectURL(url);
+          try { resolve(cv.toDataURL("image/jpeg", 0.82)); } catch (err) { reject(err); }
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("image load failed")); };
+        img.src = url;
+      });
+    }
+
     qs("#publishBtn").addEventListener("click", async (e) => {
       const btn = e.currentTarget;
       btn.disabled = true; btn.textContent = "Submitting…";
+      // stash the user's own first photo so the confirmation page shows it (not a stock image)
+      try {
+        const first = draft.photos[0];
+        if (first && first.file) sessionStorage.setItem("spreadhope:lastCover", await fileToCover(first.file));
+        else sessionStorage.removeItem("spreadhope:lastCover");
+      } catch (err) { try { sessionStorage.removeItem("spreadhope:lastCover"); } catch (e2) {} }
       const res = await D.submitCampaign(draft);
       if (res.ok) location.href = "submitted.html?ref=" + res.ref + "&title=" + encodeURIComponent(draft.title || "Your fundraiser") + "&cat=" + encodeURIComponent(draft.category || "Community");
       else { btn.disabled = false; btn.textContent = "Publish fundraiser"; toast("Something went wrong. Try again.", "err"); }
     });
 
-    // mobile preview collapse
-    qs("#previewToggle")?.addEventListener("click", () => qs("#previewRail").classList.toggle("collapsed"));
+    // mobile preview collapse — starts closed; opens only when the user taps
+    qs("#previewToggle")?.addEventListener("click", () => {
+      const open = !qs("#previewRail").classList.toggle("collapsed");
+      qs("#previewToggle").setAttribute("aria-expanded", String(open));
+    });
 
     bind();
     updatePreview();
@@ -1780,7 +1809,11 @@
     const cat = param("cat") || "Community";
     qs("#refCode").textContent = ref;
     qs("#miniTitle").textContent = title;
-    qs("#miniImg").src = D.fallbackImg(cat);
+    const img = qs("#miniImg");
+    let cover = null;
+    try { cover = sessionStorage.getItem("spreadhope:lastCover"); } catch (e) {}
+    img.onerror = () => { img.onerror = null; img.src = D.fallbackImg(cat); };
+    img.src = cover || D.fallbackImg(cat);
     qs("#miniMeta").textContent = cat + " · Awaiting review";
   };
 
@@ -1898,26 +1931,29 @@
     const cimg = (c) => `<img src="${c.cover}" alt="" loading="lazy" onerror="this.onerror=null;this.src='assets/img/hero.png'">`;
     const flow = (pct, gw) => `<span class="careflow"><span class="careflow-track"><span class="careflow-fill${gw ? " gw" : ""}" style="${gw ? "--w:" + pct + "%" : "width:" + pct + "%"}"></span></span></span>`;
     const card = (c, cls, cur) => `<a class="d-card${cls || ""}"><span class="d-cimg">${cimg(c)}<b class="m-tag">${esc(c.category)}</b><i class="m-mh">${hr}</i></span><span class="d-cb"><span class="d-ct">${esc(c.title)}</span>${flow(D.pct(c))}<span class="d-cn"><b>${money(c.raised)}</b> of ${money(c.goal)}</span></span>${cur || ""}</a>`;
+    const orgSteps = ["Basics", "Story", "Goal", "Photos", "Review"];
+    const stepper = (a) => `<div class="m-steps">${orgSteps.map((s, i) => `<span class="m-step${i === a ? " on" : i < a ? " done" : ""}">${s}</span>`).join("")}</div>`;
+    const og = { name: c1.organizer.name, rel: c1.organizer.relation || "Family", loc: c1.location || "Your city", title: c1.title, cat: c1.category, goal: money(c1.goal) };
     let caps, scenes, url;
     if (kind === "org") {
       url = "spreadhope.org/start";
-      caps = ["Start a campaign", "Add a clear title", "Add image & story", "Set your goal & publish", "Track support roll in"];
+      caps = ["Your basics", "Tell your story", "Title & goal", "Review & publish", "Submitted for review"];
       scenes = [
-        `<div class="m-screen m-center"><div class="m-canvas"><span class="m-canvas-ic">+</span><span class="m-canvas-tx">New fundraiser</span></div><button class="btn btn-primary d-btn pulse" type="button">Create a campaign<span class="m-cursor"></span></button></div>`,
-        `<div class="m-screen m-split"><div class="m-form"><div class="m-flabel">Campaign title</div><div class="m-input active"><span class="m-typed">Send Jonas to study</span><span class="m-caret"></span></div><div class="m-flabel">Category</div><div class="m-input selin"><span>Education</span>${chev}</div></div><div class="m-prev"><span class="d-phero ph"></span><b class="m-ptag in">Education</b><i class="m-h1 in"></i><i class="m-p dim"></i></div></div>`,
-        `<div class="m-screen m-split"><div class="m-form"><div class="m-flabel">Cover image</div><div class="m-upload done">${ck}<span>cover.jpg added</span></div><div class="m-flabel">Your story</div><div class="m-input tall"><i class="ml"></i><i class="ml"></i><i class="ml w60"></i></div></div><div class="m-prev"><span class="d-phero appear">${cimg(c1)}</span><b class="m-ptag">Education</b><i class="m-h1"></i><i class="m-p in"></i><i class="m-p in d2 w60"></i></div></div>`,
-        `<div class="m-screen m-split"><div class="m-form"><div class="m-flabel">Funding goal</div><div class="m-input goal">$28,000</div><div class="m-reviewed">${ck}<span>Passed review</span></div><button class="m-cta pub" type="button">Publish campaign<span class="m-cursor"></span></button></div><div class="m-prev"><span class="d-phero">${cimg(c1)}</span><b class="m-ptag">Education</b><i class="m-h1"></i>${flow(8, true)}<div class="m-statusrow"><span class="m-status">● Live</span><span class="m-goaltx">$0 of $28,000</span></div></div></div>`,
-        `<div class="m-screen m-dash"><div class="m-dash-h"><span class="m-live">● Live</span><span>Your dashboard</span></div><div class="m-stats"><div class="m-stat"><b class="m-count" data-to="1250" data-pre="$">$0</b><span>raised</span></div><div class="m-stat"><b class="m-count" data-to="18">0</b><span>supporters</span></div><div class="m-stat"><b class="m-count" data-to="32">0</b><span>hearts</span></div></div>${flow(45, true)}<div class="m-feedlist"><div class="m-frow"><span class="m-fav">A</span><i class="m-frtx"></i><b class="m-fram">+$50</b></div><div class="m-frow"><span class="m-fav">M</span><i class="m-frtx w70"></i><b class="m-fram">+$25</b></div><div class="m-frow"><span class="m-fav">P</span><i class="m-frtx w50"></i><b class="m-fram">+$100</b></div></div><div class="m-floaters"><i>${hr}</i><i>${hr}</i><i>${hr}</i></div></div>`,
+        `<div class="m-screen m-wiz">${stepper(0)}<div class="m-wtitle">Your basics</div><div class="m-field"><span class="m-flabel">Your full name</span><div class="m-input active"><span class="m-typed">${esc(og.name)}</span><span class="m-caret"></span></div></div><div class="m-field"><span class="m-flabel">Relationship to the cause</span><div class="m-input"><span class="m-ival">${esc(og.rel)}</span></div></div><div class="m-field"><span class="m-flabel">Location</span><div class="m-input"><span class="m-ival">${esc(og.loc)}</span></div></div><button class="btn btn-primary btn-block d-btn" type="button">Continue<span class="m-cursor"></span></button></div>`,
+        `<div class="m-screen m-wiz">${stepper(1)}<div class="m-wtitle">Your story</div><div class="m-field"><span class="m-flabel">Tell your story</span><div class="m-input tall m-story"><span class="m-story-tx">${esc(c1.blurb)}</span><span class="m-caret"></span></div></div><button class="btn btn-primary btn-block d-btn" type="button">Continue<span class="m-cursor"></span></button></div>`,
+        `<div class="m-screen m-wiz">${stepper(2)}<div class="m-wtitle">Title &amp; goal</div><div class="m-field"><span class="m-flabel">Fundraiser title</span><div class="m-input"><span class="m-ival">${esc(og.title)}</span></div></div><div class="m-field"><span class="m-flabel">Category</span><div class="m-catrow"><span class="m-catchip sel">${esc(og.cat)}</span><span class="m-catchip">Emergency</span><span class="m-catchip">Family</span></div></div><div class="m-field"><span class="m-flabel">Goal amount</span><div class="m-input goal">${og.goal}</div></div><button class="btn btn-primary btn-block d-btn" type="button">Continue<span class="m-cursor"></span></button></div>`,
+        `<div class="m-screen m-wiz">${stepper(4)}<div class="m-wtitle">Review &amp; publish</div><div class="m-revcard"><span class="m-revimg">${cimg(c1)}<b class="m-tag light">${esc(og.cat)}</b></span><span class="m-revb"><b>${esc(og.title)}</b><em>Goal ${og.goal} · ${esc(og.loc)}</em></span></div><div class="m-revnote">${ck}<span>Reviewed by our team before it goes live</span></div><button class="btn btn-primary btn-block d-btn" type="button">Publish fundraiser<span class="m-cursor"></span></button></div>`,
+        `<div class="m-screen m-conf m-submitted"><span class="m-bigcheck">${ck}<i class="m-spark s1"></i><i class="m-spark s2"></i><i class="m-spark s3"></i><i class="m-spark s4"></i></span><div class="m-conf-t">Submitted for review</div><div class="m-status2"><span class="dot"></span>Pending approval</div><div class="m-revcard compact"><span class="m-revimg">${cimg(c1)}</span><span class="m-revb"><b>${esc(og.title)}</b><em>${esc(og.cat)} · Awaiting review</em></span></div><div class="m-ref">Reference: <b>CW-7Q2ARO</b></div></div>`,
       ];
     } else {
       url = "spreadhope.org";
-      caps = ["Browse campaigns", "Open the campaign", "Choose your amount", "Confirm securely", "See the impact grow"];
+      caps = ["Browse campaigns", "Open the campaign", "Choose your amount", "Donation received", "Share the story"];
       scenes = [
         `<div class="m-screen d-browse"><div class="d-srch">${mag}<span>${esc(c1.category.toLowerCase())} near me</span></div><div class="d-cards">${card(cs[0])}${card(cs[1], " pick", '<span class="m-cursor"></span>')}${card(cs[2])}</div></div>`,
         `<div class="m-screen d-camp"><span class="d-hero">${cimg(c1)}<b class="m-tag light">${esc(c1.category)}</b></span><div class="m-org"><span class="m-oav">${initials(c1.organizer.name)}</span><span class="m-oinfo"><b>${esc(c1.organizer.name)} <i class="m-vf">${vf}</i></b><span>Organizer · ${esc(c1.location || "Verified")}</span></span></div><div class="d-ct big">${esc(c1.title)}</div><div class="m-statrow"><span><b>${money(c1.raised)}</b> raised</span><span class="m-srpct">${D.pct(c1)}%</span></div>${flow(D.pct(c1))}<button class="btn btn-primary btn-block d-btn" type="button">Donate now<span class="m-cursor"></span></button></div>`,
         `<div class="m-screen d-don"><div class="d-donhd"><span class="d-mini">${cimg(c1)}</span><span class="d-minitx"><b>${esc(c1.title)}</b><span>${money(c1.raised)} raised · ${D.pct(c1)}%</span></span></div><div class="m-label">Choose your amount</div><div class="m-amts"><span class="m-amt">$25</span><span class="m-amt sel">$50 <i class="m-amtck">${ck}</i></span><span class="m-amt">$100</span><span class="m-amt">$300</span><span class="m-amt">$500</span><span class="m-amt">$1k</span></div><button class="btn btn-primary btn-block d-btn" type="button">Donate $50<span class="m-cursor"></span></button><div class="m-secure2">${lock}<span>Secure &amp; protected</span></div></div>`,
-        `<div class="m-screen m-conf"><span class="m-bigcheck">${ck}<i class="m-spark s1"></i><i class="m-spark s2"></i><i class="m-spark s3"></i><i class="m-spark s4"></i></span><div class="m-conf-t">Donation sent</div><div class="m-conf-amt">$50 · ${esc(c1.title)}</div><div class="m-conf-d">${mail}<span>Receipt on its way</span></div></div>`,
-        `<div class="m-screen d-imp"><a class="d-card big"><span class="d-cimg">${cimg(c1)}<b class="m-tag">${esc(c1.category)}</b></span><span class="d-cb"><span class="d-ct">${esc(c1.title)}</span>${flow(Math.min(99, D.pct(c1) + 4), true)}<span class="d-cn"><b class="m-count" data-pre="$" data-from="${c1.raised}" data-to="${c1.raised + 250}">${money(c1.raised)}</b> of ${money(c1.goal)}</span></span></a><div class="d-impline">${hr}<span><b>+3</b> supporters just now</span></div><div class="m-floaters"><i>${hr}<u>+$50</u></i><i>${hr}<u>+$25</u></i><i>${hr}</i><i>${hr}<u>+$100</u></i></div></div>`,
+        `<div class="m-screen m-conf"><span class="m-badge">Donation received</span><span class="m-bigcheck">${ck}<i class="m-spark s1"></i><i class="m-spark s2"></i><i class="m-spark s3"></i><i class="m-spark s4"></i></span><div class="m-conf-t">You just helped this story move forward.</div><div class="m-amtpill">$50 donated</div><div class="m-conf-d">Your gift goes straight to <b>${esc(c1.organizer.name)}</b>'s fundraiser.</div></div>`,
+        `<div class="m-screen d-share"><div class="d-donhd"><span class="d-mini">${cimg(c1)}</span><span class="d-minitx"><b>${esc(c1.title)}</b><span>${money(c1.raised)} raised · ${D.pct(c1)}%</span></span></div><div class="m-label">Share this fundraiser</div><div class="m-sharerow"><span class="m-schip">Copy link</span><span class="m-schip fb">Facebook</span><span class="m-schip wa">WhatsApp<span class="m-cursor"></span></span></div><div class="m-conf-d">The more it's shared, the more people can help.</div></div>`,
       ];
     }
     mount.className = "hd reveal " + (mount.classList.contains("in") ? "in " : "") + (kind === "org" ? "hd-org" : "hd-donor");
